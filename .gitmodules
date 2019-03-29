@@ -4,6 +4,6 @@
 [submodule "TuningTools"]
 	path = TuningTools
 	url = git@github.com:wsfreund/TuningTools.git
-[submodule "RootCoreMacros"]
-	path = RootCoreMacros
-	url = https://github.com/wsfreund/RootCoreMacros.git
+[submodule "TuningBooks"]
+	path = TuningBooks
+	url = ssh://git@gitlab.cern.ch:7999/ringer/tuningbooks.git
