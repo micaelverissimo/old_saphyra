@@ -4,3 +4,6 @@
 [submodule "TuningTools"]
 	path = TuningTools
 	url = git@github.com:wsfreund/TuningTools.git
+[submodule "RootCoreMacros"]
+	path = RootCoreMacros
+	url = https://github.com/wsfreund/RootCoreMacros.git
