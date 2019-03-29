@@ -1,9 +1,6 @@
-[submodule "RingerCore"]
-	path = RingerCore
+[submodule "Tools/RingerCore"]
+	path = Tools/RingerCore
 	url = git@github.com:wsfreund/RingerCore.git
-[submodule "TuningTools"]
-	path = TuningTools
+[submodule "Tools/TuningTools"]
+	path = Tools/TuningTools
 	url = git@github.com:wsfreund/TuningTools.git
-[submodule "TuningBooks"]
-	path = TuningBooks
-	url = ssh://git@gitlab.cern.ch:7999/ringer/tuningbooks.git
