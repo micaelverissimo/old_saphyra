@@ -1,5 +1,5 @@
 
-# RingerProject framework
+# Hephaestus: The Ringer Tuning framework
 
 This framework release contains all packages used to tune and analyse the Ringer algorithm.
 
