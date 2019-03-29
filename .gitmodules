@@ -1,0 +1,6 @@
+[submodule "RingerCore"]
+	path = RingerCore
+	url = git@github.com:wsfreund/RingerCore.git
+[submodule "TuningTools"]
+	path = TuningTools
+	url = git@github.com:wsfreund/TuningTools.git
