@@ -11,3 +11,6 @@
 
 
 
+[submodule "Gaugi"]
+	path = Gaugi
+	url = ssh://git@gitlab.cern.ch:7999/jodafons/gaugi.git
