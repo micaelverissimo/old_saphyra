@@ -1,0 +1,388 @@
+2019-03-31 Werner S Freund
+	* New: script to create a csv for the ringer rp-normalization;
+	* Fix: made script independent of file name.
+
+2019-03-23 Werner S Freund
+	* Bug fix: fixed FastNet seed propagation;
+	* Change: default cross-validation is now KFold (previously known as
+	JackKnife).
+	* Tagging TuningTools-01-01-05
+
+2019-02-28 Werner S Freund
+	* Tuning job skips already existant files except if specified to overwrite.
+
+2018-12-12 Werner S Freund
+	* Fixed critical bug on DataCurator breaking the TuningJob.
+	* Tagging TuningTools-01-01-04
+
+2018-12-12 Werner S Freund
+	* Added option to save pre-processed files
+	* RingerRp now used ring-indexes instead of eta granularity
+	* Tagging TuningTools-01-01-03
+
+2018-11-26 Werner S Freund
+	* Added phi information to be saved
+
+2017-02-24 Werner S Freund
+	* Added normalizations for shower shapes
+	* Tagging TuningTools-01-01-02
+
+2017-02-24 Werner S Freund
+	* Set standardCaloVariables to skip rings as well so that
+	we can tune a fusion neural network using that data;
+	* Added protection to DecisionMaking before propagating
+	data to the discriminator
+	* Added to TunedDataArchieve the number of tuned datasets
+	and changed its version to 8
+	* Tagging TuningTools-01-01-01
+
+2017-02-24 Werner S Freund
+	* Implemented expertNNs in FastNet!
+	* DecisionMaking now plots considering output space support region;
+	* Fixed bug in CrossValStat expandOPs;
+	* Fixed bug of trying to configure coreConf twice;
+	* You will finally meet the TuningTools-01-01-00 \o/
+
+2017-02-23 Werner S Freund
+	* The full training cycle was validated at this commit
+	* Fixed EtaMu, RingerRp normalization issues (finally!);
+	* Added option to propagate pile-up directly to hidden layer
+	which also allows to implement experNN in fastnet;
+	* Tagging TuningTools-01-01-00h
+
+2017-02-21 Werner S Freund
+	* Fixed issue when running on loboc;
+	* Not tagging
+
+2017-02-20 Werner S Freund
+	* CrossValStat correction now runs on loboc;
+	* Tagging TuningTools-01-01-00g
+
+2017-02-20 Werner S Freund
+	* It is now possible to run crossValStatAnalysis correction
+	on RootCore framework;
+	* Not tagging yet
+
+2017-02-19 Werner S Freund
+	* Fixed bug where worst sp was being chosen as the best sp;
+	* Fixed bug where MSE was receiving large values at some
+	occasions.
+	* Fixed bug in Norm1 where no absolute value was being used
+	* Fixed bug when reading version 2 BranchEffCollector and
+	not displaying error messages
+	* Improved crossValStatAnalysis export capability, now it
+	can create linear correction thresholds and estimate efficiency
+	using TuningTools data and xAOD
+	* Data curator can now handle to the user operation data from
+	the raw data. Also display error messages when using expert data.
+	* DecisionMaking use optional neuron, sort, init info
+	* Added decide methods for the thresholds
+	* Added ThresholdCollection
+	* Added has and all methods for PPChain and PPCollection
+	* Added message for skimmedNtuple with the filtering which
+	will be used
+	* CrossValStatAnalysis will raise always that it find a
+	eta/et bin which do not match.
+	* Added datacurator skeleton
+	* Tagging TuningTools-01-01-00f
+
+
+2017-02-15 Werner S Freund
+  * Fixed runGRIDTuning parser
+	* Tagging TuningTools-01-01-00e
+
+2018-02-14 Werner S Freund
+	* Added alwaysUseSPNetwork option to crossValStatAnalysis
+
+2018-02-14 Werner S Freund
+	* Added lock file for crossValStatAnalysis;
+	* Fixed unusual crash when running crossValStatAnalysis with threshold
+	correction;
+	* Fixed thres_value and bkg2d plot in DecisionMaker;
+	* Added a sketch on how to add decision maker to the TuningJob
+	* Tagging TuningTools-01-01-00d.
+
+
+2018-02-14 Werner S Freund
+	* Bug fix in BranchEffCollector which was setting etaBin equal to
+	etBin
+	* Patch for this bug in crossValStatAnalysis, however it may
+	have more colateral effects.
+	* Bug fix in ReferenceBenchmark not shown backgroundEfficiencies properly
+	* Protected CrossValStat from loading default ppCol;
+	* Compile TuningTools with no debug logging by default
+	* Tagging TuningTools-01-01-00c.
+
+2018-02-13 Werner S Freund
+	* Tagging TuningTools-01-01-00b.
+
+2018-02-13 Werner S Freund
+	* TuningToolLib can create in python a single NeuralNetwork
+	and propagate its output using MT.
+	* CrossValStat has the option to apply the linear correction
+	for all cross-validation sorts;
+	* Added DataDriven LH tunes;
+	* Added StatUpperLimit pre-proc;
+	* Tagging TuningTools-01-01-00a.
+
+2018-01-09 Werner S Freund
+	* Added DataCuration method to unify tuning data management;
+	* Added support to AnalysisBase integration;
+	* Added DiscriminantPileupCorrection method;
+	* Moved some methods to modules in which they fit better;
+	* Parsers are now created on factory to avoid having interference between
+	parents;
+	* Not tagging yet.
+
+2018-01-05 Werner S Freund
+	* Added Micael fixes for monitoring with some small modifications.
+	* Tagging TuningTools-01-00-39.
+
+2018-01-05 Werner S Freund
+	* Added message Expert normalizations to notify user that the dataset should
+	be extracted from the same original ntuple.
+	* Fixed runExpertTuning.py which had several minor issues.
+	* Added --overwrite flag to crossValStatAnalysis.
+	* Added --tmpFolder option to crossValStatAnalysis.
+	* Tagging TuningTools-01-00-38.
+
+2018-01-04 Werner S Freund
+	* CrossValStatAnalysis can now read grid and standalone jobs together
+	throught the use of MixedJobBinnedFilter, which is now the default filter
+	instead of None.
+	* Added StandaloneJobBinnedFilter filter.
+	* CrossValStatAnalysis can now detect bins with same et/eta and merge them
+	to ensure every network will be used during selection.
+	* Tagging TuningTools-01-00-37.
+
+2018-01-04 Werner S Freund
+	* Improved matlab script to handle .npz files
+	* Added new normalization for ExpertNN: ExpertNorm1Std
+	* Improved behavior when do-multi-stop is set to false,
+	now keep signal and background efficiency values.
+	* Ensure that crossValStatAnalysis will create a directory
+	if outputPath has a path specified.
+	* Added option to dump all neurons information and improve
+	crossValStatAnalysis debugging.
+	* Tagging TuningTools-01-00-36.
+
+2018-01-04 Werner S Freund
+	* Added Guilherme MR adding summary monitoring slides.
+	* Tagging TuningTools-01-00-35.
+
+2018-01-04 Werner S Freund
+	* Added Julio/Micael MRs to fix monitoring.
+	* Fixed --development flag issues.
+	* Tagging TuningTools-01-00-34.
+
+2017-12-21 Werner S Freund
+	* Fast fix for cross-val revertible bug.
+
+2017-12-21 Werner S Freund
+	* Fix in CrossValStatAnalysis where it would try to find .gz files in
+	mergedDict
+	* Tagging TuningTools-01-00-33
+
+2017-12-20 Werner S Freund
+	* Improved TuningDataArchieve/BenchmarkEfficiencyArchieve reading speed
+	when using only one bin
+	* Disable mergeOutput in runGRIDtuning until GRID improves its merge jobs
+	policy or tune its parameters.
+	* Small change in tuningWrapper which now displays the correct reference
+	instead always assuming that non multi-stop jobs are set to use MSE.
+	* Tagging TuningTools-01-00-32
+
+2017-12-19 Werner S Freund
+	* Added StatReductionFactor pre-processing for stats studies
+	* RingerFilterMu was adding mu to patterns
+	* Tagging TuningTools-01-00-31
+
+2017-12-19 Werner S Freund
+	* runGRIDtuning will feed development flag to child jobs
+	* Reverted crossValStatAnalysis to use init method the same way
+	as the sort and neural choose method.
+	* Tagging TuningTools-01-00-30
+
+2017-12-18 Werner S Freund
+	* Removed keras import at coreConf as it is not needed anymore.
+	* Tagging TuningTools-01-00-29
+
+2017-12-18 Werner S Freund
+	* Removed auto import of ROOT dependent modules
+	* Tagging TuningTools-01-00-28
+
+2017-12-18 Werner S Freund
+	* Added policy: production jobs can only be submitted with clean TuningTools
+	and RingerCore modules. Development jobs should be submit with --development
+	flags.
+	* Tagging TuningTools-01-00-27
+
+2017-12-17 Werner S Freund
+	* runGRIDTuning now can automatically estimate multi-thread jobs
+	* Some cosmetics for fileJuicer
+	* CrossValStatAnalysis does not try to remove files not in
+	binFilesMergedDict any more.
+	* Tagging TuningTools-01-00-26
+
+2017-12-16 Werner S Freund
+	* SkimmedNtuple is now able to extract TrigRinger
+	* Tagging TuningTools-01-00-25
+
+2017-12-15 Werner S Freund
+	* Multi-stop can be turned-off once again.
+	* CrossValStat can now expand sp-stop only training to have multiple
+	operation points
+	* Tagging TuningTools-01-00-24
+
+2017-12-14 Werner S Freund
+	* Improved add_container to try 3 protocols before giving-up
+	* Tagging TuningTools-01-00-23
+
+2017-12-07 Werner S Freund
+	* take params was not returning anything
+	* Tagging TuningTools-01-00-22
+
+2017-12-07 Werner S Freund
+	* Fixed important bug in pre-processing which did not apply the ppChain to
+	the train dataset
+	* Fixed tensorflow fortran representation
+	* Tagging TuningTools-01-00-21
+
+2017-12-02 Werner S Freund
+	* Added new choose method via MSE and set it for init method retrieval
+
+2017-11-20 Werner S Freund
+	* Updated createData to be able to read special v5 file
+	* Tagging TuningTools-01-00-20
+
+2017-11-15 Werner S Freund
+	* João added fileJuicer and multiFiles in runGRIDTuning
+	* Tagging TuningTools-01-00-19
+
+2017-11-15 Werner S Freund
+	* Added multi-core job option to runGRIDTuning.py
+	* Added verbose message to show OMP_NUM_THREADS in runTuning.py
+	* Tagging TuningTools-01-00-18
+
+2017-09-01 Werner S Freund
+	* Set git to ignore changes in Makefile.RootCore to allow tags to appear
+	clean even when there are changes in MakeFile.RootCore
+	* Tagging TuningTools-01-00-17
+
+2017-09-01 Werner S Freund
+	* Added git version to the GRID jobs so that it can be accessed and saved by
+	the GRID jobs.
+	* Removed skipScout flag since it is not available anymore.
+	* Project flag on files is going to be set to 'Project__version__' instead
+	of the project name
+	* Tagging TuningTools-01-00-16.
+
+2017-07-22 Werner S Freund
+	* Small fix in PreProc
+	* Tagging TuningTools-01-00-15.
+
+2017-07-22 Werner S Freund
+	* Added monitoring v2 to main branch;
+	* Fixed CrossValStat not accepting -r files;
+	* Skimmed ntuple now extracts TRT_PID
+	* Added expertNN option to tuningJob
+	* Tagging TuningTools-01-00-14.
+
+2017-07-22 Werner S Freund
+	* Panda now supports merging tgz files automatically, removed fileMerging
+	usage on the grid;
+	* Tagging TuningTools-01-00-13.
+
+2017-02-09 Werner S Freund
+	* Bug fix on BaseModuleParser where core framework was set to configure data
+	frame;
+	* Added createData compatibility to TagAndProbeFrame skimToNtuple data also
+	for the offline operation;
+	* Set TuningFile to version 7, which saves the RingerOperation instead
+	of strings as keys to the efficiencies.
+	* Removed branchName from coreDef.
+	* Tagging TuningTools-01-00-12.
+
+2017-01-27 Werner S Freund
+	* Improve CrossValStat to handle cases where an operation bin can have both
+	merged and non-merged files.
+	* Tagging TuningTools-01-00-11.
+
+2017-01-23 Werner S Freund
+	* Removed OLs property as this is not planned to be used and makes code more
+	complex;
+	* Added AUC/InBoundAUC/SP/BestBench/ClosestPoint methods for retrieving
+	operation points and models;
+	* Previous methods can be used separately for the operation point
+  or for the model choice at any combination.
+	* Removed duplicated code in CrossValStat.PerfHolder for retrieving
+	operation point. It was replaced to use ReferenceBenchmark.getOutermostPerf
+	method.
+	* Fixed bug in CrossValStat which would keep history from folders from
+	previous bin when running multiple bins, causing new bins to not create
+	new folders within the monitoring file.
+	* Tagging TuningTools-01-00-10.
+
+2017-01-23 Werner S Freund
+	* Many panda issues solved, and now fully operational on loboc
+	* Tagging TuningTools-01-00-09
+
+2017-01-22 Werner S Freund
+	* Created own queue handling for PBS jobs.
+	* Submiting test to Panda to check if grid problem is now solved.
+	* Tagging TuningTools-01-00-08
+
+2017-01-21 Werner S Freund
+	* Added script for creating tag and probe performane slides.
+	* Not tagging yet, waiting for grid reintegration
+
+2017-01-20 João Victor Pinto
+	* Added new pre-processing for adding eta-mu variables to the network
+	* Not tagging yet, waiting for grid reintegration
+
+2017-01-15 Werner S Freund
+	* keras now compatible with local cluster.
+	* fixed keras multiple inits unable to retrieve network weights.
+	* protected fastnet roc with npCurrent to allow Pd/Pf performance calculation.
+	* Tagging TuningTools-01-00-07.
+
+2017-01-13 Werner S Freund
+	* Added CrossValidatioMethod using sklearn.
+	* Tagging TuningTools-01-00-06.
+
+2017-01-12 Werner S Freund
+	* Wrong core/framework type setup are ignored and job continues using
+	default setup.
+	* Tagging TuningTools-01-00-05.
+
+2017-01-12 Werner S Freund
+	* Changed all logging display message methods to _*messagelevel*.
+	* Handle argparse inexact argument matching for core-framework and
+	data-framework option.
+	* Set local cluster jobs to compress data.
+	* Local cluster jobs now fully operational for pbs
+	* Tagging TuningTools-01-00-04.
+
+2017-01-11 Werner S Freund
+	* Fixed auto-cofiguration for tuningjob.
+	* Tagging TuningTools-01-00-03
+
+2017-01-11 Werner S Freund
+	* Removed bad comma in import
+	* Tagging TuningTools-01-00-02
+
+2017-01-11 Werner S Freund
+	* Muted root messages on CreateData.py;
+	* Fixed CreateData bad auto-configuration when using parsers;
+	* Tagging TuningTools-01-00-01
+
+2017-01-08 Werner S Freund
+	* Added keras, currently configured to run EarlyStopping with val_loss as
+	monitored variable. Currently also using mse as cost function.
+	* __init__.py: Added dynamic version using RingerCore git_description
+	* The files saved on this module will now have attached the version
+	which they were produced.
+	* Dynmaic configuration for the core options and dataframe which is
+	shared with all the program via the coreDef module.
+	* Muted StoreGate.
+	* Tagging TuningTools-01-00-00
