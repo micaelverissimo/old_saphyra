@@ -1,8 +1,8 @@
 
 setupATLAS
 #asetup 21.2.28,AnalysisBase,setup,here
-#asetup AnalysisBase,21.2.9,setup,here
-asetup none,gcc62,cmakesetup
+asetup AnalysisBase,21.2.9,setup,here
+#asetup none,gcc62,cmakesetup
 #asetup AthAnalysis,latest,setup,here,centos
 #asetup Athena,master,latest,setup,here
 
