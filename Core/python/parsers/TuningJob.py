@@ -1,7 +1,7 @@
 __all__ = ['TuningJobParser', 'tuningJobParser',
            'TuningExpertParser', 'tuningExpertParser']
 
-from RingerCore import NotSet, ArgumentParser, BooleanStr
+from Gaugi import NotSet, ArgumentParser, BooleanStr
 
 from TuningTools.coreDef import hasFastnet, hasExmachina
 from TuningTools.TuningJob import BatchSizeMethod

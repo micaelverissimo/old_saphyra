@@ -3,7 +3,7 @@ __all__ = ['EarlyStopping']
 
 from keras.callbacks import Callback
 
-from RingerCore import Logger, LoggingLevel, NotSet, checkForUnusedVars
+from Gaugi import Logger, LoggingLevel, NotSet, checkForUnusedVars
 from libTuningTools import genRoc
 import numpy as np
 

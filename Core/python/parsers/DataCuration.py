@@ -1,6 +1,6 @@
 __all__ = ['DataCurationParser', 'dataCurationParser']
 
-from RingerCore import ArgumentParser, BooleanStr, NotSet
+from Gaugi import ArgumentParser, BooleanStr, NotSet
 from TuningTools.CrossValid import CrossValidMethod
 from TuningTools.dataframe.EnumCollection  import RingerOperation
 

@@ -1,6 +1,6 @@
 __all__ = ['CreateSelectorFiles']
 
-from RingerCore import ( checkForUnusedVars, calcSP, save, load, Logger
+from Gaugi import ( checkForUnusedVars, calcSP, save, load, Logger
                        , LoggingLevel, expandFolders, traverse
                        , retrieve_kw, NotSet, csvStr2List, select, progressbar, getFilters
                        , apply_sort, LoggerStreamable, appendToFileName, ensureExtension
@@ -165,7 +165,7 @@ class CreateSelectorFiles( Logger ):
         init =  info['init']
         pyThres = info['cut']
         
-        from RingerCore import retrieveRawDict
+        from Gaugi import retrieveRawDict
         if isinstance( pyThres, float ):
           pyThres = RawThreshold( thres = pyThres
                                 , etBinIdx = etBinIdx, etaBinIdx = etaBinIdx

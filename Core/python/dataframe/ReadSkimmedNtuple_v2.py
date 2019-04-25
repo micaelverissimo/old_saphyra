@@ -1,6 +1,6 @@
 __all__ = ['ReadData','readData']
 
-from RingerCore import ( EnumStringification, Logger, LoggingLevel, traverse
+from Gaugi import ( EnumStringification, Logger, LoggingLevel, traverse
                        , stdvector_to_list, checkForUnusedVars, expandFolders
                        , RawDictStreamer, RawDictStreamable, RawDictCnv, retrieve_kw
                        , csvStr2List, NotSet, progressbar )

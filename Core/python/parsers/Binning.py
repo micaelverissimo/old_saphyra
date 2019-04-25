@@ -1,6 +1,6 @@
 __all__ = ['addBinningOptions']
 
-from RingerCore import NotSet
+from Gaugi import NotSet
 def addBinningOptions( parser, label = '' ):
   parser.add_argument('--%set-bins' % (label + '-' if label else '')
           , nargs='+', default = NotSet, type = int,
@@ -11,7 +11,7 @@ def addBinningOptions( parser, label = '' ):
               wants to run the job only for the specified bin index.
               In case a list is specified, it is transformed into a
               MatlabLoopingBounds, read its documentation on:
-                http://nbviewer.jupyter.org/github/wsfreund/RingerCore/blob/master/readme.ipynb#LoopingBounds
+                http://nbviewer.jupyter.org/github/wsfreund/Gaugi/blob/master/readme.ipynb#LoopingBounds
               for more details.
           """)
   parser.add_argument('--%seta-bins' % (label + '-' if label else ''), nargs='+'

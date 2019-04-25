@@ -1,7 +1,7 @@
 __all__ = [ 'RetrieveCoreFramework', 'CoreFrameworkParser', 'coreFrameworkParser'
           , 'RetrieveDataFramework', 'DataframeParser', 'dataframeParser']
 
-from RingerCore import argparse, ArgumentParser, NotSet
+from Gaugi import argparse, ArgumentParser, NotSet
 from TuningTools.coreDef import coreConf, AvailableTuningToolCores, dataframeConf
 
 class RetrieveCoreFramework( argparse.Action ):

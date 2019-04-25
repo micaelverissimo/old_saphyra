@@ -22,7 +22,7 @@ from . import CrossValidStatMon
 __all__.extend( CrossValidStatMon.__all__    )
 from .CrossValidStatMon import *
 
-# Also make available the RingerCore parsers
-from RingerCore import parsers
+# Also make available the Gaugi parsers
+from Gaugi import parsers
 __all__.extend(parsers.__all__)
-from RingerCore.parsers import *
+from Gaugi.parsers import *

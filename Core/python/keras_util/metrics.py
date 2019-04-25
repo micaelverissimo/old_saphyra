@@ -7,7 +7,7 @@ import numpy as np
 
 from TuningTools.TuningJob import ReferenceBenchmark
 from TuningTools.coreDef import npCurrent
-from RingerCore import keyboard
+from Gaugi import keyboard
 
 
 try:

@@ -1,6 +1,6 @@
 __all__ = ['CreateDataParser', 'createDataParser']
 
-from RingerCore import ArgumentParser, get_attributes, BooleanStr, NotSet
+from Gaugi import ArgumentParser, get_attributes, BooleanStr, NotSet
 
 from TuningTools.dataframe.EnumCollection import RingerOperation
 from TuningTools.parsers.BaseModuleParser import CoreFrameworkParser, DataframeParser

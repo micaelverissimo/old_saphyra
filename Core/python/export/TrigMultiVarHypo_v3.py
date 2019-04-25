@@ -1,8 +1,8 @@
 
 __all__ = [ "TrigMultiVarHypo_v3" ]
 
-from RingerCore import Logger
-from RingerCore import ( checkForUnusedVars, calcSP, save, load, Logger
+from Gaugi import Logger
+from Gaugi import ( checkForUnusedVars, calcSP, save, load, Logger
                        , LoggingLevel, expandFolders, traverse
                        , retrieve_kw, NotSet, csvStr2List, select, progressbar, getFilters
                        , apply_sort, LoggerStreamable, appendToFileName, ensureExtension

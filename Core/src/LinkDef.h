@@ -3,6 +3,7 @@
 #include "TuningTools/RingerPhysVal_v2.h"
 #include "TuningTools/SkimmedNtuple.h"
 #include "TuningTools/SkimmedNtuple_v2.h"
+#include "TuningTools/TuningToolPyWrapper.h"
 //#include <vector>
 
 #if defined(__CLING__) || defined(__CINT__)
@@ -17,6 +18,7 @@
 //#pragma link C++ class std::vector<int8_t>+;
 
 // And for the event model class:
+#pragma link C++ class TuningToolPyWrapper+;
 #pragma link C++ class RingerPhysVal+;
 #pragma link C++ class RingerPhysVal_v2+;
 #pragma link C++ class MuonPhysVal+;

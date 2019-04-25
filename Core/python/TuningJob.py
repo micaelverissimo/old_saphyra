@@ -8,8 +8,7 @@ from Gaugi                   import ( Logger, LoggerStreamable, LoggingLevel
                                          , save, load, EnumStringification
                                          , checkForUnusedVars, NotSet, csvStr2List, retrieve_kw
                                          , traverse, LimitedTypeList, RawDictStreamable
-                                         , LimitedTypeStreamableList, masterLevel
-                                         , ProjectGit )
+                                         , LimitedTypeStreamableList, masterLevel )
 from Gaugi.LoopingBounds     import *
 
 from TuningTools.PreProc          import *
@@ -59,8 +58,8 @@ class TunedDiscrArchieveRDS( LoggerRawDictStreamer ):
     #raw['__version'] = obj._version
     import TuningTools, Gaugi
     raw['Gaugi__version__'], raw['TuningTools__version__'] = RingerCore.__version__, TuningTools.__version__
-    parent__version__ = ProjectGit.tag
-    raw['Project__version__'] = parent__version__
+    #parent__version__ = ProjectGit.tag
+    #raw['Project__version__'] = parent__version__
     return LoggerRawDictStreamer.treatDict(self, obj, raw)
 
 

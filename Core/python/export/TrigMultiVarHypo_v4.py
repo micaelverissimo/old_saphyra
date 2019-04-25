@@ -1,8 +1,8 @@
 
 __all__ = [ "TrigMultiVarHypo_v4" ]
 
-from RingerCore import Logger
-from RingerCore import ( checkForUnusedVars, calcSP, save, load, Logger
+from Gaugi import Logger
+from Gaugi import ( checkForUnusedVars, calcSP, save, load, Logger
                        , LoggingLevel, expandFolders, traverse
                        , retrieve_kw, NotSet, csvStr2List, select, progressbar, getFilters
                        , apply_sort, LoggerStreamable, appendToFileName, ensureExtension
@@ -186,7 +186,7 @@ class TrigMultiVarHypo_v4( Logger ):
       self._logger.info('Export weights to pickle format...')
       modelDict['__version__'] = self._version
       modelDict['__core__'] = TuningToolCores.keras
-      from RingerCore import save
+      from Gaugi import save
       save( modelDict, filename )
 
     from ROOT import TFile, TTree
@@ -259,7 +259,7 @@ class TrigMultiVarHypo_v4( Logger ):
       self._logger.info('Export Thresholds to pickle format...')
       modelDict['__version__'] = self._version
       modelDict['__core__'] = TuningToolCores.keras
-      from RingerCore import save
+      from Gaugi import save
       save( modelDict, filename )
 
 

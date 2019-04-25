@@ -1,6 +1,6 @@
 __all__ = ['TuningToolGridNamespace']
 
-from RingerCore import GridNamespace
+from Gaugi import GridNamespace
 
 ################################################################################
 ## Specialization of GridNamespace for this package

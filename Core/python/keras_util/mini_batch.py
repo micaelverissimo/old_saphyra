@@ -3,7 +3,7 @@ __all__ = ['MiniBatchGenerator']
 
 
 from keras.utils import Sequence
-from RingerCore import Logger, LoggingLevel, NotSet, checkForUnusedVars
+from Gaugi import Logger, LoggingLevel, NotSet, checkForUnusedVars
 import numpy as np
 
 

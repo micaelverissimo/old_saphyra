@@ -18,7 +18,7 @@ from Gaugi import ( Logger, checkForUnusedVars, reshape, save, load, traverse
                        , retrieve_kw, NotSet, appendToFileName, LoggerRawDictStreamer
                        , RawDictCnv, LoggerStreamable, ensureExtension, secureExtractNpItem
                        , progressbar, RawDictStreamer, RawDictStreamable, csvStr2List
-                       , expandFolders, ProjectGit
+                       , expandFolders
                        )
 
 from TuningTools.coreDef import npCurrent

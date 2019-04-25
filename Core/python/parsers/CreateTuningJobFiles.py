@@ -1,6 +1,6 @@
 __all__ = ['JobFileTypeCreation', 'TuningJobFileParser', 'tuningJobFileParser']
 
-from RingerCore import (ArgumentParser, BooleanStr, get_attributes
+from Gaugi import (ArgumentParser, BooleanStr, get_attributes
                        , NotSet, EnumStringification)
 
 from TuningTools.CrossValid import CrossValidMethod

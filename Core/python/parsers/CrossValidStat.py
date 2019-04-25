@@ -1,6 +1,6 @@
 __all__ = ['CrossValStatsJobParser', 'crossValStatsJobParser']
 
-from RingerCore import ArgumentParser, BooleanStr, NotSet
+from Gaugi import ArgumentParser, BooleanStr, NotSet
 
 from TuningTools.dataframe.EnumCollection import RingerOperation, PileupReference
 from TuningTools.TuningJob import ChooseOPMethod
