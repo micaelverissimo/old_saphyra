@@ -88,7 +88,7 @@ source setup_standalone.sh
 # build and compile
 source buildthis.sh
 # setup the libs and modules
-source setup_prometheus
+source setup_saphyra.sh
 ```
 
 ## Athena Installation
