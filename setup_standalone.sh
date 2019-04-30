@@ -1,3 +1,4 @@
+#!/bin/bash
 export Athena_SETUP=off
 export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/include/python2.7/"
 export LC_ALL=''

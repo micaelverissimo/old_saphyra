@@ -1,4 +1,6 @@
+#!/bin/bash
 export Athena_SETUP=on
+
 rm CMakeLists.txt
 setupATLAS
 #asetup 21.2.28,AnalysisBase,setup,here

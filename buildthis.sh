@@ -1,4 +1,4 @@
-
+#!/bin/bash
 #source setup_module.sh
 #source setup_module.sh --head
 
