@@ -1,13 +1,13 @@
 
 [submodule "Gaugi"]
 	path = Gaugi
-	url = https://gitlab.cern.ch/jodafons/jodafons/gaugi.git
+	url = https://gitlab.cern.ch/jodafons/gaugi.git
 [submodule "External/pytex"]
 	path = External/pytex
-	url = https://gitlab.cern.ch/jodafons/jodafons/pytex.git
+	url = https://gitlab.cern.ch/jodafons/pytex.git
 [submodule "External/monet"]
 	path = External/monet
-  url = https://gitlab.cern.ch/jodafons/jodafons/monet.git
+  url = https://gitlab.cern.ch/jodafons/monet.git
 [submodule "docker"]
 	path = docker
-	url = https://gitlab.cern.ch/jodafons/jodafons/docker.git
+	url = https://gitlab.cern.ch/jodafons/docker.git
