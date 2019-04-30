@@ -1,6 +1,6 @@
 __all__ = ['TuningToolGridNamespace']
 
-from Gaugi import GridNamespace
+from pandas import GridNamespace
 
 ################################################################################
 ## Specialization of GridNamespace for this package

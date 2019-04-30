@@ -11,6 +11,7 @@ import os, pkgutil
 hasExmachina = False # Force disable, decrepted
 hasFastnet   = bool( pkgutil.find_loader( 'libTuningTools' ) or pkgutil.find_loader( 'libTuningToolsLib' ) )
 hasKeras     = bool( pkgutil.find_loader( 'keras' )          )
+hasFastnet=True
 
 from Gaugi import ( EnumStringification, npConstants, Configure
                        , EnumStringificationOptionConfigure, Holder
@@ -105,9 +106,10 @@ class _ConfigureCoreFramework( EnumStringificationOptionConfigure ):
   def core_framework(self):
     if self.core is TuningToolCores.FastNet:
       try:
-        from libTuningTools import TuningToolPyWrapper as RawWrapper
+        from libsaphyra import TuningToolPyWrapper as RawWrapper
       except ImportError:
-        from libTuningToolsLib import TuningToolPyWrapper as RawWrapper
+        from libTuningTools import TuningToolPyWrapper as RawWrapper
+        #from libTuningToolsLib import TuningToolPyWrapper as RawWrapper
       import sys, os
       from ctypes import c_uint
       class TuningToolPyWrapper( RawWrapper, object ):

@@ -1008,10 +1008,6 @@ class TuningJob(Logger):
         - doMultiStop (FastNet prop) [True]: Tune classifier using P_D, P_F and
           SP when set to True. Uses only SP when set to False.
     """
-    from TuningTools import TuningToolsGit
-    from Gaugi import RingerCoreGit
-    TuningToolsGit.ensure_clean()
-    GaugiGit.ensure_clean()
     from Gaugi import OMP_NUM_THREADS
     self._info( 'OMP_NUM_THREADS is set to: %d', OMP_NUM_THREADS )
     import gc, os.path

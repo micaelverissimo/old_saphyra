@@ -10,6 +10,7 @@ import numpy as np
 from copy import deepcopy
 from TuningTools.dataframe import *
 
+import ROOT, pkgutil
 
 
 class ReadData(Logger):
@@ -143,13 +144,19 @@ class ReadData(Logger):
     supportTriggers       = retrieve_kw(kw, 'supportTriggers',       True                   )
     monitoring            = retrieve_kw(kw, 'monitoring',            None                   )
     pileupRef             = retrieve_kw(kw, 'pileupRef',             NotSet                 )
-    import ROOT, pkgutil
+
     #gROOT.ProcessLine (".x $ROOTCOREDIR/scripts/load_packages.C");
     #ROOT.gROOT.Macro('$ROOTCOREDIR/scripts/load_packages.C')
-    if not( bool( pkgutil.find_loader( 'libTuningTools' ) ) and ROOT.gSystem.Load('libTuningTools') >= 0 ) and \
-       not( bool( pkgutil.find_loader( 'libTuningToolsLib' ) ) and ROOT.gSystem.Load('libTuningToolsLib') >= 0 ):
-      self._fatal("Could not load TuningTools library", ImportError)
+    try:
+      if not( bool( pkgutil.find_loader( 'libTuningTools' ) ) and ROOT.gSystem.Load('libTuningTools') >= 0 ) and \
+        not( bool( pkgutil.find_loader( 'libTuningToolsLib' ) ) and ROOT.gSystem.Load('libTuningToolsLib') >= 0 ):
+        self._logger.debug("Could not load TuningTools library", ImportError)
+    except:
+      if not ROOT.gSystem.Load('libsaphyra') >=0:
+        self._logger.fatal('Saphyra lib not found.')
 
+
+    ROOT.gSystem.Load('libsaphyra')
     if 'level' in kw: self.level = kw.pop('level')
     # and delete it to avoid mistakes:
     checkForUnusedVars( kw, self._warning )

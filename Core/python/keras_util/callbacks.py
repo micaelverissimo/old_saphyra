@@ -2,10 +2,13 @@
 __all__ = ['EarlyStopping']
 
 from keras.callbacks import Callback
-
-from Gaugi import Logger, LoggingLevel, NotSet, checkForUnusedVars
-from libTuningTools import genRoc
 import numpy as np
+from Gaugi import Logger, LoggingLevel, NotSet, checkForUnusedVars
+try:
+  from libsaphyra import genRoc
+except:
+  from libTuningTools import genRoc
+
 
 class EarlyStopping(Callback,Logger):
 

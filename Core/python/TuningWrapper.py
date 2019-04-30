@@ -37,6 +37,7 @@ class TuningWrapper(Logger):
     self.references = ReferenceBenchmarkCollection( [] )
 
     coreframe = coreConf.core_framework()
+    print coreframe
     self._toFrame = False
     self.dataCurator = dataCurator
     from TuningTools import DecisionMaker
@@ -483,11 +484,9 @@ class TuningWrapper(Logger):
     """
     self.retrieveExpert()
     self._debug('Initalizing newff...')
-    if coreConf() is TuningToolCores.ExMachina:
-      if funcTrans is NotSet: funcTrans = ['tanh', 'tanh']
-      self._model = self._core.FeedForward(nodes, funcTrans, 'nw')
+    print coreConf()
 
-    elif coreConf() is TuningToolCores.FastNet:
+    if coreConf() is TuningToolCores.FastNet:
       if funcTrans is NotSet: funcTrans = ['tansig', 'tansig']
       if self.addPileupToOutputLayer: nodes[1] = nodes[1] + 1
       if self._expertNNs:
