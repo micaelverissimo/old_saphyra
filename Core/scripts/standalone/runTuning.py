@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
-from TuningTools.parsers import ArgumentParser, LoggerParser, TuningJobParser
-from RingerCore import emptyArgumentsPrintHelp, NotSet, LoggingLevel, DevParser
+from Gaugi.parsers import ArgumentParser, LoggerParser
+from TuningTools.parsers import TuningJobParser
+
+from Gaugi import emptyArgumentsPrintHelp, NotSet, LoggingLevel
 
 parser = ArgumentParser(description = 'Tune discriminators using input data.',
-                        parents = [TuningJobParser(), LoggerParser(), DevParser()])
+                        parents = [TuningJobParser(), LoggerParser()])
 parser.make_adjustments()
 
 emptyArgumentsPrintHelp( parser )
@@ -20,7 +22,7 @@ if args.sortBounds   not in (None, NotSet): conf_kw['sortBoundsCol']   = args.so
 if args.initBounds   not in (None, NotSet): conf_kw['initBoundsCol']   = args.initBounds
 if args.confFileList not in (None, NotSet): conf_kw['confFileList']    = args.confFileList
 # Binning
-from RingerCore import printArgs, NotSet, Logger, LoggingLevel
+from Gaugi import printArgs, NotSet, Logger, LoggingLevel
 if not(args.et_bins is NotSet) and len(args.et_bins)  == 1: args.et_bins  = args.et_bins[0]
 if not(args.eta_bins is NotSet) and len(args.eta_bins) == 1: args.eta_bins = args.eta_bins[0]
 

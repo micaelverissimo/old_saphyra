@@ -264,7 +264,7 @@ class JobSubmitNamespace( Logger, argparse.Namespace ):
 
   def append_to_job_submission_option(self, option, val):
     try:
-      from RingerCore.LimitedTypeList import LimitedTypeList
+      from Gaugi.LimitedTypeList import LimitedTypeList
       if hasattr(val,'__metaclass__') and issubclass(val.__metaclass__, LimitedTypeList):
         attr = self.get_job_submission_option(option)
         attr += val

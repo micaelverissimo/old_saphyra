@@ -12,15 +12,9 @@ from .CreateTuningJobFiles import *
 from . import TuningJob
 __all__.extend( TuningJob.__all__            )
 from .TuningJob import *
-from . import TuningToolsGrid
-__all__.extend( TuningToolsGrid.__all__      )
-from .TuningToolsGrid import *
 from . import CrossValidStat
 __all__.extend( CrossValidStat.__all__       )
 from .CrossValidStat import *
-from . import CrossValidStatMon
-__all__.extend( CrossValidStatMon.__all__    )
-from .CrossValidStatMon import *
 
 # Also make available the Gaugi parsers
 from Gaugi import parsers

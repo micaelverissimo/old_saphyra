@@ -7,7 +7,7 @@ __all__ = ['SecondaryDataset','SecondaryDatasetCollection',
 import os
 from Gaugi.messenger import Logger
 from Gaugi.parsers.Logger import LoggerNamespace
-from Gaugi.parsers.ClusterManager import ( JobSubmitArgumentParser, JobSubmitNamespace
+from pandas.ClusterManager import ( JobSubmitArgumentParser, JobSubmitNamespace
                                          , clusterManagerParser ) 
 from Gaugi.LimitedTypeList import LimitedTypeList
 from Gaugi.gtypes import BooleanStr, NotSet
@@ -251,7 +251,13 @@ def GridParser():
       help = """Flag to disable auto retrying jobs.""")
   gridParserGroup.add_job_submission_option('--crossSite',
       required = False, type=int,
-      help = """Split jobs over many sites.""")
+      help = """Split jobs over many sites.""") 
+  gridParserGroup.add_job_submission_option('--containerImage',
+      required = True,
+      help = """The docker container link""")
+  
+  
+  
   mutuallyEx1 = gridParserGroup.add_mutually_exclusive_group( required=False )
   mutuallyEx1.add_job_submission_option('-itar','--inTarBall', 
       metavar='InTarBall', 
@@ -260,6 +266,9 @@ def GridParser():
       metavar='OutTarBall',  
       help = "The environemnt tarball for posterior usage.")
   mutuallyEx1.title = 'GRID Mutually Exclusive Arguments'
+  
+  
+  
   return gridParser 
 gridParser = GridParser()
 ################################################################################
@@ -394,8 +403,8 @@ class GridNamespace( JobSubmitNamespace ):
     if not self.dry_run:
       self.pre_download()
     # We need to cd to this dir so that prun accepts the submission
-    workDir=os.path.expandvars("$ROOTCOREBIN/..")
-    os.chdir(workDir)
+    #workDir=os.path.expandvars("$ROOTCOREBIN/..")
+    #os.chdir(workDir)
     JobSubmitNamespace.run(self)
 
 
@@ -455,7 +464,7 @@ class GridNamespace( JobSubmitNamespace ):
     filename = os.path.expandvars(filename)
     basefile = os.path.basename(filename)
     dirname = os.path.dirname( filename )
-    from Gaugi.FileIO import checkFile
+    from Gaugi import checkFile
     if not checkFile(filename, md5sum):
       self._info('Downloading %s to avoid doing it on server side.', basefile)
       import urllib
@@ -471,25 +480,9 @@ class GridNamespace( JobSubmitNamespace ):
       Packages which need special libraries downloads to install should inherit
       from this class and overload this method to download needed libraries.
     """
-    self.check_retrieve("$ROOTCOREBIN/../Downloads/boost.tgz"
-                       ,"5a5d5614d9a07672e1ab2a250b5defc5"
-                       ,"http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.gz"
-                       )
-    self.check_retrieve("$ROOTCOREBIN/../Downloads/cython.tgz"
-                       ,"890b494a12951f1d6228c416a5789554"
-                       ,"https://pypi.python.org/packages/c6/fe/97319581905de40f1be7015a0ea1bd336a756f6249914b148a17eefa75dc/Cython-0.24.1.tar.gz"
-                       )
-    self.check_retrieve("$ROOTCOREBIN/../Downloads/numpy.tgz"
-                       ,"3cb325c3dff03b5bc15206c757a26116"
-                       ,"https://github.com/numpy/numpy/archive/v1.10.4.tar.gz"
-                       #,"http://sourceforge.net/projects/numpy/files/NumPy/1.10.4/numpy-1.10.4.tar.gz/download"
-                       )
-    self.check_retrieve("$ROOTCOREBIN/../Downloads/setuptools.tgz"
-                       ,"0744ee90ad266fb117d59f94334185d0"
-                       ,"https://pypi.python.org/packages/32/3c/e853a68b703f347f5ed86585c2dd2828a83252e1216c1201fa6f81270578/setuptools-26.1.1.tar.gz"
-                       )
-    self.check_retrieve("$ROOTCOREBIN/../Downloads/scipy.tgz"
-                       ,"9c6bc68693d7307acffce690fe4f1076"
-                       ,"https://github.com/scipy/scipy/archive/v0.18.0-1.tar.gz"
-                       )
-
+    
+    #self.check_retrieve("$ROOTCOREBIN/../Downloads/scipy.tgz"
+    #                   ,"9c6bc68693d7307acffce690fe4f1076"
+    #                   ,"https://github.com/scipy/scipy/archive/v0.18.0-1.tar.gz"
+    #                   )
+    return True
