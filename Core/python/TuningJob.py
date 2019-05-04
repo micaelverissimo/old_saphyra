@@ -57,7 +57,7 @@ class TunedDiscrArchieveRDS( LoggerRawDictStreamer ):
     raw['tunedDiscr']   = transformToRawDiscr( raw['tunedDiscr'] )
     #raw['__version'] = obj._version
     import TuningTools, Gaugi
-    raw['Gaugi__version__'], raw['TuningTools__version__'] = RingerCore.__version__, TuningTools.__version__
+    #raw['Gaugi__version__'], raw['TuningTools__version__'] = RingerCore.__version__, TuningTools.__version__
     #parent__version__ = ProjectGit.tag
     #raw['Project__version__'] = parent__version__
     return LoggerRawDictStreamer.treatDict(self, obj, raw)
