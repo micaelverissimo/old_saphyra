@@ -103,6 +103,14 @@ source build/x86-*/setup.sh
 ```
 
 
+## LCG with docker
+![Alt text](docs/docker_logo.png?raw=true "Docker")
+
+See `docker` to build your image. 
+
+
+
+
 ## Contribution
 
 - Dr. João Victor da Fonseca Pinto, UFRJ/COPPE, CERN/ATLAS (jodafons@cern.ch) [maintainer, developer]
