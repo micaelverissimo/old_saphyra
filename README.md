@@ -104,7 +104,7 @@ source build/x86-*/setup.sh
 
 
 ## LCG with docker
-![Alt text](docs/docker_logo.png?raw=true "Docker")
+![Alt text](docs/docker_logo.png?raw=true "Docker" width="100" height="100")
 
 See `docker` to build your image. 
 
