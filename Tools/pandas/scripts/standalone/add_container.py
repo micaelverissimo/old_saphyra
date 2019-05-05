@@ -1,7 +1,3 @@
-
-
-
-
 #!/usr/bin/env python
 
 from Gaugi  import LoggingLevel, Logger, expandFolders

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from RingerCore import emptyArgumentsPrintHelp, ArgumentParser
-from TuningTools.parsers import createDataParser, loggerParser, devParser
+from Gaugi import emptyArgumentsPrintHelp, ArgumentParser
+from TuningTools.parsers import createDataParser, loggerParser
 
 parser = ArgumentParser(description = 'Create TuningTool data from PhysVal.',
-                        parents = [createDataParser, loggerParser, devParser])
+                        parents = [createDataParser, loggerParser])
 parser.make_adjustments()
 
 emptyArgumentsPrintHelp(parser)
@@ -16,7 +16,7 @@ if len(args.reference) > 2:
   raise ValueError("--reference set to multiple values: %r", args.reference)
 if len(args.reference) is 1:
   args.reference.append( args.reference[0] )
-from RingerCore import Logger, LoggingLevel, printArgs, NotSet
+from Gaugi import Logger, LoggingLevel, printArgs, NotSet
 logger = Logger.getModuleLogger( __name__, args.output_level )
 
 from TuningTools import RingerOperation

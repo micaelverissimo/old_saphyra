@@ -299,6 +299,10 @@ def _InParser():
   _inParserGroup.add_job_submission_option('--nFilesPerJob', type=int,
       required = False,
       help = """Number of files to run per job.""")
+  _inParserGroup.add_job_submission_option('--noBuild', type=BooleanStr,
+      required = False,  default = False,
+      help = """Force no build.""")
+
   return _inParser 
 ################################################################################
 def _OutParser():

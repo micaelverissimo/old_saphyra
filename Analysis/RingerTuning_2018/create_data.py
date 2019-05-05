@@ -51,9 +51,8 @@ efficiencyValues = np.array([np.array([refs]) for refs in zip(traverse(pdrefs,tr
                                                  ,traverse(pfrefs,tree_types=(np.ndarray),simple_ret=True))]).reshape(pdrefs.shape + (2,) )
 
 
-basePath     = '/home/jodafons/CERN-DATA/data/data17_13TeV/GRL_v97'
-sgnInputFile = 'EGAM1'
-bkgInputFile = 'EGAM7'
+sgnInputFile = '/eos/user/j/jodafons/CERN-DATA/data/data17_13TeV/PhysVal_v2/EGAM1/'
+bkgInputFile = '/eos/user/j/jodafons/CERN-DATA/data/data17_13TeV/PhysVal_v2/EGAM7/'
 outputFile   = 'sample'
 treePath     = ["*/HLT/Physval/Egamma/probes",
                 "*/HLT/Physval/Egamma/fakes"]
@@ -61,11 +60,11 @@ treePath     = ["*/HLT/Physval/Egamma/probes",
 import os.path
 from TuningTools import Reference, RingerOperation
 from TuningTools import createData
-from RingerCore  import LoggingLevel
+from Gaugi  import LoggingLevel
 from TuningTools.dataframe import Dataframe
 
-createData( sgnFileList      = os.path.join( basePath, sgnInputFile ),
-            bkgFileList      = os.path.join( basePath, bkgInputFile ),
+createData( sgnFileList      = sgnInputFile,
+            bkgFileList      = bkgInputFile,
             ringerOperation  = RingerOperation.Trigger,
             referenceSgn     = Reference.Off_Likelihood, # probes passed by lhmedium
             referenceBkg     = Reference.Off_Likelihood, # electrons/any reproved by very loose

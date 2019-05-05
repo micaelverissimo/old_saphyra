@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from RingerCore import LoggingLevel, Logger
+from Gaugi import LoggingLevel, Logger
 mainLogger = Logger.getModuleLogger("FileJuicer")
 
 import argparse
@@ -20,8 +20,8 @@ if len(sys.argv)==1:
 args = parser.parse_args()
 
 
-from RingerCore import load,save
-from RingerCore import changeExtension, ensureExtension, appendToFileName, progressbar, mkdir_p
+from Gaugi import load,save
+from Gaugi import changeExtension, ensureExtension, appendToFileName, progressbar, mkdir_p
 from itertools import product
 import numpy as np
 if args.outputPath is None:
