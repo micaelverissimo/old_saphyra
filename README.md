@@ -107,10 +107,10 @@ source build/x86-*/setup.sh
 
 See `docker` to build your image. You must setup ATLAS and voms first.
 After setup all enviroments just use the example to launch a job using
-the docker image ml-base.
+the docker image ml-base. Saphyra must be setted.
 
 ```bash
-python runGRIDtuning.py \
+runGRIDtuning.py \
  --do-multi-stop 0 \
  --containerImage docker://jodafons/ml-base:latest \
  -c user.jodafons.config_test2 \
