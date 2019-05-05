@@ -104,9 +104,24 @@ source build/x86-*/setup.sh
 
 
 ## LCG with docker
-![Alt text](docs/docker_logo.png?raw=true "Docker" width="100" height="100")
 
-See `docker` to build your image. 
+See `docker` to build your image. You must setup ATLAS and voms first.
+After setup all enviroments just use the example to launch a job using
+the docker image ml-base.
+
+```bash
+python runGRIDtuning.py \
+ --do-multi-stop 0 \
+ --containerImage docker://jodafons/ml-base:latest \
+ -c user.jodafons.config_test2 \
+ -d user.jodafons.sample.npz  \
+ -p user.jodafons.ppFile.test.pic.gz \
+ -x user.jodafons.crossValid.test.pic.gz \
+ -o user.jodafons.job_test \
+ --eta-bin 0  \
+ --et-bin 0  \
+ --site AUTO \
+```
 
 
 
