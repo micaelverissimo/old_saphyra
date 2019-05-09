@@ -21,6 +21,7 @@ from Gaugi import ( Logger, checkForUnusedVars, reshape, save, load, traverse
                        , expandFolders
                        )
 
+from Gaugi.messenger.macros import *
 from TuningTools.coreDef import npCurrent
 from TuningTools.dataframe import Dataset
 import numpy as np
@@ -134,6 +135,11 @@ class BranchEffCollector(object):
   def count(self):
     "Total number of counted occurrences"
     return self._count
+
+  def sum( self, passed, count ):
+    self._passed = passed
+    self._count = count
+
 
   def eff_str(self):
     "Retrieve the efficiency string"
@@ -1347,6 +1353,157 @@ class TuningDataArchieve( BenchmarkEfficiencyArchieve ):
     return outputPath
 
 
+  
+
+
+class ReaderPool( Logger ):
+
+  def __init__(self, fList, reader, nthreads):
+    
+    Logger.__init__(self)
+    from Gaugi import csvStr2List
+    from Gaugi import expandFolders
+    fList = csvStr2List ( fList )
+    self._fList = expandFolders( fList )
+    self.process_pipe = []
+    self._outputs = []
+    self._nthreads = nthreads
+    self._reader = reader
+
+  def __call__( self, ringerOperation, **kw ):
+
+    from Gaugi import SafeProcess
+    while len(self._fList) > 0:
+      if len(self.process_pipe) < int(self._nthreads):
+        job_id = len(self._fList)
+        f = self._fList.pop()
+        proc = SafeProcess( self._reader , job_id)
+        proc(f,ringerOperation,**kw)
+        self.process_pipe.append( (job_id, proc) )
+      
+      for proc in self.process_pipe:
+        if not proc[1].is_alive():
+          MSG_INFO( self,  ('pop process id (%d) from the stack')%(proc[0]) )
+          self._outputs.append( proc[1].get() )
+          self.process_pipe.remove(proc)
+    
+    # Check pipe process
+    # Protection for the last jobs
+    while len(self.process_pipe)>0:
+      for proc in self.process_pipe:
+        if not proc[1].is_alive():
+          MSG_INFO( self,  ('pop process id (%d) from the stack')%(proc[0]) )
+          self._outputs.append( proc[1].get( (None,None,None,None) ) )
+          self.process_pipe.remove(proc)
+    
+    npData = self.__mergePatternShapes( [obj[0] for obj in self._outputs] )
+    npBaseData = self.__mergeBaseInfoShapes( [obj[1] for obj in self._outputs] )
+    effCollector = self.__mergeEffCollector( [obj[2] for obj in self._outputs] )
+
+    # TODO: need to implement the merge for cross collector. Use the first 
+    # for the moment since this is not used.
+    effCrossCollector=None
+    for obj in self._outputs:
+      if obj[3] is not None:
+        effCrossCollector=obj[3]; break
+
+    return npData, npBaseData, effCollector, effCrossCollector
+
+
+  def __mergePatternShapes( self, npArrayList ):
+    npArray = None
+    from copy import deepcopy, copy
+    import numpy as np
+    for tmpnpArray in npArrayList:
+      if tmpnpArray is not None:
+        if npArray is None:
+          npArray = deepcopy(tmpnpArray)
+        else: 
+          shape = npArray.shape
+          for etBin in range(shape[0]):
+            for etaBin in range(shape[1]):
+              if npArray[etBin][etaBin].shape[1]==0 and tmpnpArray[etBin][etaBin].shape[1]==0:
+                continue # bad condition
+              elif npArray[etBin][etaBin].shape[1]!=0 and tmpnpArray[etBin][etaBin].shape[1]==0:
+                continue # its good, do noting
+              elif npArray[etBin][etaBin].shape[1]==0 and tmpnpArray[etBin][etaBin].shape[1]!=0:
+                npArray[etBin][etaBin] = copy(tmpnpArray[etBin][etaBin]) # just overwrite
+              else: # concatenate
+                npArray[etBin][etaBin] = np.concatenate( (npArray[etBin][etaBin], tmpnpArray[etBin][etaBin]),axis=0)
+    return npArray
+   
+  def __mergeBaseInfoShapes( self, npArrayList ):
+    npArray = None
+    from copy import deepcopy, copy
+    import numpy as np
+    entries = len(npArrayList)
+    step = int(entries/100) if int(entries/100) > 0 else 1
+    for tmpnpArray in progressbar( npArrayList, entries,step=step, logger=self._logger, prefix='Merging base infos...') :
+      if tmpnpArray is not None:
+        if npArray is None:
+          npArray = deepcopy(tmpnpArray)
+        else: 
+          for patternBin, _  in enumerate(tmpnpArray):
+            shape = npArray[patternBin].shape
+            for etBin in range(shape[0]):
+              for etaBin in range(shape[1]):
+                if npArray[patternBin][etBin][etaBin].shape[1]==0 and tmpnpArray[patternBin][etBin][etaBin].shape[1]==0:
+                  continue # bad condition
+                elif npArray[patternBin][etBin][etaBin].shape[1]!=0 and tmpnpArray[patternBin][etBin][etaBin].shape[1]==0:
+                  continue # its good, do noting
+                elif npArray[patternBin][etBin][etaBin].shape[1]==0 and tmpnpArray[patternBin][etBin][etaBin].shape[1]!=0:
+                  npArray[patternBin][etBin][etaBin] = copy(tmpnpArray[patternBin][etBin][etaBin]) # just overwrite
+                else: # concatenate
+                  npArray[patternBin][etBin][etaBin] = np.concatenate( (npArray[patternBin][etBin][etaBin], 
+                                                                        tmpnpArray[patternBin][etBin][etaBin]) )
+ 
+    return npArray
+ 
+  def __mergePatternShapes( self, npArrayList ):
+    npArray = None
+    from copy import deepcopy, copy
+    import numpy as np
+    entries = len(npArrayList)
+    step = int(entries/100) if int(entries/100) > 0 else 1
+    for tmpnpArray in progressbar( npArrayList, entries,step=step, logger=self._logger, prefix='Merging patterns...') :
+      if tmpnpArray is not None:
+        if npArray is None:
+          npArray = deepcopy(tmpnpArray)
+        else: 
+          shape = npArray.shape
+          for etBin in range(shape[0]):
+            for etaBin in range(shape[1]):
+              if npArray[etBin][etaBin].shape[1]==0 and tmpnpArray[etBin][etaBin].shape[1]==0:
+                continue # bad condition
+              elif npArray[etBin][etaBin].shape[1]!=0 and tmpnpArray[etBin][etaBin].shape[1]==0:
+                continue # its good, do noting
+              elif npArray[etBin][etaBin].shape[1]==0 and tmpnpArray[etBin][etaBin].shape[1]!=0:
+                npArray[etBin][etaBin] = copy(tmpnpArray[etBin][etaBin]) # just overwrite
+              else: # concatenate
+                npArray[etBin][etaBin] = np.concatenate( (npArray[etBin][etaBin], tmpnpArray[etBin][etaBin]),axis=0)
+    return npArray
+ 
+
+
+
+  def __mergeEffCollector( self, collectorList ):
+    tmpCollector = None
+    entries = len(collectorList)
+    step = int(entries/100) if int(entries/100) > 0 else 1
+    for collector in progressbar( collectorList, entries,step=step, logger=self._logger, prefix='Merging eff collectors...') :
+      if collector is not None:
+        if tmpCollector is None:  
+          tmpCollector=collector; continue
+        else:
+          for key in tmpCollector.keys():
+            shape = (len(tmpCollector[key]), len(tmpCollector[key][0]))
+            for etBin in range(shape[0]):
+              for etaBin in range(shape[1]):
+                tmpCollector[key][etBin][etaBin].sum( collector[key][etBin][etaBin].passed,
+                                                      collector[key][etBin][etaBin].count )
+    return tmpCollector
+
+
 
 class CreateData(Logger):
 
@@ -1415,10 +1572,6 @@ class CreateData(Logger):
     #      When set to None, the Pd and Pf will be set to the value of the
     #      benchmark correspondent to the operation level set.
     #"""
-    #from TuningTools import TuningToolsGit
-    #from RingerCore import RingerCoreGit
-    #TuningToolsGit.ensure_clean()
-    #RingerCoreGit.ensure_clean()
     from TuningTools.dataframe import FilterType, Reference, Dataset, Dataframe
     pattern_oFile         = retrieve_kw(kw, 'pattern_oFile',         'tuningData'    )
     efficiency_oFile      = retrieve_kw(kw, 'efficiency_oFile',      NotSet          )
@@ -1448,6 +1601,7 @@ class CreateData(Logger):
     doMonitoring          = retrieve_kw(kw, 'doMonitoring',          True            )
     pileupRef             = retrieve_kw(kw, 'pileupRef',             NotSet          )
     dataframe             = retrieve_kw(kw, 'dataframe',             NotSet          )
+    nthreads              = retrieve_kw(kw, 'threads',               1               )
 
     # Mute root messages
     from ROOT import TFile, gROOT, kTRUE
@@ -1532,82 +1686,36 @@ class CreateData(Logger):
                'supportTriggers':       supportTriggers,
                #'pileupRef':             pileupRef,
              }
+    
+    # Collect signal samples
+    readerPool = ReaderPool( sgnFileList, reader, nthreads )
+    self._info('Extracting signal dataset information')
+    npSgn, npBaseSgn, sgnEff, sgnCrossEff  = readerPool(
+                                               ringerOperation,
+                                               filterType = FilterType.Signal,
+                                               reference = referenceSgn,
+                                               treePath = treePath[0],
+                                               getRates = getRates,
+                                               **kwargs)
+    if npSgn.size: self.__printShapes(npSgn, 'Signal')
 
-    #if doMonitoring is True:
-    #  # Create root file to attach all histograms
-    #  from RingerCore import StoreGate
-    #  monitoring_oFile = appendToFileName(pattern_oFile, 'monitoring', separator='-')
-    #  monTool = StoreGate(monitoring_oFile)
-    #  reader.bookHistograms(monTool)
-    #  kwargs['monitoring'] = monTool
 
-    if efficiencyTreePath[0] == treePath[0] or getRates == False:
-      self._info('Extracting signal dataset information')
-      npSgn, npBaseSgn, sgnEff, sgnCrossEff  = reader(sgnFileList,
-                                                 ringerOperation,
-                                                 filterType = FilterType.Signal,
-                                                 reference = referenceSgn,
-                                                 treePath = treePath[0],
-                                                 getRates = getRates,
-                                                 **kwargs)
-      if npSgn.size: self.__printShapes(npSgn, 'Signal')
-    else:
-      if not getRatesOnly:
-        self._info("Extracting signal data" )
-        npSgn, _, _, _ =     reader(sgnFileList,
-                                    ringerOperation,
-                                    filterType = FilterType.Signal,
-                                    reference = referenceSgn,
-                                    treePath = treePath[0],
-                                    getRates = False,
-                                    **kwargs)
-        self.__printShapes(npSgn, 'Signal')
-      else:
-        self._warning("Informed treePath was ignored and used only efficiencyTreePath.")
-
-      self._info("Extracting signal efficiencies")
-      _, _, sgnEff, sgnCrossEff  =    reader(sgnFileList,
-                                             ringerOperation,
-                                             filterType = FilterType.Signal,
-                                             reference = referenceSgn,
-                                             treePath = efficiencyTreePath[0],
-                                             getRatesOnly = True,
-                                             **kwargs)
-
-    if efficiencyTreePath[1] == treePath[1] or getRates == False:
-      self._info('Extracting background dataset information')
-      npBkg, npBaseBkg, bkgEff, bkgCrossEff  = reader(bkgFileList,
-                                                 ringerOperation,
-                                                 filterType = FilterType.Background,
-                                                 reference = referenceBkg,
-                                                 treePath = treePath[1],
-                                                 getRates = getRates,
-                                                 **kwargs)
-    else:
-      if not getRatesOnly:
-        self._info("Extracting background data for treePath" )
-        npBkg, _, _, _  =    reader(bkgFileList,
-                                    ringerOperation,
-                                    filterType = FilterType.Background,
-                                    reference = referenceBkg,
-                                    treePath = treePath[1],
-                                    getRates = False,
-                                    **kwargs)
-      else:
-        self._warning("Informed treePath was ignored and used only efficiencyTreePath.")
-
-      self._info("Extracting background efficiencies")
-      _, _, bkgEff, bkgCrossEff  =    reader(bkgFileList,
-                                             ringerOperation,
-                                             filterType = FilterType.Background,
-                                             reference = referenceBkg,
-                                             treePath = efficiencyTreePath[1],
-                                             getRatesOnly=True,
-                                             **kwargs)
+    # Collect background samples
+    readerPool = ReaderPool( bkgFileList, reader, nthreads )
+    self._info('Extracting background dataset information')
+    npBkg, npBaseBkg, bkgEff, bkgCrossEff  = readerPool(
+                                               ringerOperation,
+                                               filterType = FilterType.Background,
+                                               reference = referenceBkg,
+                                               treePath = treePath[1],
+                                               getRates = getRates,
+                                               **kwargs)
     if npBkg.size: self.__printShapes(npBkg, 'Background')
+
 
     # Rewrite all effciency values
     if isinstance(efficiencyValues, np.ndarray) or efficiencyValues not in (None, NotSet):
+      # Just hold the first one
       for etBin in range(nEtBins):
         for etaBin in range(nEtaBins):
           for key in sgnEff.iterkeys():
@@ -1617,6 +1725,8 @@ class CreateData(Logger):
           self._info( "Set bin (et%d:,eta:%d) target efficiency to (Pd:%f,Pf:%f)", etBin, etaBin
                     , sgnEff[key][etBin][etaBin].efficiency
                     , bkgEff[key][etBin][etaBin].efficiency )
+
+
 
     cls = TuningDataArchieve if not getRatesOnly else BenchmarkEfficiencyArchieve
     kwin = {'etaBins':                     etaBins
@@ -1756,7 +1866,6 @@ class CreateData(Logger):
                     )
         # etaBin
       # etBin
-
 
 
 

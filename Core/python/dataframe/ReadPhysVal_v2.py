@@ -335,10 +335,12 @@ class ReadData(Logger):
       pileupDataType = np.float32
     else:
       raise NotImplementedError("Pile-up reference %r is not implemented." % pileupRef)
+    #baseInfoBranch = BaseInfo((etBranch, etaBranch, pileupBranch),(npCurrent.fp_dtype, npCurrent.fp_dtype, pileupDataType))
+    
     baseInfoBranch = BaseInfo((etBranch, etaBranch, pileupBranch, "el_phi" if ringerOperation < 0 else "trig_L2_calo_phi" ),
-                              (npCurrent.fp_dtype, npCurrent.fp_dtype, npCurrent.fp_dtype, pileupDataType) )
-    baseInfo = [None, ] * baseInfoBranch.nInfo
+                                      (npCurrent.fp_dtype, npCurrent.fp_dtype, npCurrent.fp_dtype, npCurrent.fp_dtype) )
 
+    baseInfo = [None, ] * baseInfoBranch.nInfo
     # Make sure all baseInfoBranch information is available:
     for idx in baseInfoBranch:
       self.__setBranchAddress(t,baseInfoBranch.retrieveBranch(idx),event)
@@ -656,9 +658,12 @@ class ReadData(Logger):
     npObject = self.treatNpInfo(cPos, npEt, npEta, useEtBins, useEtaBins,
                                 nEtBins, nEtaBins, standardCaloVariables, ringConfig,
                                 npPatterns, )
+
     data = [self.treatNpInfo(cPos, npEt, npEta, useEtBins, useEtaBins,
-                                                    nEtBins, nEtaBins, standardCaloVariables, ringConfig,
-                                                    npData) for npData in npBaseInfo]
+                             nEtBins, nEtaBins, standardCaloVariables, ringConfig,
+                             npData) for npData in npBaseInfo]
+    
+    
     npBaseInfo = npCurrent.array( data, dtype=np.object )
 
 
@@ -677,7 +682,6 @@ class ReadData(Logger):
         for etaBin in range(nEtaBins) if useBins else range(1):
           for branch in branchEffCollectors.itervalues():
             lBranch = branch if not useBins else branch[etBin][etaBin]
-            self._info('%s',lBranch)
           if crossVal:
             for branchCross in branchCrossEffCollectors.itervalues():
               lBranchCross = branchCross if not useBins else branchCross[etBin][etaBin]
@@ -704,7 +708,7 @@ class ReadData(Logger):
 
   def treatNpInfo(self, cPos, npEt, npEta, useEtBins,
                   useEtaBins, nEtBins, nEtaBins, standardCaloVariables,
-                  ringConfig, npInput, ):
+                  ringConfig, npInput ):
     ## Remove not filled reserved memory space:
     if npInput.shape[npCurrent.odim] > cPos:
       npInput = np.delete( npInput, slice(cPos,None), axis = npCurrent.odim)
@@ -751,68 +755,6 @@ class ReadData(Logger):
     # useBins
     return npObject
   # end of (ReadData.treatNpInfo)
-
-
-  #def bookHistograms(self, monTool):
-  #  """
-  #    Booking all histograms to monitoring signal and backgorund samples
-  #  """
-  #  from ROOT import TH1F
-  #  etabins = [-2.47,-2.37,-2.01,-1.81,-1.52,-1.37,-1.15,-0.80,-0.60,-0.10,0.00,\
-  #             0.10, 0.60, 0.80, 1.15, 1.37, 1.52, 1.81, 2.01, 2.37, 2.47]
-  #  pidnames = ['VetoLHLoose','LHLoose','LHMedium','LHTight']
-  #  mcnames  = ['NoFound','VetoTruth', 'Electron','Z','Unknown']
-  #  dirnames = ['Signal','Background']
-  #  basepath = 'Distributions'
-  #  for dirname in dirnames:
-  #    monTool.mkdir(basepath+'/'+dirname)
-  #    monTool.addHistogram(TH1F('et'       ,'E_{T}; E_{T} ; Count'  ,200,0,200))
-  #    monTool.addHistogram(TH1F('eta'      ,'eta; eta ; Count', len(etabins)-1, np.array(etabins)))
-  #    monTool.addHistogram(TH1F('mu'       ,'mu; mu ; Count'  ,100,0,100))
-  #    monTool.addHistogram(TH1F('et_match' ,"E_{T}; E_{T} ; Count"  ,200,0,200))
-  #    monTool.addHistogram(TH1F('eta_match','eta; eta ; Count',len(etabins)-1,np.array(etabins)))
-  #    monTool.addHistogram(TH1F('mu_match' ,'mu; mu ; Count'  ,100,0,100))
-  #    monTool.addHistogram(TH1F('offline', 'Ofline; pidname; Count',len(pidnames),0.,len(pidnames)))
-  #    monTool.addHistogram(TH1F('offline_match', 'Ofline; pidname; Count',len(pidnames),0.,len(pidnames)))
-  #    monTool.addHistogram(TH1F('truth', 'Truth; ; Count',len(mcnames),0.,len(mcnames)))
-  #    monTool.addHistogram(TH1F('truth_match', 'Truth; ; Count',len(mcnames),0.,len(mcnames)))
-  #    monTool.setLabels(basepath+'/'+dirname+'/offline', pidnames )
-  #    monTool.setLabels(basepath+'/'+dirname+'/offline_match', pidnames )
-
-  #def __fillHistograms(self, monTool, filterType, event, match=False):
-  #
-  #  # Select the correct directory to Fill the histograns
-  #  if filterType == FilterType.Signal:
-  #    dirname = 'Signal'
-  #  elif filterType == FilterType.Background:
-  #    dirname = 'Background'
-  #  else:
-  #    return
-  #  # Add a sufix "_match" when we have to fill after all selections
-  #  if match is True: name = '_match'
-  #  else: name = ''
-  #  # Common offline variabels monitoring
-  #  monTool.histogram('Distributions/'+dirname+'/et' +name).Fill(event.el_et*1e-3)
-  #  monTool.histogram('Distributions/'+dirname+'/eta'+name).Fill(event.el_eta)
-  #  monTool.histogram('Distributions/'+dirname+'/mu' +name).Fill(event.el_nPileupPrimaryVtx)
-  #  # Offline Monitoring
-  #  if not event.el_lhLoose: monTool.histogram('Distributions/'+dirname+'/offline'+name).Fill('VetoLHLoose',1)
-  #  if event.el_lhLoose:     monTool.histogram('Distributions/'+dirname+'/offline'+name).Fill('LHLoose'    ,1)
-  #  if event.el_lhMedium:    monTool.histogram('Distributions/'+dirname+'/offline'+name).Fill('LHMedium'   ,1)
-  #  if event.el_lhTight:     monTool.histogram('Distributions/'+dirname+'/offline'+name).Fill('LHTight'    ,1)
-  #
-  #  # MonteCarlo Monitoring
-  #  if event.mc_hasMC == False:
-  #    monTool.histogram('Distributions/'+dirname+'/truth'+name).Fill('NoFound',1)
-  #  else:
-  #    if not (event.mc_isElectron and (event.mc_hasZMother or event.mc_hasWMother) ):
-  #      monTool.histogram('Distributions/'+dirname+'/truth'+name).Fill('VetoTruth',1)
-  #    elif event.mc_isElectron and event.mc_hasZMother:
-  #      monTool.histogram('Distributions/'+dirname+'/truth'+name).Fill('Z',1)
-  #    elif event.mc_isElectron:
-  #      monTool.histogram('Distributions/'+dirname+'/truth'+name).Fill('Electron',1)
-  #    else:
-  #      monTool.histogram('Distributions/'+dirname+'/truth'+name).Fill('Unknown',1)
 
 
 # Instantiate object
