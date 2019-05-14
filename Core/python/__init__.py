@@ -53,22 +53,22 @@ from . import SubsetGenerator
 __all__.extend( SubsetGenerator.__all__      )
 from .SubsetGenerator import *
 
-# dataframe core
 from . import dataframe
 __all__.extend( dataframe.__all__            )
 from dataframe import *
+
 # parsers sub-package modules
 from . import parsers
 __all__.extend( parsers.__all__              )
 from parsers import *
-# plots sub-package modules
-#from . import monitoring
-#__all__.extend( monitoring.__all__           )
-#from monitoring import *
-# plots sub-package modules
+
 from . import export
 __all__.extend( export.__all__           )
 from export import *
+
+#from . import keras_util
+#__all__.extend( keras_util.__all__           )
+#from keras_util import *
 
 
 

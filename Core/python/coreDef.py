@@ -1,36 +1,29 @@
-__all__ = [ 'hasExmachina', 'hasFastnet', 'hasKeras', 'TuningToolCores'
+__all__ = [ 'hasFastnet', 'hasKeras', 'TuningToolCores'
           , 'AvailableTuningToolCores', 'CoreConfiguration', 'coreConf'
           , 'NumpyConfiguration', 'npCurrent'
           , 'DataframeConfiguration' , 'dataframeConf'
-          #, 'TuningToolsGit'
           ]
 
 import os, pkgutil
 
-#hasExmachina = bool( pkgutil.find_loader( 'exmachina' )      )
-hasExmachina = False # Force disable, decrepted
-hasFastnet   = bool( pkgutil.find_loader( 'libTuningTools' ) or pkgutil.find_loader( 'libTuningToolsLib' ) )
-hasKeras     = bool( pkgutil.find_loader( 'keras' )          )
-hasFastnet=True
+hasFastnet   = bool( pkgutil.find_loader( 'libsaphyra' ) )
+hasKeras     = bool( pkgutil.find_loader( 'keras' )      )
 
 from Gaugi import ( EnumStringification, npConstants, Configure
                        , EnumStringificationOptionConfigure, Holder
                        , NotSet, ArgumentError)
 
-#TuningToolsGit = GitConfiguration(  'TuningToolsGit', __file__, tagArgStr = '--tuning-tools-info')
 
 class TuningToolCores( EnumStringification ):
   _ignoreCase = True
   ShallowMode = 0
   FastNet = 1
-  ExMachina = 2
-  keras = 3
+  keras = 2
 
 class AvailableTuningToolCores( EnumStringification ):
   _ignoreCase = True
   ShallowMode = 0
   if hasFastnet: FastNet = 1
-  if hasExmachina: ExMachina = 2
   if hasKeras: keras = 3
 
   @classmethod
@@ -76,8 +69,6 @@ class _ConfigureCoreFramework( EnumStringificationOptionConfigure ):
       core = TuningToolCores.FastNet
     elif hasKeras:
       core = TuningToolCores.keras
-    elif hasExmachina:
-      core = TuningToolCores.ExMachina
     else:
       core = TuningToolCores.ShallowMode
       self._debug("No core available.")
@@ -88,10 +79,7 @@ class _ConfigureCoreFramework( EnumStringificationOptionConfigure ):
     Returns the api instance which is to be used to read the data
     """
     import numpy as np
-    if self.core is TuningToolCores.ExMachina:
-      # Define the exmachina numpy constants
-      kwargs = { 'useFortran' : True, 'fp_dtype' : np.float64, 'int_dtype' : np.int64 }
-    elif self.core is TuningToolCores.FastNet:
+    if self.core is TuningToolCores.FastNet:
       kwargs = { 'useFortran' : False, 'fp_dtype' : np.float32, 'int_dtype' : np.int32 }
     elif self.core is TuningToolCores.keras:
       from keras.backend import backend
@@ -138,12 +126,11 @@ class _ConfigureCoreFramework( EnumStringificationOptionConfigure ):
 
       # End of TuningToolPyWrapper
       return TuningToolPyWrapper
-    elif self.core is TuningToolCores.ExMachina:
-      import exmachina
-      return exmachina
     elif self.core is TuningToolCores.keras:
-      import keras
-      return keras
+      from TuningTools.keras_core.coreDef import KerasWrapper
+      return KerasWrapper
+
+
 
 # The singleton holder
 CoreConfiguration = Holder( _ConfigureCoreFramework() )

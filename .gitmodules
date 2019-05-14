@@ -8,6 +8,6 @@
 [submodule "External/monet"]
 	path = External/monet
   url = https://gitlab.cern.ch/jodafons/monet.git
-[submodule "docker"]
-	path = docker
-	url = https://gitlab.cern.ch/jodafons/docker.git
+[submodule "External/docker"]
+	path = External/docker
+	url = ssh://git@gitlab.cern.ch:7999/jodafons/docker.git

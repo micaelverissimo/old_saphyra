@@ -1384,7 +1384,7 @@ class ReaderPool( Logger ):
       for proc in self.process_pipe:
         if not proc[1].is_alive():
           MSG_INFO( self,  ('pop process id (%d) from the stack')%(proc[0]) )
-          self._outputs.append( proc[1].get() )
+          self._outputs.append( proc[1].get( (None,None,None,None)) )
           self.process_pipe.remove(proc)
     
     # Check pipe process

@@ -3,12 +3,12 @@ __all__ = ['TuningJobParser', 'tuningJobParser',
 
 from Gaugi import NotSet, ArgumentParser, BooleanStr
 
-from TuningTools.coreDef import hasFastnet, hasExmachina
+from TuningTools.coreDef import hasFastnet
 from TuningTools.TuningJob import BatchSizeMethod
 from TuningTools.parsers.BaseModuleParser import CoreFrameworkParser
 from TuningTools.parsers.DataCuration import DataCurationParser
 from TuningTools.parsers.Binning import addBinningOptions
-
+hasExmachina=False
 ################################################################################
 # Create tuningJob file related objects
 ################################################################################

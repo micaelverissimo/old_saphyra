@@ -10,6 +10,7 @@ from Gaugi                   import ( Logger, LoggerStreamable, LoggingLevel
                                          , traverse, LimitedTypeList, RawDictStreamable
                                          , LimitedTypeStreamableList, masterLevel )
 from Gaugi.LoopingBounds     import *
+from Gaugi.messenger.macros  import *
 
 from TuningTools.PreProc          import *
 from TuningTools.SubsetGenerator  import *
@@ -41,7 +42,7 @@ class TunedDiscrArchieveRDS( LoggerRawDictStreamer ):
        not obj.tunedDiscr   or \
        not obj.tuningInfo   or \
        not obj.tunedPP:
-      self._fatal("Attempted to retrieve empty data from TunedDiscrArchieve.")
+      MSG_FATAL(self,"Attempted to retrieve empty data from TunedDiscrArchieve.")
     # Treat looping bounds:
     raw['neuronBounds'] = transformToMatlabBounds( raw['neuronBounds'] ).getOriginalVec()
     raw['sortBounds']   = transformToPythonBounds( raw['sortBounds'] ).getOriginalVec()
@@ -342,7 +343,7 @@ class TunedDiscrArchieve( LoggerStreamable ):
                'tunedPP' : self._tunedPP[ sortIdx ], \
                'tuningInfo' : self._tuningInfo[ idx ] }
     except ValueError, e:
-      self._fatal(("Couldn't find one the required indexes on the job bounds. "
+      MSG_FATAL(self,("Couldn't find one the required indexes on the job bounds. "
           "The retrieved error was: %s") % e, ValueError)
   # getTunedInfo
 
@@ -504,7 +505,7 @@ class ReferenceBenchmark(EnumStringification, LoggerStreamable):
     checkForUnusedVars( kw, self._warning )
     self._name      = name
     if not (type(self.name) is str):
-      self._fatal("Name must be a string.")
+      MSG_FATAL(self,"Name must be a string.")
     self._reference = ReferenceBenchmark.retrieve(reference)
     # Fill attributes with standard values
     self._totalSignalCount = 0
@@ -528,7 +529,7 @@ class ReferenceBenchmark(EnumStringification, LoggerStreamable):
       # Check if everything is ok
       if signalEfficiency is None or backgroundEfficiency is None:
         if self._reference != ReferenceBenchmark.SP:
-          self._fatal("Cannot specify non-empty ReferenceBenchmark without signalEfficiency and backgroundEfficiency arguments.")
+          MSG_FATAL(self,"Cannot specify non-empty ReferenceBenchmark without signalEfficiency and backgroundEfficiency arguments.")
         else:
           return
       # Total counts:
@@ -546,7 +547,7 @@ class ReferenceBenchmark(EnumStringification, LoggerStreamable):
         self._crossPdList = signalCrossEfficiency.allDSEfficiencyList
         self._crossPfList = signalCrossEfficiency.allDSEfficiencyList
       else:
-        self._debug("ReferenceBenchmark build with no cross-validation object")
+        MSG_DEBUG(self,"ReferenceBenchmark build with no cross-validation object")
 
       self.refVal = self.__refVal()
   # __init__
@@ -687,7 +688,7 @@ class ReferenceBenchmark(EnumStringification, LoggerStreamable):
     if sort is None: #and ds in (Dataset.Test, Dataset.Validation, Dataset.Operation):
       return self.refVal
     if not self.crossPd:
-      self._fatal("Attempted to retrieve Cross-Validation information which is not available.")
+      MSG_FATAL(self,"Attempted to retrieve Cross-Validation information which is not available.")
     if ds is not Dataset.Unspecified and sort is None:
       if self.reference is ReferenceBenchmark.Pd:
         return self.crossPd[ds]
@@ -750,7 +751,7 @@ class ReferenceBenchmark(EnumStringification, LoggerStreamable):
         try:
           benchmark = cmpType * npData[3]
         except IndexError:
-          self._fatal("AUC is not available.")
+          MSG_FATAL(self,"AUC is not available.")
       elif method is ChooseOPMethod.MSE:
           benchmark = (-1. * cmpType) * npData[4]
       else:
@@ -763,7 +764,7 @@ class ReferenceBenchmark(EnumStringification, LoggerStreamable):
         try:
           benchmark = cmpType * npData[3]
         except IndexError:
-          self._fatal("AUC is not available.")
+          MSG_FATAL(self,"AUC is not available.")
       elif method is ChooseOPMethod.MSE:
           benchmark = (-1. * cmpType) * npData[4]
       else:
@@ -774,13 +775,13 @@ class ReferenceBenchmark(EnumStringification, LoggerStreamable):
           benchmark = cmpType * npData[3]
           refVec = npData[3]
         except IndexError:
-          self._fatal("AUC is not available.")
+          MSG_FATAL(self,"AUC is not available.")
       elif method is ChooseOPMethod.MSE:
           benchmark = (-1. * cmpType) * npData[4]
       else:
         benchmark = (cmpType) * npData[0]
     else:
-      self._fatal("Unknown reference %d" , self.reference)
+      MSG_FATAL(self,"Unknown reference %d" , self.reference)
     if method is ChooseOPMethod.MSE:
       return np.argmax( benchmark )
     lRefVal = self.getReference( ds = ds, sort = sortIdx )
@@ -792,7 +793,7 @@ class ReferenceBenchmark(EnumStringification, LoggerStreamable):
       if not refAllowedIdxs.size:
         if not self.allowLargeDeltas:
           # We don't have any candidate, raise:
-          self._fatal("eps is too low, no indexes passed constraint! Reference is %r | RefVec is: \n%r" %
+          MSG_FATAL(self,"eps is too low, no indexes passed constraint! Reference is %r | RefVec is: \n%r" %
               (lRefVal, refVec))
         else:
           if method is not ChooseOPMethod.ClosestPointToReference:
@@ -800,7 +801,7 @@ class ReferenceBenchmark(EnumStringification, LoggerStreamable):
             distances = np.abs( refVec - lRefVal )
             minDistanceIdx = np.argmin( distances )
             # We can search for the closest candidate available:
-            self._warning("No indexes passed eps constraint (%r%%) for reference value (%s:%r) where refVec is: \n%r",
+            MSG_WARNING(self,"No indexes passed eps constraint (%r%%) for reference value (%s:%r) where refVec is: \n%r",
                                  eps*100., ReferenceBenchmark.tostring(self.reference), lRefVal, refVec)
             # This is the new minimal distance:
             lRefVal = refVec[minDistanceIdx]
@@ -813,7 +814,7 @@ class ReferenceBenchmark(EnumStringification, LoggerStreamable):
       else:
         if method is not ChooseOPMethod.ClosestPointToReference:
           if len(refAllowedIdxs) != len(refVec):
-            self._info("Found %d points within %r%% distance from benchmark.",
+            MSG_INFO(self,"Found %d points within %r%% distance from benchmark.",
                               len(refAllowedIdxs), eps*100. )
       # Otherwise we return best benchmark for the allowed indexes:
       if method is ChooseOPMethod.ClosestPointToReference:
@@ -1009,7 +1010,7 @@ class TuningJob(Logger):
           SP when set to True. Uses only SP when set to False.
     """
     from Gaugi import OMP_NUM_THREADS
-    self._info( 'OMP_NUM_THREADS is set to: %d', OMP_NUM_THREADS )
+    MSG_INFO(self, 'OMP_NUM_THREADS is set to: %d', OMP_NUM_THREADS )
     import gc, os.path
     from copy import deepcopy
     ### Retrieve configuration from input values:
@@ -1033,13 +1034,13 @@ class TuningJob(Logger):
     if 'confFileList' in kw and ( 'neuronBoundsCol' in kw or \
                                   'sortBoundsCol'   in kw or \
                                   'initBoundsCol'   in kw ):
-      self._fatal(("confFileList is mutually exclusive with [neuronBounds, " \
+      MSG_FATAL(self,("confFileList is mutually exclusive with [neuronBounds, " \
           "sortBounds and initBounds], either use one or another " \
           "terminology to specify the job configuration."), ValueError)
     confFileList    = kw.pop('confFileList', None )
     # Retrieve configuration looping parameters
     if not confFileList:
-      self._debug("Retrieving looping configuration from passed arguments")
+      MSG_DEBUG(self,"Retrieving looping configuration from passed arguments")
       # There is no configuration file, read information from kw:
       neuronBoundsCol   = retrieve_kw( kw, 'neuronBoundsCol', MatlabLoopingBounds(5, 5)                             )
       sortBoundsCol     = retrieve_kw( kw, 'sortBoundsCol',   PythonLoopingBounds( dCurator.crossValid.nSorts())    )
@@ -1060,7 +1061,7 @@ class TuningJob(Logger):
 
 
     else:
-      self._debug("Retrieving looping configuration from file.")
+      MSG_DEBUG(self,"Retrieving looping configuration from file.")
       # Make sure confFileList is in the correct format
       confFileList = csvStr2List( confFileList )
       # Now loop over confFiles and add to our configuration list:
@@ -1091,16 +1092,16 @@ class TuningJob(Logger):
     # Check if looping bounds are ok:
     for neuronBounds in neuronBoundsCol():
       if neuronBounds.lowerBound() < 1:
-        self._fatal("Neuron lower bound is not allowed, it must be at least 1.", ValueError)
+        MSG_FATAL(self,"Neuron lower bound is not allowed, it must be at least 1.", ValueError)
     for sortBounds in sortBoundsCol():
       if sortBounds.lowerBound() < 0:
-        self._fatal("Sort lower bound is not allowed, it must be at least 0.", ValueError)
+        MSG_FATAL(self,"Sort lower bound is not allowed, it must be at least 0.", ValueError)
       if sortBounds.upperBound() >= dCurator.crossValid.nSorts():
-        self._fatal(("Sort upper bound (%d) is not allowed, it is higher or equal then the number "
+        MSG_FATAL(self,("Sort upper bound (%d) is not allowed, it is higher or equal then the number "
             "of sorts used (%d).") % (sortBounds.upperBound(), dCurator.crossValid.nSorts(),), ValueError )
     for initBounds in initBoundsCol():
       if initBounds.lowerBound() < 0:
-        self._fatal("Attempted to create an initialization index lower than 0.", ValueError)
+        MSG_FATAL(self,"Attempted to create an initialization index lower than 0.", ValueError)
     ## Retrieve binning information:
     etBins  = retrieve_kw(kw, 'etBins',  None )
     etaBins = retrieve_kw(kw, 'etaBins', None )
@@ -1115,20 +1116,20 @@ class TuningJob(Logger):
       etaBins = MatlabLoopingBounds(etaBins)
     # Read the cluster configuration
     if 'cluster' in kw and 'clusterFile' in kw:
-      self._fatal("cluster is mutually exclusive with clusterFile, \
+      MSG_FATAL(self,"cluster is mutually exclusive with clusterFile, \
           either use or another terminology to specify SubsetGenaratorCollection object.", ValueError)
 
     # Check if use requested bins are ok:
     # TODO Looping configuration should have its own curator
     if etBins is not None:
       if not dCurator.isEtDependent:
-        self._fatal("Requested to run for specific et bins, but no et bins are available.", ValueError)
+        MSG_FATAL(self,"Requested to run for specific et bins, but no et bins are available.", ValueError)
       if etBins.lowerBound() < 0 or etBins.upperBound() >= dCurator.nEtBins:
-        self._fatal("etBins (%r) bins out-of-range. Total number of et bins: %d" % (etBins.list(), dCurator.nEtBins), ValueError)
+        MSG_FATAL(self,"etBins (%r) bins out-of-range. Total number of et bins: %d" % (etBins.list(), dCurator.nEtBins), ValueError)
       if not dCurator.isEtaDependent:
-        self._fatal("Requested to run for specific eta bins, but no eta bins are available.", ValueError)
+        MSG_FATAL(self,"Requested to run for specific eta bins, but no eta bins are available.", ValueError)
       if etaBins.lowerBound() < 0 or etaBins.upperBound() >= dCurator.nEtaBins:
-        self._fatal("etaBins (%r) bins out-of-range. Total number of eta bins: %d" % (etaBins.list(), dCurator.nEtaBins) , ValueError)
+        MSG_FATAL(self,"etaBins (%r) bins out-of-range. Total number of eta bins: %d" % (etaBins.list(), dCurator.nEtaBins) , ValueError)
 
     # Retrieve some useful information and keep it on memory
     nConfigs = len( neuronBoundsCol )
@@ -1140,27 +1141,19 @@ class TuningJob(Logger):
     tuningWrapper = TuningWrapper( dCurator
                                  , level                  = self.level
                                  , doPerf                 = retrieve_kw( kw, 'doPerf',                 NotSet )
-                                 # Expert Neural Networks confs:
                                  , merged                 = merged
-                                 , expertPaths            = retrieve_kw( kw, 'expertPaths',            NotSet )
                                  , summaryOPs             = retrieve_kw( kw, 'summaryOPs',             NotSet )
-                                 # All core confs:
                                  , maxFail                = retrieve_kw( kw, 'maxFail',                NotSet )
-                                 , algorithmName          = retrieve_kw( kw, 'algorithmName',          NotSet )
+                                 , optmin_alg             = retrieve_kw( kw, 'optmin_alg',             NotSet )
                                  , epochs                 = retrieve_kw( kw, 'epochs',                 NotSet )
                                  , batchSize              = retrieve_kw( kw, 'batchSize',              NotSet )
                                  , batchMethod            = retrieve_kw( kw, 'batchMethod',            NotSet )
                                  , showEvo                = retrieve_kw( kw, 'showEvo',                NotSet )
-                                 , useTstEfficiencyAsRef  = retrieve_kw( kw, 'useTstEfficiencyAsRef',  NotSet )
-                                 # ExMachina confs:
-                                 , networkArch            = retrieve_kw( kw, 'networkArch',            NotSet )
                                  , costFunction           = retrieve_kw( kw, 'costFunction',           NotSet )
                                  , shuffle                = retrieve_kw( kw, 'shuffle',                NotSet )
                                  # FastNet confs:
                                  , seed                   = retrieve_kw( kw, 'seed',                   NotSet )
                                  , doMultiStop            = retrieve_kw( kw, 'doMultiStop',            NotSet )
-                                 , addPileupToOutputLayer = retrieve_kw( kw, 'addPileupToOutputLayer', NotSet )
-                                 # TODO: This must be configurable by conf file for future
                                  , secondaryPP            = retrieve_kw( kw, 'secondaryPP'           , NotSet )
                                  )
 
@@ -1197,9 +1190,9 @@ class TuningJob(Logger):
         # FIXME Ugly, ugly... can be someone's nightmare
         fulloutput = save( [], os.path.join( outputDir, outputFile ), compress = compress, dryrun = True )
         if os.path.exists(fulloutput) and not overwrite:
-          self._warning('Skipping already existent output file %s (set overwrite option to ignore it).', fulloutput )
+          MSG_WARNING(self,'Skipping already existent output file %s (set overwrite option to ignore it).', fulloutput )
           continue
-        self._info('Running configuration file number %d%s', confNum, dCurator.binStr)
+        MSG_INFO(self,'Running configuration file number %d%s', confNum, dCurator.binStr)
         tunedDiscr = []
         tuningInfo = []
         nSorts = len(sortBounds)
@@ -1212,45 +1205,43 @@ class TuningJob(Logger):
           # And loop over neuron configurations and initializations:
           for neuronIdx, neuron in enumerate(neuronBounds()):
             for init in initBounds():
+
               # keras only
               model = modelBoundsCol[confNum][neuronIdx]
               if model and coreConf() is TuningToolCores.keras:
                 from keras.models import clone_model
                 model = clone_model(model)
-
-              self._info('Training <Neuron = %d, sort = %d, init = %d>%s...', neuron, sort, init, dCurator.binStr)
-              if dCurator.merged:
-                self._info( 'Discriminator Configuration: input = %d, hidden layer = %d, output = %d',
-                            (dCurator.nInputs[0]+dCurator.nInputs[1]), neuron, 1)
-                tuningWrapper.newExpff( [nInputs, neuron, 1] )
-                cTunedDiscr, cTuningInfo = tuningWrapper.trainC_Exp()
-              else:
-                self._info( 'Discriminator Configuration: input = %d, hidden layer = %d, output = %d',
+                MSG_INFO(self,'Training <Model = %d, sort = %d, init = %d>%s...', neuronIdx, sort, init, dCurator.binStr)
+              elif coreConf() is TuningToolCores.FastNet:
+                MSG_INFO(self,'Training <Neuron = %d, sort = %d, init = %d>%s...', neuron, sort, init, dCurator.binStr)
+                MSG_INFO(self, 'Discriminator Configuration: input = %d, hidden layer = %d, output = %d',
                             dCurator.nInputs, neuron, 1)
-                ### create the neural network object
-                tuningWrapper.newff([dCurator.nInputs, neuron, 1], model=model)
-                ### train the discriminator
-                cTunedDiscr, cTuningInfo = tuningWrapper.train_c()
+              
+              ### create the neural network object
+              tuningWrapper.newff([dCurator.nInputs, neuron, 1], model=model)
+              ### train the discriminator
+              MSG_INFO(self, "Starting the training...")
+              cTunedDiscr, cTuningInfo = tuningWrapper.train_c()
 
-              self._debug('Finished C++ tuning, appending tuned discriminators to tuning record...')
+              MSG_DEBUG(self,'Finished C++ tuning, appending tuned discriminators to tuning record...')
               # Append retrieved tuned discriminators and its tuning information
               tunedDiscr.append( cTunedDiscr )
               tuningInfo.append( cTuningInfo )
-            self._debug('Finished all initializations for neuron %d...', neuron)
-          self._debug('Finished all neurons for sort %d...', sort)
+            MSG_DEBUG(self,'Finished all initializations for neuron %d...', neuron)
+          MSG_DEBUG(self,'Finished all neurons for sort %d...', sort)
           # Finished all inits for this sort, we need to undo the crossValid if
           # we are going to do a new sort, otherwise we continue
           if not ( (confNum+1) == nConfigs and sort == sortBounds.endBound()):
             dCurator.toRawPatterns()
-          self._debug('Finished all hidden layer neurons for sort %d...', sort)
-        self._debug('Finished all sorts for configuration %d in collection...', confNum)
+          MSG_DEBUG(self,'Finished all hidden layer neurons for sort %d...', sort)
+        MSG_DEBUG(self,'Finished all sorts for configuration %d in collection...', confNum)
         ## Finished retrieving all tuned discriminators for this config file for
         ## this pre-processing. Now we head to save what we've done so far:
         # This pre-processing was tuned during this tuning configuration:
         tunedPP = PreProcCollection( [ dCurator.ppCol[etBinIdx][etaBinIdx][sort] for sort in sortBounds() ] )
 
         # Define output file name:
-        self._info('Saving file named %s...', fulloutput)
+        MSG_INFO(self,'Saving file named %s...', fulloutput)
 
         extraKw = {}
         if dCurator.nEtBins is not None:
@@ -1268,10 +1259,10 @@ class TuningJob(Logger):
                                         tunedPP = tunedPP,
                                         **extraKw
                                       ).save( fulloutput, compress )
-        self._info('File "%s" saved!', savedFile)
+        MSG_INFO(self,'File "%s" saved!', savedFile)
 
       # Finished all configurations we had to do
-      self._info('Finished tuning job!')
+      MSG_INFO(self,'Finished tuning job!')
 
   # end of __call__ member fcn
 
