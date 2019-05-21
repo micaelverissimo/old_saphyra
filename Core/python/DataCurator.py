@@ -563,8 +563,8 @@ class DataCurator( CrossValidCurator, PreProcCurator, Logger ):
     # Pop indexes
     if lPat == 1:
       trnData = trnData[0]; valData = valData[0]; tstData = tstData[0]
-    elif coreConf() is TuningToolCores.keras:
-      self._fatal("Not implemented case for more than 1 dataset when using keras as core.")
+    #elif coreConf() is TuningToolCores.keras:
+    #  self._fatal("Not implemented case for more than 1 dataset when using keras as core.")
     # Now do the same with the base information:
     from TuningTools import BaseInfo
     trnBaseInfo, valBaseInfo, tstBaseInfo = [[(None, None) for _ in range(BaseInfo.nInfo)] for _ in range(3)]

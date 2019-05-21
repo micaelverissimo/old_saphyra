@@ -36,13 +36,19 @@ class BinaryClassificationEarlyStopping(Callback,Logger):
  
 
   def on_epoch_end(self, epoch, logs={}):
-   
+    
     # get the number of datasets is in the validation and where is the target position in the
     # keras tensor.
     n_datasets, target_index = self.__how_many_datasets()
-        
-    s_idx = np.where(self.validation_data[target_index]== 1)[0] # get the target positive index
-    b_idx = np.where(self.validation_data[target_index]==-1)[0] # get the target negative index
+    target = self.validation_data[target_index]
+
+    # check if the model uses two outputs (cross entropy method)
+    if target.shape[1] > 1:
+      from TuningTools.keras_core.utilities import inverse_to_categorical
+      target = inverse_to_categorical(target)
+
+    s_idx = np.where(target== 1)[0] # get the target positive index
+    b_idx = np.where(target==-1)[0] # get the target negative index
    
     # get all the positive (target) samples for each dataset
     local_data = [ self.validation_data[di][s_idx] for di in range(n_datasets) ]
@@ -55,14 +61,19 @@ class BinaryClassificationEarlyStopping(Callback,Logger):
     # generate the neural output for all negative cases
     local_batch = self.__minimal_local_batch if local_data[0].shape[0] > self.__minimal_local_batch else local_data[0].shape[0]         
     y_pred_b = self.model.predict(local_data if n_datasets>1 else local_data[0], batch_size=local_batch, verbose=self.__verbose)
-    
+   
+    # check if the model uses two outputs (cross entropy method)
+    if y_pred_s.shape[1]>1:
+      # remap the output to [-1,1] range
+      y_pred_s = (y_pred_s[:,1]-0.5)*2
+      y_pred_b = (y_pred_b[:,1]-0.5)*2
+
     # generate the roc curve (c++ embeded)
     sp, det, fa, thresholds = c_genRoc( y_pred_s, y_pred_b, 1, -1, 0.01 )
     
     # get the max sp value (knee of the curve)
     knee = np.argmax( sp )
     sp_max = sp[knee]
-    
 
     # check ig the current sp score is maximal
     if sp_max > self.__current_score:

@@ -24,7 +24,7 @@ class KerasWrapper( Logger ):
   def __init__(self, **kw ):    
     Logger.__init__( self, **kw )
     self._model         = retrieve_kw( kw, 'model'                , NotSet                          )
-    self._secondaryPP   = retrieve_kw( kw, 'secondaryPP'          , []                              )
+    self._secondaryPP   = retrieve_kw( kw, 'secondaryPP'          , NotSet                          )
     from keras.optimizers import RMSprop, SGD, Adam
     adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     self._optmin_alg    = retrieve_kw( kw, 'optmin_alg'           , Adam                             )
@@ -56,6 +56,7 @@ class KerasWrapper( Logger ):
 
 
 
+    self._history = NotSet
     self._batchSize = 1024                        
     self._verbose = True if self.level is LoggingLevel.VERBOSE else False
     checkForUnusedVars(kw, self._debug )
@@ -86,19 +87,29 @@ class KerasWrapper( Logger ):
                           optimizer = self._optmin_alg,
                           metrics = self._metrics )
     self._model.summary()
-    print self._model.optimizer
+
 
   def fit(self, trnData, trnTarget, valData, valTarget):
+    
+    if type(valData) is list:
+      for idx, ds in enumerate(valData):
+        MSG_INFO(self, "Dataset %d with [%d, %d]", idx,ds.shape[0],ds.shape[1])
+    else:
+      MSG_INFO(self, "Dataset 0 with [%d, %d]", valData.shape[0],valData.shape[1])
+
+    from TuningTools.keras_core.utilities import to_categorical
     MSG_INFO(self, "Batch fitting size is: %d",self._batchSize)
     self._history = self._model.fit( _checkSecondaryPP(trnData, self._secondaryPP)
-                                    , trnTarget
-                                    , validation_data = ( _checkSecondaryPP(valData,self._secondaryPP) , valTarget )
+                                    , to_categorical(trnTarget,num_classes=2) if self._costFunction is 'binary_crossentropy' else trnTarget
+                                    , validation_data = ( _checkSecondaryPP(valData,self._secondaryPP) , \
+                                      to_categorical(valTarget,num_classes=2) if self._costFunction is 'binary_crossentropy' else valTarget )
                                     , epochs          = self._epochs
                                     , batch_size      = self._batchSize
                                     , callbacks       = self._callbacks
                                     , verbose         = True
                                     , shuffle         = self._shuffle
                                     )
+    MSG_INFO(self, "Finished the fit.")
     return self._history
 
 
@@ -108,25 +119,28 @@ class KerasWrapper( Logger ):
                                                              tstTarget=npCurrent.fp_array([]), 
                                                              use_test = False,
                                                              batch_size = 5000):
-          
+    # Map the neural network output to [-1,1] range
+    def _checkOutput( output ):
+      return (output[:,1]-0.5)*2 if output.shape[1]>1 else output
 
-    from TuningTools.Neural import Roc
-    trnOutput = self._model.predict(_checkSecondaryPP(trnData,self._secondaryPP),batch_size=batch_size)
-    valOutput = self._model.predict(_checkSecondaryPP(valData,self._secondaryPP),batch_size=batch_size)
+    trnOutput = _checkOutput( self._model.predict(_checkSecondaryPP(trnData,self._secondaryPP),batch_size=batch_size) )
+    valOutput = _checkOutput( self._model.predict(_checkSecondaryPP(valData,self._secondaryPP),batch_size=batch_size) )
+
+    from TuningTools.Neural import Roc as RocObject
     if tstData.size:
-      tstOutput = self._model.predict(_checkSecondaryPP(tstData,self._secondaryPP),batch_size=batch_size)
+      tstOutput = _checkOutput( self._model.predict(_checkSecondaryPP(tstData,self._secondaryPP),batch_size=batch_size) )
       output = np.concatenate([trnOutput,valOutput,tstOutput] )
       target = np.concatenate([trnTarget,valTarget,tstTarget] )
       signal = tstOutput[np.where(tstTarget==1)]; noise = tstOutput[np.where(tstTarget==-1)]
-      tst_roc = Roc( c_genRoc(signal, noise, 1, -1, 0.01) )
+      tst_roc = RocObject( c_genRoc(signal, noise, 1, -1, 0.01) )
     else:
       output = np.concatenate([trnOutput,valOutput] )
       target = np.concatenate([trnTarget,valTarget] )
       signal = valOutput[np.where(valTarget==1)]; noise = valOutput[np.where(valTarget==-1)]
-      tst_roc = Roc( c_genRoc(signal, noise, 1, -1, 0.01) )
+      tst_roc = RocObject( c_genRoc(signal, noise, 1, -1, 0.01) )
 
     signal = output[np.where(target==1)]; noise = output[np.where(target==-1)]
-    op_roc = Roc( c_genRoc(signal, noise, 1, -1, 0.01) )
+    op_roc = RocObject( c_genRoc(signal, noise, 1, -1, 0.01) )
     return op_roc, tst_roc
 
   

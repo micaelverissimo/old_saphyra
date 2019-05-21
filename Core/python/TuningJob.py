@@ -1217,11 +1217,15 @@ class TuningJob(Logger):
                 MSG_INFO(self, 'Discriminator Configuration: input = %d, hidden layer = %d, output = %d',
                             dCurator.nInputs, neuron, 1)
               
-              ### create the neural network object
+              # create the neural network object
               tuningWrapper.newff([dCurator.nInputs, neuron, 1], model=model)
-              ### train the discriminator
+              # train the discriminator
               MSG_INFO(self, "Starting the training...")
               cTunedDiscr, cTuningInfo = tuningWrapper.train_c()
+
+              # Append some useful information into the dictionary
+              if coreConf() is TuningToolCores.keras:
+                cTunedDiscr['keras_summary'].update( {'sort':sort,'init':init,'model':neuronIdx} )
 
               MSG_DEBUG(self,'Finished C++ tuning, appending tuned discriminators to tuning record...')
               # Append retrieved tuned discriminators and its tuning information

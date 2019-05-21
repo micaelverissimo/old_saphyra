@@ -21,21 +21,17 @@ class TuningWrapper(Logger):
   """
     TuningTool is the higher level representation of the TuningToolPyWrapper class.
   """
-
   # FIXME Create a dict with default options for FastNet and for ExMachina
-
   def __init__( self, dataCurator, **kw ):
     Logger.__init__( self, kw )
     self.references = ReferenceBenchmarkCollection( [] )
     coreframe = coreConf.core_framework()
-    print coreframe
     self.dataCurator = dataCurator
     
     self._level                = retrieve_kw( kw, 'level',          LoggingLevel.INFO               )
     epochs                     = retrieve_kw( kw, 'epochs',                 10000                   )
     maxFail                    = retrieve_kw( kw, 'maxFail',                50                      )
     self.doPerf                = retrieve_kw( kw, 'doPerf',                 True                    )
-
     self.useTstEfficiencyAsRef = retrieve_kw( kw, 'useTstEfficiencyAsRef',  False                   )
     self._saveOutputs          = retrieve_kw( kw, 'saveOutputs',            False                   )
     self.summaryOPs            = retrieve_kw( kw, 'summaryOPs',            [None for _ in range(len(self.dataCurator.dataLocation))])
@@ -107,12 +103,8 @@ class TuningWrapper(Logger):
     self._valTarget  = self._emptyTarget
     self._tstTarget  = self._emptyTarget
     self.sortIdx = None
-    self.addPileupToOutputLayer = False
-
- 
+    self.addPileupToOutputLayer = False 
   # TuningWrapper.__init__
-
-
 
 
   def release(self):
@@ -221,7 +213,6 @@ class TuningWrapper(Logger):
       self.references = references
 
 
-
   def setSortIdx(self, sort):
 
     if coreConf() is TuningToolCores.FastNet:
@@ -240,10 +231,6 @@ class TuningWrapper(Logger):
                           self._core.fa * 100.  )
 
 
-
-
-
-
   def trnData(self, release = False):
     if coreConf() is TuningToolCores.keras:
       ret = [self.__separete_patterns(ds,self._trnTarget) for ds in self._trnData] if self._merged else \
@@ -259,6 +246,9 @@ class TuningWrapper(Logger):
       Set test dataset of the tuning method.
     """
     if self._merged:
+      self._sgnSize = data[0][0].shape[npCurrent.odim]
+      self._bkgSize = data[0][1].shape[npCurrent.odim]
+
       if coreConf() is TuningToolCores.keras:
         self._trnData = list()
         for pat in data:
@@ -272,12 +262,15 @@ class TuningWrapper(Logger):
       elif coreConf() is TuningToolCores.FastNet:
         MSG_FATAL(self,  "Expert Neural Networks not implemented for FastNet core" )
     else:
+      self._sgnSize = data[0].shape[npCurrent.odim]
+      self._bkgSize = data[1].shape[npCurrent.odim]
       if coreConf() is TuningToolCores.keras:
         if target is None:
           data, target = self.__concatenate_patterns(data)
         _checkData(data, target)
         self._trnData = data
         self._trnTarget = target
+
       elif coreConf() is TuningToolCores.FastNet:
         self._trnData = data
         self._core.setTrainData( data )
@@ -322,7 +315,6 @@ class TuningWrapper(Logger):
         self._core.setValData( data )
 
 
-
   def testData(self, release = False):
     if coreConf() is TuningToolCores.keras:
       ret = [self.__separete_patterns(ds,self._tstTarget) for ds in self._tstData] if self._merged else \
@@ -360,8 +352,6 @@ class TuningWrapper(Logger):
       elif coreConf() is TuningToolCores.FastNet:
         self._tstData = data
         self._core.setTstData( data )
-
-
 
 
   def newff(self, nodes, funcTrans = NotSet, model = None):
@@ -406,6 +396,7 @@ class TuningWrapper(Logger):
       # Retrieve raw network
       rawDictTempl['discriminator'] = self.__discr_to_dict( self._core.model )
       rawDictTempl['benchmark'] = self.references[0]
+      rawDictTempl['keras_summary'] = {'history':history}
       tunedDiscrList.append( deepcopy( rawDictTempl ) )
       tuningInfo = DataTrainEvolution( history ).toRawObj()
 
