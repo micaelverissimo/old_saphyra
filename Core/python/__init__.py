@@ -76,3 +76,10 @@ from Gaugi import masterLevel
 masterLevel.mute( 'StoreGate'                )
 __version__ = 1.0
 #__version__ = TuningToolsGit.tag
+
+
+# make compatible with old pickle files
+import sys
+sys.modules['RingerCore']=Gaugi
+
+
