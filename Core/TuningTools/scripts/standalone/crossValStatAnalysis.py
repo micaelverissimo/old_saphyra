@@ -3,8 +3,9 @@
 from time import time
 start = time()
 
-from RingerCore import ( csvStr2List, str_to_class, NotSet, BooleanStr
-                       , Logger, LoggingLevel, emptyArgumentsPrintHelp 
+#from RingerCore import ( csvStr2List, str_to_class, NotSet, BooleanStr
+from Gaugi import ( csvStr2List, str_to_class, NotSet, BooleanStr
+                       , Logger, LoggingLevel, emptyArgumentsPrintHelp
                        , expandPath, mkdir_p )
 
 from TuningTools.parsers import ( ArgumentParser, loggerParser,
@@ -64,7 +65,7 @@ if args.refFile is not None:
     refArgs = []
     try:
       try:
-        benchmarks = (effArchieve.signalEfficiencies[efficiencyKey][etBin][etaBin], 
+        benchmarks = (effArchieve.signalEfficiencies[efficiencyKey][etBin][etaBin],
                       effArchieve.backgroundEfficiencies[efficiencyKey][etBin][etaBin])
         if benchmarks[0]._readVersion is 2:
           benchmarks[0]._etBin = etBin; benchmarks[0]._etaBin = etaBin
@@ -77,7 +78,7 @@ if args.refFile is not None:
       mainLogger.fatal("Could not retrieve operation point %s at efficiency file. Available options are: %r"
                       , refLabel, effArchieve.signalEfficiencies.keys() )
     #try:
-    #  crossBenchmarks = (effArchieve.signalCrossEfficiencies[refLabel][etBin][etaBin], 
+    #  crossBenchmarks = (effArchieve.signalCrossEfficiencies[refLabel][etBin][etaBin],
     #                     effArchieve.backgroundCrossEfficiencies[refLabel][etBin][etaBin])
     #  refArgs.extend( crossBenchmarks )
     #except KeyError, AttributeError:
@@ -86,9 +87,9 @@ if args.refFile is not None:
     # FIXME: Shouldn't this be a function or class?
     opRefs = [ReferenceBenchmark.SP, ReferenceBenchmark.Pd, ReferenceBenchmark.Pf]
     refBenchmarkList = ReferenceBenchmarkCollection([])
-    for ref in opRefs: 
-      refBenchmarkList.append( ReferenceBenchmark( "OperationPoint_" + refLabel.replace('Accept','') + "_" 
-                                                   + ReferenceBenchmark.tostring( ref ), 
+    for ref in opRefs:
+      refBenchmarkList.append( ReferenceBenchmark( "OperationPoint_" + refLabel.replace('Accept','') + "_"
+                                                   + ReferenceBenchmark.tostring( ref ),
                                                    ref, *refArgs ) )
     refBenchmarkCol.append( refBenchmarkList )
   del effArchieve
@@ -97,7 +98,7 @@ elif args.redo_decision_making or (args.redo_decision_making  in (None,NotSet) a
   if args.pile_up_ref in (None,NotSet):
     mainLogger.fatal("Cannot redo decision making without specifying --pile-up-ref.")
 
-stat = CrossValidStatAnalysis( 
+stat = CrossValidStatAnalysis(
     args.discrFiles
     , binFilters = args.binFilters
     , binFilterIdxs = args.binFilterIdx
@@ -121,7 +122,7 @@ stat( outputName              = args.outputFileBase
     , overwrite               = args.overwrite
     # Data curator arguments:
     , dataLocation            = args.data
-    , ppFile                  = args.ppFile 
+    , ppFile                  = args.ppFile
     , crossValidFile          = args.crossFile
     , clusterFile             = args.clusterFile
     , crossValidMethod        = args.crossValidMethod

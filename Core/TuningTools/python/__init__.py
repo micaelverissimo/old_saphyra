@@ -79,6 +79,7 @@ __version__ = 1.0
 
 
 # make compatible with old pickle files
+import Gaugi as Gaugi
 import sys
 sys.modules['RingerCore']=Gaugi
 
