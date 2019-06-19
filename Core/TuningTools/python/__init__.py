@@ -66,9 +66,9 @@ from . import export
 __all__.extend( export.__all__           )
 from export import *
 
-#from . import keras_util
-#__all__.extend( keras_util.__all__           )
-#from keras_util import *
+from . import tableboard
+__all__.extend( tableboard.__all__           )
+from tableboard import *
 
 
 

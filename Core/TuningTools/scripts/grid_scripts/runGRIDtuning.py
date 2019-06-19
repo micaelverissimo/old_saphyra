@@ -33,8 +33,8 @@ from pandas import ioGridParser, GridOutputCollection, GridOutput
 ioGridParser.delete_arguments('grid__inDS', 'grid__nJobs')
 ioGridParser.suppress_arguments( grid__mergeOutput          = False # We disabled it since late 2017, where GRID
     # added a limited to the total memory and processing time for merging jobs.
-                               #, grid_CSV__outputs          = GridOutputCollection( [ GridOutput('td','*tunedDiscr*') ] )
-                               , grid_CSV__outputs          = GridOutputCollection( [ ] )
+                               , grid_CSV__outputs          = GridOutputCollection( [ GridOutput('td','tunedDiscr*.pic') ] )
+                               #, grid_CSV__outputs          = GridOutputCollection( [  ] )
                                , grid__nFiles               = None
                                , grid__nFilesPerJob         = 1
                                , grid__forceStaged          = True
@@ -246,7 +246,6 @@ else:
 
 memoryVal = args.get_job_submission_option('memory')
 
-tuningJob      = '/home/atlas/saphyra/Core/scripts/standalone/runTuning.py'
 
 # Prepare to run
 from itertools import product
@@ -262,7 +261,7 @@ for etBin, etaBin in progressbar( product( args.et_bins(),
   if args.multi_files: ###NOTE: Fix all et/eta multi file names
     for s in secondaryDSs:  s.container = re.sub(r'_et\d+_eta\d+',r'_et%d_eta%d' % (etBin, etaBin), s.container )
 
-  args.setExec("""sh -c 'python {tuningJob}
+  args.setExec("""sh -c 'python /home/atlas/saphyra/Core/scripts/standalone/runTuning.py
                     --data {DATA}
                     --confFileList {CONFIG}
                     --ppFile {PP}
@@ -291,7 +290,6 @@ for etBin, etaBin in progressbar( product( args.et_bins(),
                     {OUTPUT_LEVEL}
                     {CORE}'
                """.format(
-                           tuningJob        = tuningJob,
                            DATA             = dataStr,
                            CONFIG           = configStr,
                            PP               = ppStr,

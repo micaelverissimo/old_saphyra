@@ -11,3 +11,6 @@
 [submodule "External/docker"]
 	path = External/docker
 	url = https://gitlab.cern.ch/jodafons/docker.git
+[submodule "External/machinelearning"]
+	path = External/machinelearning
+	url = https://gitlab.cern.ch/jodafons/machinelearning.git
