@@ -28,7 +28,7 @@ else()
   link_directories(${Boost_LIBRARY_DIR})
  
   ### If needed to find numpy check caffe script
-  ### https://github.com/PMBio/peer/blob/master/cmake/FindNumpy.cmake 
+  # https://github.com/PMBio/peer/blob/master/cmake/FindNumpy.cmake 
   if (NOT NUMPY_INCLUDE_DIR)
       exec_program ("${PYTHON_EXECUTABLE}"
         ARGS "-c 'import numpy; print numpy.get_include()'"
@@ -76,7 +76,7 @@ else()
   
   
   add_subdirectory(Gaugi)
-  #add_subdirectory(Core/TuningTools)
+  add_subdirectory(Core/TuningTools)
   #add_subdirectory(Core/Keras)
   add_subdirectory(External/monet)
   add_subdirectory(External/pytex)
@@ -84,7 +84,7 @@ else()
   
   add_library(saphyra SHARED
     $<TARGET_OBJECTS:Gaugi> 
-    #$<TARGET_OBJECTS:TuningTools> 
+    $<TARGET_OBJECTS:TuningTools> 
   )
   
   

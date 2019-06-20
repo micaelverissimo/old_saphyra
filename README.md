@@ -51,7 +51,6 @@ Then use this commands to include the root into your path.
 
 ```bash
 echo 'source ~/.bin/root/build/bin/thisroot.sh' >> ~/.bashrc
-source $HOME/root/bin/thisroot.sh
 ```
 
 Then use apt-get (or yum) to install other dependencies (steps marked with recommended are not obligatory):
@@ -83,23 +82,14 @@ source setup_module.sh --head
 ## Standalone Installation (Recommended)
 
 ```bash
-# setup all standalone envs
-source setup_standalone.sh
-# build and compile
 source buildthis.sh
 # setup the libs and modules
-source setup_saphyra.sh
+source setup.sh
 ```
 
 ## Athena Installation
 
 ```bash
-# setup all ATLAS envs
-source setup_athena.sh
-# build and compile
-source buildthis.sh
-# setup the libs and modules
-source build/x86-*/setup.sh
 ```
 
 
