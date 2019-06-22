@@ -120,7 +120,7 @@ else:
 
 # Save model and weights
 model.save(model_name)
-print('Saved trained model at %s ' % model_path)
+print('Saved trained model at %s ' % model_name)
 
 # Score trained model.
 scores = model.evaluate(x_test, y_test, verbose=1)
