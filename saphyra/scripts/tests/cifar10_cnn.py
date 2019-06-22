@@ -13,13 +13,39 @@ from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 import os
 
+
+
+from Gaugi.messenger import LoggingLevel, Logger
+import argparse
+
+mainLogger = Logger.getModuleLogger("job")
+parser = argparse.ArgumentParser(description = '', add_help = False)
+parser = argparse.ArgumentParser()
+
+model_name = 'keras_cifar10_trained_model.h5'
+
+parser.add_argument('-o','--outputFile', action='store', 
+        dest='outputFile', required = False, default = model_name,
+            help = "The output store name.")
+
+import sys,os
+if len(sys.argv)==1:
+    parser.print_help()
+    sys.exit(1)
+
+args = parser.parse_args()
+
+
+
+
+
 batch_size = 32
 num_classes = 10
 epochs = 1
 data_augmentation = False
 num_predictions = 20
-save_dir = os.path.join(os.getcwd(), 'saved_models')
-model_name = 'keras_cifar10_trained_model.h5.tgz'
+#save_dir = os.path.join(os.getcwd(), 'saved_models')
+
 
 # The data, split between train and test sets:
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
@@ -122,8 +148,8 @@ else:
                         workers=4)
 
 # Save model and weights
-model.save(model_name)
-print('Saved trained model at %s ' % model_name)
+model.save(args.outputFile)
+print('Saved trained model at %s ' %args.outputFile)
 
 # Score trained model.
 scores = model.evaluate(x_test, y_test, verbose=1)

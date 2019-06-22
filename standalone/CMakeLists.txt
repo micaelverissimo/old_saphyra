@@ -77,7 +77,7 @@ else()
   
   add_subdirectory(Gaugi)
   add_subdirectory(Core/TuningTools)
-  #add_subdirectory(Core/Keras)
+  add_subdirectory(saphyra)
   add_subdirectory(External/monet)
   add_subdirectory(External/pytex)
   add_subdirectory(Tools/pandas)

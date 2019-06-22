@@ -25,7 +25,7 @@ from pandas import ioGridParser, GridOutputCollection, GridOutput
 ioGridParser.delete_arguments('grid__inDS', 'grid__nJobs')
 ioGridParser.suppress_arguments( grid__mergeOutput          = False # We disabled it since late 2017, where GRID
     # added a limited to the total memory and processing time for merging jobs.
-                               , grid_CSV__outputs          = GridOutputCollection( [ GridOutput('td','*.h5.tgz') ] )
+                               , grid_CSV__outputs          = GridOutputCollection( [ GridOutput('td','tunedDiscr*') ] )
                                #, grid_CSV__outputs          = GridOutputCollection( [  ] )
                                , grid__nFiles               = None
                                , grid__nFilesPerJob         = 1
@@ -59,7 +59,8 @@ printArgs( args, mainLogger.debug )
 
 
 
-
+args.set_job_submission_option('inTarBall', args.get_job_submission_option('outTarBall') )
+args.set_job_submission_option('outTarBall', None )
 
 
 from pandas import SecondaryDataset, SecondaryDatasetCollection
@@ -70,6 +71,8 @@ if hasattr( args, 'outputDir' ):
 else:
   _outputDir=""
 
-args.setExec("""sh -c 'python /home/atlas/saphyra/Core/keras_core/scripts/tests/cifar10_cnn.py"""  )
+args.setExec("""sh -c 'python /home/atlas/saphyra/saphyra/scripts/tests/cifar10_cnn.py -o tunedDiscr.h5"""  )
 # And run
 args.run()
+
+
