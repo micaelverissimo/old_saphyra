@@ -15,10 +15,8 @@ import os
 
 
 
-from Gaugi.messenger import LoggingLevel, Logger
 import argparse
 
-mainLogger = Logger.getModuleLogger("job")
 parser = argparse.ArgumentParser(description = '', add_help = False)
 parser = argparse.ArgumentParser()
 
