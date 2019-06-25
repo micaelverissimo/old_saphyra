@@ -84,7 +84,7 @@ else()
   
   add_library(saphyra SHARED
     $<TARGET_OBJECTS:Gaugi> 
-    $<TARGET_OBJECTS:TuningTools> 
+    #$<TARGET_OBJECTS:TuningTools> 
   )
   
   
