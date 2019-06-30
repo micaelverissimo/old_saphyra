@@ -4,6 +4,7 @@ __all__ = ["sp"]
 from keras.callbacks import Callback
 
 class sp(Callback):
+  
   def __init__(self, verbose=False):
     super(Callback, self).__init__()
     self.__verbose = verbose

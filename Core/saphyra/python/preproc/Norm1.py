@@ -1,7 +1,8 @@
 
-__all__ ['Norm1']
+__all__ = ['Norm1']
 
 from saphyra.preproc import PrepObj
+from Gaugi import checkForUnusedVars
 import numpy as np
 
 

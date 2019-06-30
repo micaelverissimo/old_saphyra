@@ -7,8 +7,6 @@ from Gaugi import LoggerStreamable, LoggerRawDictStreamer, RawDictCnv, checkForU
 from saphyra.enumerations import *
 
 
-
-
 class CrossVal_v1( LoggerStreamable ):
 
   _streamerObj = LoggerRawDictStreamer(toPublicAttrs = {'_shuffle', '_random_state', '_n_splits', '_method'})
@@ -54,17 +52,10 @@ class CrossVal_v1( LoggerStreamable ):
       return self._obj
 
 
-  def save(self, fname):
+  def save(self, ofile):
     d = self.toRawObj()
     from Gaugi import save
-    save( d, fname, compress=True)
-
-
-
-
-
-
-
+    save( d, ofile, compress=True)
 
 
 
