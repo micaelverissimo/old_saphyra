@@ -8,9 +8,9 @@ parser = argparse.ArgumentParser(description = '', add_help = False)
 parser = argparse.ArgumentParser()
 
 
-parser.add_argument('-i','--inputFile', action='store', 
-        dest='inputFile', required = True,
-            help = "The input files that will be used to configure the job (sort and init).")
+parser.add_argument('-c','--configFile', action='store', 
+        dest='configFile', required = True,
+            help = "The job config file that will be used to configure the job (sort and init).")
 
 parser.add_argument('-o','--outputFile', action='store', 
         dest='outputFile', required = False, default = None,
@@ -56,7 +56,7 @@ del raw
 from saphyra import PandaJob, sp, PreProcChain_v1, Norm1
 from sklearn.model_selection import KFold,StratifiedKFold
 
-job = PandaJob(   job       = args.inputFile, 
+job = PandaJob(   job       = args.configFile, 
                   models    = args.modelFile,
                   loss      = 'binary_crossentropy',
                   metrics   = ['accuracy'],
