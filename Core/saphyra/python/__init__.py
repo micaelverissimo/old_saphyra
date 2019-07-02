@@ -16,6 +16,10 @@ from . import PandaJob
 __all__.extend( PandaJob.__all__              )
 from PandaJob import *
 
+from . import CreatePandaJobs
+__all__.extend( CreatePandaJobs.__all__              )
+from CreatePandaJobs import *
+
 
 
 from . import preproc

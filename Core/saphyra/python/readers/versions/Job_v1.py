@@ -22,10 +22,14 @@ class Job_v1( LoggerStreamable ):
   def set_sorts(self, v):
     if type(v) is int:
       self._sorts = [v]
+    else:
+      self._sorts = v
 
   def set_inits(self, v):
     if type(v) is int:
       self._inits = range(v)
+    else:
+      self._inits = v
 
   def get_sorts(self):
     return self._sorts

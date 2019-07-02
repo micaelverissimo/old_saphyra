@@ -2,6 +2,7 @@
 
 from Gaugi  import LoggingLevel, Logger, expandFolders
 import argparse
+import os
 mainLogger = Logger.getModuleLogger("prometheus.job")
 parser = argparse.ArgumentParser(description = '', add_help = False)
 parser = argparse.ArgumentParser()

@@ -1,4 +1,4 @@
-g
+
 __all__ = ["ShowerShapesSimpleNorm"]
 
 from Gaugi import ( Logger, 

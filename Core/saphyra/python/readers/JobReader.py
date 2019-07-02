@@ -34,7 +34,7 @@ class JobReader( Logger ):
     obj.save(ofile)
 
 
-  def object(self):
+  def get_object(self):
     return self._obj
 
 

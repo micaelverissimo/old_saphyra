@@ -18,6 +18,7 @@ class Norm1(PrepObj):
     checkForUnusedVars(d, self._warning )
     del d
 
+
   def _retrieveNorm(self, data):
     """
       Calculate pre-processing parameters.
@@ -25,15 +26,11 @@ class Norm1(PrepObj):
     if isinstance(data, (tuple, list,)):
       norms = []
       for cdata in data:
-        cnorm = np.abs( cdata.sum(axis=npCurrent.pdim).reshape(
-            npCurrent.access( pidx=1,
-                              oidx=cdata.shape[npCurrent.odim] ) ) )
+        cnorm = np.abs( cdata.sum(axis=1) )
         cnorm[cnorm==0] = 1
         norms.append( cnorm )
     else:
-      norms = np.abs( data.sum(axis=npCurrent.pdim).reshape(
-            npCurrent.access( pidx=1,
-                              oidx=data.shape[npCurrent.odim] ) ) )
+      norms = np.abs( data.sum(axis=1) )
       norms[norms==0] = 1
     return norms
 
@@ -54,9 +51,9 @@ class Norm1(PrepObj):
     if isinstance(data, (tuple, list,)):
       ret = []
       for i, cdata in enumerate(data):
-        ret.append( cdata / norms[i] )
+        ret.append( cdata / norms[i][:,None] )
     else:
-      ret = data / norms
+      ret = data/norms[:,None]
     return ret
 
 

@@ -21,7 +21,10 @@ class PreProcReader( Logger ):
     # the current file version
     if version == 1:
       from saphyra import PreProcChain_v1
+      print raw
       self._obj = PreProcChain_v1.fromRawObj( raw )
+      print self._obj
+      print type(self._obj)
     else:
       # error because the file does not exist
       self._logger.fatal( 'File version (%d) not supported in (%s)', version, ofile)
