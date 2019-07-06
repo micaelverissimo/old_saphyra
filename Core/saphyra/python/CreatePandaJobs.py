@@ -69,20 +69,29 @@ class CreatePandaJobs( Logger ):
     sortJobsWindowList = CreatePandaJobs._retrieveJobLoopingBoundsCol( sortBounds, nSortsPerJob )
     initJobsWindowList = CreatePandaJobs._retrieveJobLoopingBoundsCol( PythonLoopingBounds( nInits ), nInitsPerJob )
 
-
+    # Create the windows in which each job will loop upon:
+    #modelJobsWindowList = CreatePandaJob._retrieveJobLoopingBoundsCol( range(len(models)), 
+    #                                                                               nModelsPerJob )
+   
+    #for modelWindowBounds in modelJobsWindowList():
+      
     for sortWindowBounds in sortJobsWindowList():
 
       for initWindowBounds in initJobsWindowList():
         
-        MSG_INFO( self, 'Creating job config with sort (%d to %d) and %d inits', 
-            sortWindowBounds[0], sortWindowBounds[-1], len(initWindowBounds))
+        #MSG_INFO( self, 'Creating job config with sort (%d to %d) and %d inits and model Index (%d to %d)', 
+        #    sortWindowBounds[0], sortWindowBounds[-1], len(initWindowBounds), modelWindowBounds[0],modelWindowBounds[-1])
 
         from saphyra.readers.versions import Job_v1
         job = Job_v1()
         job.set_sorts(list(sortWindowBounds))
         job.set_inits(list(initWindowBounds))
+        #job.set_models(list(modelWindowBounds))
         job.save( outputFolder+'/job_container/' + ('job_config_%s_%s.%s') %
-            (sortWindowBounds.formattedString('s'), initWindowBounds.formattedString('i'), time_stamp) )
+            ( 
+              #modelWindowBounds.formatedString('m'),
+              sortWindowBounds.formattedString('s'), 
+              initWindowBounds.formattedString('i'), time_stamp) )
 
 
     from saphyra.readers.versions import CrossVal_v1

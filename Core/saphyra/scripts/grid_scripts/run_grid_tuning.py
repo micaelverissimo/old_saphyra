@@ -38,6 +38,9 @@ parentReqParser.add_argument('-c','--configFileDS', metavar='Config_DS', require
 parentReqParser.add_argument('-m','--modelDS', required = True, metavar='MODEL', action='store',
                              help = "The dataset model file to be used in the tuning process.")
 
+parentReqParser.add_argument('-j','--jobPath', required = True, metavar='JOB_PATH', action='store',
+                             help = "The path to the job (python script file).")
+
 
 
 
@@ -46,7 +49,9 @@ from pandas import ioGridParser, GridOutputCollection, GridOutput
 ioGridParser.delete_arguments('grid__inDS', 'grid__nJobs')
 ioGridParser.suppress_arguments( grid__mergeOutput          = False # We disabled it since late 2017, where GRID
     # added a limited to the total memory and processing time for merging jobs.
-                               , grid_CSV__outputs          = GridOutputCollection( [ GridOutput('td','tunedDiscr*') ] )
+                               , grid_CSV__outputs          = GridOutputCollection( [ GridOutput('td','tunedDiscr.pic.gz'),
+                                                                                      #GridOutput('plog', 'pilotlog.txt')
+                                                                                      ] )
                                #, grid_CSV__outputs          = GridOutputCollection( [  ] )
                                , grid__nFiles               = None
                                , grid__nFilesPerJob         = 1
@@ -99,8 +104,7 @@ args.append_to_job_submission_option( 'secondaryDSs'
 
 from pandas import SecondaryDataset, SecondaryDatasetCollection
 
-
-args.setExec("""sh -c 'python /home/atlas/saphyra/saphyra/scripts/standalone/job_tuning.py -o tunedDiscr -x %CROSSVAL -d %DATA -m %MODEL -pp %PP -i %IN"""  )
+args.setExec("""sh -c 'source saphyra_pull.sh && python {JOB_PATH} -o tunedDiscr -x %CROSSVAL -d %DATA -m %MODEL -p %PP -c %IN'""".format(JOB_PATH=args.jobPath)  )
 
 # And run
 args.run()
