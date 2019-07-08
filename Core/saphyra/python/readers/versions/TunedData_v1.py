@@ -37,9 +37,12 @@ class TunedData_v1( LoggerStreamable ):
                             'metadata' : metadata, 
                            })
 
+  def merge( self, obj ):
+    self._tunedData.extend( obj.get_data() )
+
 
   def get_data(self):
-    return self._data 
+    return self._tunedData
 
 
   def save(self, ofile):

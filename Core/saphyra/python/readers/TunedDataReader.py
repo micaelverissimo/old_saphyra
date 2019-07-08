@@ -11,19 +11,26 @@ class TunedDataReader( Logger ):
     Logger.__init__(self, kw)
     self._obj = NotSet
 
-  def load( self, ofile ):
+  def load( self, fList ):
     from Gaugi import load
-    raw = load( ofile )
-    # get the file version
-    version = raw['__version']
+    from Gaugi import csvStr2List, expandFolders, progressbar
+    fList = csvStr2List(fList)
+    fList = expandFolders(fList)
+    from saphyra import TunedData_v1
+    self._obj = TunedData_v1()
 
-    # the current file version
-    if version == 1:
-      from saphyra import TunedData_v1
-      self._obj = TunedData_v1.fromRawObj( raw )
-    else:
-      # error because the file does not exist
-      self._logger.fatal( 'File version (%d) not supported in (%s)', version, ofile)
+    for inputFile in progressbar(fList, len(fList), prefix="Reading tuned data collection...", logger=self._logger):
+
+      raw = load( inputFile )
+      # get the file version
+      version = raw['__version']
+      # the current file version
+      if version == 1:
+        obj = TunedData_v1.fromRawObj( raw )
+        self._obj.merge( obj )
+      else:
+        # error because the file does not exist
+        self._logger.fatal( 'File version (%d) not supported in (%s)', version, inputFile)
 
     # return the list of keras models
     return self._obj
