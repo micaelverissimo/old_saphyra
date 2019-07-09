@@ -169,7 +169,7 @@ class PandaJob( Logger ):
                       metrics = deepcopy(self.metrics),
                       )
             model_for_this_init.summary()
-          except RuntimeError, e:
+          except RuntimeError as e:
             MSG_FATAL( self, "Compilation model error: %s" , e)
 
          

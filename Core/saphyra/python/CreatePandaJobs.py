@@ -45,7 +45,7 @@ class CreatePandaJobs( Logger ):
 
   def __call__( self, **kw): 
 
-    from sklearn.model_selection import *
+    from sklearn.model_selection import KFold
     from saphyra import Norm1
     
     # Cross validation configuration

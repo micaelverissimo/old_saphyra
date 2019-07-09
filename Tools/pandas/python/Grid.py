@@ -175,7 +175,7 @@ class MultiThreadGridConfigure( CastToTypeOptionConfigure ):
           self._choice = 1
           self.mt_job = False
         self.job_memory_consumption = job_memory_consumption
-      except DataIdentifierNotFound, e:
+      except DataIdentifierNotFound as e:
         self._fatal(("Could not retrieve number of files on informed data DID. "
                      "Did you send the dataset to the GRID (e.g. by running add_container?). "
                      "Rucio error:\n%s"), e, RuntimeError)

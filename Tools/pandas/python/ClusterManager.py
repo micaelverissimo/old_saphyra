@@ -129,7 +129,7 @@ class _JobSubmitActionsContainer( _ActionsContainer ):
           if 'default' in kwargs and kwargs['default'] not in (None, NotSet):
             kwargs['default'] = OptionRetrieve( option = kwargs['option']
                                               , value = kwargs['default'] )
-      except TypeError, e:
+      except TypeError as e:
         pass
     _ActionsContainer.add_argument(self, *args, **kwargs)
 
@@ -272,7 +272,7 @@ class JobSubmitNamespace( Logger, argparse.Namespace ):
         self.get_job_submission_option(option).extend(val)
       else:
         self.get_job_submission_option(option).append(val)
-    except AttributeError, e:
+    except AttributeError as e:
       raise TypeError('Option \'%s\' is not a collection. Details:\n%s' % (option,e))
 
   def _find_job_submission_option(self, option):
