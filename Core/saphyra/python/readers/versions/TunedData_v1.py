@@ -21,7 +21,7 @@ class TunedData_v1( LoggerStreamable ):
 
   def __init__( self, **kw ):
 
-    LoggerStreamable.__init__(self, kw)
+    LoggerStreamable.__init__(self, **kw)
     self._tunedData = []
   
 

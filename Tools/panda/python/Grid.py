@@ -7,7 +7,7 @@ __all__ = ['SecondaryDataset','SecondaryDatasetCollection',
 import os
 from Gaugi.messenger import Logger
 from Gaugi.parsers.Logger import LoggerNamespace
-from pandas.ClusterManager import ( JobSubmitArgumentParser, JobSubmitNamespace
+from panda.ClusterManager import ( JobSubmitArgumentParser, JobSubmitNamespace
                                          , clusterManagerParser ) 
 from Gaugi.LimitedTypeList import LimitedTypeList
 from Gaugi.gtypes import BooleanStr, NotSet

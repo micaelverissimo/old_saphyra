@@ -15,8 +15,9 @@ from Gaugi import ( Logger,
 from Gaugi.messenger.macros import *
 from saphyra.preproc import PrepObj
 
+import six
 
-class PreProcChain_v1 ( Logger ):
+class PreProcChain_v1 ( six.with_metaclass( LimitedTypeStreamableList,  Logger) ):
   """
     The PreProcChain is the object to hold the pre-processing chain to be
     applied to data. They will be sequentially applied to the input data.
@@ -25,7 +26,7 @@ class PreProcChain_v1 ( Logger ):
   __version = 1
 
   # Use class factory
-  __metaclass__ = LimitedTypeStreamableList
+  #__metaclass__ = LimitedTypeStreamableList
   
   # These are the list (LimitedTypeList) accepted objects:
   _acceptedTypes = (PrepObj,)

@@ -7,6 +7,7 @@ __all__ = [ 'hasFastnet', 'hasKeras', 'TuningToolCores'
 import os, pkgutil
 
 hasFastnet   = bool( pkgutil.find_loader( 'libsaphyra' ) )
+hasFastnet=False
 hasKeras     = bool( pkgutil.find_loader( 'keras' )      )
 
 from Gaugi import ( EnumStringification, npConstants, Configure

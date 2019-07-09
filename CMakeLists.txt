@@ -79,7 +79,7 @@ else()
   add_subdirectory(Core/saphyra)
   add_subdirectory(External/monet)
   add_subdirectory(External/pytex)
-  add_subdirectory(Tools/pandas)
+  add_subdirectory(Tools/panda)
   
   add_library(saphyra SHARED
     $<TARGET_OBJECTS:Gaugi> 

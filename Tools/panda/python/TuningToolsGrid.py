@@ -1,6 +1,6 @@
 __all__ = ['TuningToolGridNamespace']
 
-from pandas import GridNamespace
+from panda import GridNamespace
 
 ################################################################################
 ## Specialization of GridNamespace for this package

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import os, sys, subprocess as sp, time, re
-from pandas import GridNamespace
+from panda import GridNamespace
 
 
-from pandas import SecondaryDatasetCollection, SecondaryDataset, GridOutputCollection, \
+from panda import SecondaryDatasetCollection, SecondaryDataset, GridOutputCollection, \
                    GridOutput, clusterManagerParser, ClusterManager, clusterManagerConf
 
 
@@ -44,7 +44,7 @@ parentReqParser.add_argument('-j','--jobPath', required = True, metavar='JOB_PAT
 
 
 
-from pandas import ioGridParser, GridOutputCollection, GridOutput
+from panda import ioGridParser, GridOutputCollection, GridOutput
 # Suppress/delete the following options in the grid parser:
 ioGridParser.delete_arguments('grid__inDS', 'grid__nJobs')
 ioGridParser.suppress_arguments( grid__mergeOutput          = False # We disabled it since late 2017, where GRID
@@ -102,7 +102,7 @@ args.append_to_job_submission_option( 'secondaryDSs'
 
 
 
-from pandas import SecondaryDataset, SecondaryDatasetCollection
+from panda import SecondaryDataset, SecondaryDatasetCollection
 
 args.setExec("""sh -c 'source saphyra_pull.sh && python {JOB_PATH} -o tunedDiscr -x %CROSSVAL -d %DATA -m %MODEL -p %PP -c %IN'""".format(JOB_PATH=args.jobPath)  )
 
