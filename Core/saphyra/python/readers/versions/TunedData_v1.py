@@ -37,6 +37,21 @@ class TunedData_v1( LoggerStreamable ):
                             'metadata' : metadata, 
                            })
 
+
+
+  def attach_ctx( self, context ,  metadata={}):
+    self._tunedData.append({'imodel'   : context.getHandler("imodel"),
+                            'sort'     : context.getHandler("sort"),
+                            'init'     : context.getHandler("init"),
+                            'history'  : context.getHandler("history"),
+                            'sequence' : json.loads(context.getHandler("model").to_json()),
+                            'weights'  : context.getHandler("model").get_weights() ,
+                            'metadata' : metadata, 
+                           })
+
+
+
+
   def merge( self, obj ):
     self._tunedData.extend( obj.get_data() )
 

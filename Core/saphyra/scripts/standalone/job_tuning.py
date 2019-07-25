@@ -53,10 +53,12 @@ target=target.astype(int)
 del raw
 
 
-from saphyra import PandaJob, sp, PreProcChain_v1, Norm1
+
+
+from saphyra import PandasJob, sp, PreProcChain_v1, Norm1
 from sklearn.model_selection import KFold,StratifiedKFold
 
-job = PandaJob(   job       = args.configFile, 
+job = PandasJob(  job       = args.configFile, 
                   models    = args.modelFile,
                   loss      = 'binary_crossentropy',
                   metrics   = ['accuracy'],
@@ -71,7 +73,7 @@ job = PandaJob(   job       = args.configFile,
                   target    = target,
                   )
 
-
+job.posproc   +=   [Summary()]
 job.callbacks +=   [sp(patience=25, verbose=True, save_the_best=True)]
 job.initialize()
 job.execute()

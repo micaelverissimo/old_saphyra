@@ -1,6 +1,6 @@
 
 
-__all__ = ['PandaJob']
+__all__ = ['PandasJob']
 
 from Gaugi.messenger import Logger, LoggingLevel
 from Gaugi.messenger.macros import *
@@ -13,7 +13,7 @@ import numpy as np
 
 from saphyra.posproc import Summary
 
-class PandaJob( Logger ):
+class PandasJob( Logger ):
 
   def __init__(self , inputfile=None, **kw ):
 
@@ -24,6 +24,7 @@ class PandaJob( Logger ):
     self._epochs    = retrieve_kw( kw, 'epochs'     , 1000                  )
     self._batch_size= retrieve_kw( kw, 'batch_size' , 1024                  )
     self.callbacks  = retrieve_kw( kw, 'callbacks'  , []                    )
+    self.posproc    = retrieve_kw( kw, 'posproc'    , []                    )
     self.metrics    = retrieve_kw( kw, 'metrics'    , []                    )
     self.models     = retrieve_kw( kw, 'models'     , []                    )
     self._sorts     = retrieve_kw( kw, 'sorts'      , []                    )
@@ -37,7 +38,7 @@ class PandaJob( Logger ):
     from saphyra  import PreProcChain_v1, NoPreProc
     self.ppChain    = retrieve_kw( kw, 'ppChain'    , PreProcChain_v1([NoPreProc()]))
 
-
+    
     job_auto_config = retrieve_kw( kw, 'job'        , NotSet                )
     # read the job configuration from file
     if job_auto_config:
@@ -58,6 +59,8 @@ class PandaJob( Logger ):
 
     if type(self._inits) is int:
       self._inits = range(self._inits)
+
+    self._context = NotSet
 
 
   @property
@@ -120,8 +123,33 @@ class PandaJob( Logger ):
 
   def initialize( self ):
   
-    if not self._crossval:
-      MSG_WARNING( self, "The cross validation method is not set. Set this before execute this job." )
+
+    from saphyra import JobContext
+    # Create the job context
+    self.setContext( JobContext() )
+
+    # Create the storegate for root objects
+    from Gaugi.storage import StoreGate
+    MSG_INFO( self, "Creating StoreGate...")
+    self._storegate = StoreGate( self._outputfile , level = self.level)
+    # Attach into the context
+    
+    self.getContext().setHandler( "crossval", self._crossval )
+
+
+    # Initialize the list of pos processor algorithms
+    for proc in self.posproc:
+      # Set the context into algorithm
+      proc.setContext(self.getContext())
+      proc.setStoreGateSvc( self._storegate )
+      # Set the logger output level
+      proc.level = self.level
+
+      if proc.initialize().isFailure():
+        MSG_ERROR(self, "Iniitalizing pos processor tool: %s", proc.name())
+        return StatusCode.FAILURE
+
+
 
     return StatusCode.SUCCESS
 
@@ -133,17 +161,18 @@ class PandaJob( Logger ):
   def execute( self ):
 
     # get all indexs that will be used in the cross validation data split.
-    indexs = [(train_index, val_index) for train_index, val_index in self._crossval.split(self.data,self.target)]
+    index = [(train_index, val_index) for train_index, val_index in self.getContext().getHandler("crossval").split(self.data,self.target)]
+
 
     for imodel, model in enumerate( self._models ):
 
       for isort, sort in enumerate( self._sorts ):
 
         # get the current kfold
-        x_train = self.data[indexs[sort][0]]
-        y_train = self.target[indexs[sort][0]]
-        x_val   = self.data[indexs[sort][1]]
-        y_val   = self.target[indexs[sort][1]]
+        x_train = self.data[index[sort][0]]
+        y_train = self.target[index[sort][0]]
+        x_val   = self.data[index[sort][1]]
+        y_val   = self.target[index[sort][1]]
         
         # Pre processing step
         if self._ppChain.takesParamsFromData:
@@ -156,7 +185,16 @@ class PandaJob( Logger ):
         MSG_INFO( self, "Pre processing validation set with %s", self._ppChain )
         x_val = self._ppChain( x_val )
 
+
+
+        
         for init in self._inits:  
+
+
+          self.getContext().setHandler( "index", index)
+          self.getContext().setHandler( "valData", (x_val, y_val) )
+          self.getContext().setHandler( "trnData", (x_train, y_train) )
+          
           
           # copy the model to a new pointer and make
           # the compilation on loop time
@@ -177,7 +215,15 @@ class PandaJob( Logger ):
           MSG_INFO( self, "Train Samples      :  (%d, %d)", len(y_train[y_train==1]), len(y_train[y_train==0]))
           MSG_INFO( self, "Validation Samples :  (%d, %d)", len(y_val[y_val==1]),len(y_val[y_val==0]))
 
-          summary = Summary(x_train, y_train, x_val, y_val)
+
+          self.getContext().setHandler( "model"   , model_for_this_init )
+          self.getContext().setHandler( "sort"    , sort                )
+          self.getContext().setHandler( "init"    , init                )
+          self.getContext().setHandler( "imodel"  , imodel              )
+
+          print np.unique(y_train)
+          k = compute_class_weight('balanced',np.unique(y_train),y_train) if self._class_weight else None
+          print k
 
           # Training
           history = model_for_this_init.fit(x_train, y_train, 
@@ -190,11 +236,19 @@ class PandaJob( Logger ):
                               callbacks       = deepcopy(self.callbacks),
                               class_weight    = compute_class_weight('balanced',np.unique(y_train),y_train) if self._class_weight else None,
                               shuffle         = True).history
+
+
+          self.getContext().setHandler( "history", history )
+
           
-          history['summary'] = summary( model_for_this_init )
+          # prometheus like...
+          for proc in self.posproc:
+            MSG_INFO( self, "Executing the pos processor %s", proc.name() )
+            if proc.execute( self.getContext() ).isFailure():
+              MSG_ERROR(self, "There is an erro in %s", proc.name())
 
           # add the tuned parameters to the output file
-          self._tunedData.attach( imodel, sort, init, model_for_this_init, history )
+          self._tunedData.attach_ctx( self.getContext() )
 
 
 
@@ -204,11 +258,19 @@ class PandaJob( Logger ):
 
   def finalize( self ):
 
+
+    for proc in self.posproc:
+      if proc.finalize().isFailure():
+        MSG_ERROR(self, "There is a problem to finalize the pos processor: %s", proc.name() )
+
     try:
       # prepare to save the tuned data
       self._tunedData.save( self._outputfile )
     except e:
       MSG_FATAL( self, "Its not possible to save the tuned data: %s" , e )
+
+    # Save all root objects in the store gate service
+    self._storegate.write()
 
     return StatusCode.SUCCESS
 
@@ -218,6 +280,15 @@ class PandaJob( Logger ):
   def execute_g(self):
 
     return StatusCode.SUCCESS
+
+
+  def getContext(self):
+    return self._context
+
+
+  def setContext(self, ctx):
+    self._context = ctx
+
 
 
 

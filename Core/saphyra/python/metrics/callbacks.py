@@ -39,8 +39,8 @@ class sp(Callback, Logger):
     
     knee = np.argmax(sp)
     logs['max_sp_val'] = sp[knee]
-    logs['max_sp_false_alarm_val'] = fa[knee]
-    logs['max_sp_prob_detection_val'] = pd[knee]
+    logs['max_sp_fa_val'] = fa[knee]
+    logs['max_sp_pd_val'] = pd[knee]
     if self.__verbose: 
       print( (' - val_sp: %1.4f (fa:%1.4f,pd:%1.4f)') % (sp[knee],fa[knee],pd[knee]) )
 

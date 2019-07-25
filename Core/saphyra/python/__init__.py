@@ -4,6 +4,14 @@ from . import enumerations
 __all__.extend( enumerations.__all__        )
 from .enumerations import *
 
+from . import Algorithm
+__all__.extend( Algorithm.__all__        )
+from .Algorithm import *
+
+from . import JobContext
+__all__.extend( JobContext.__all__        )
+from .JobContext import *
+
 from . import readers
 __all__.extend( readers.__all__            )
 from .readers import *
@@ -12,15 +20,17 @@ from . import metrics
 __all__.extend( metrics.__all__              )
 from .metrics import *
 
-from . import PandaJob
-__all__.extend( PandaJob.__all__              )
-from .PandaJob import *
+from . import PandasJob
+__all__.extend( PandasJob.__all__              )
+from .PandasJob import *
 
-from . import CreatePandaJobs
-__all__.extend( CreatePandaJobs.__all__              )
-from .CreatePandaJobs import *
+from . import utilities
+__all__.extend( utilities.__all__              )
+from .utilities import *
 
-
+from . import posproc
+__all__.extend( posproc.__all__              )
+from .posproc import *
 
 from . import preproc
 __all__.extend( preproc.__all__              )

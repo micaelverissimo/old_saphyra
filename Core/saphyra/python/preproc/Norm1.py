@@ -23,15 +23,8 @@ class Norm1(PrepObj):
     """
       Calculate pre-processing parameters.
     """
-    if isinstance(data, (tuple, list,)):
-      norms = []
-      for cdata in data:
-        cnorm = np.abs( cdata.sum(axis=1) )
-        cnorm[cnorm==0] = 1
-        norms.append( cnorm )
-    else:
-      norms = np.abs( data.sum(axis=1) )
-      norms[norms==0] = 1
+    norms = np.abs( data.sum(axis=1) )
+    norms[norms==0] = 1
     return norms
 
   def __str__(self):
@@ -48,12 +41,7 @@ class Norm1(PrepObj):
 
   def _apply(self, data):
     norms = self._retrieveNorm(data)
-    if isinstance(data, (tuple, list,)):
-      ret = []
-      for i, cdata in enumerate(data):
-        ret.append( cdata / norms[i][:,None] )
-    else:
-      ret = data/norms[:,None]
+    ret = data/norms[:,None]
     return ret
 
 

@@ -22,6 +22,10 @@ from .ShowerShapeSimpleNorm import *
 
 
 
+from . import reshape
+__all__.extend( reshape.__all__            )
+from .reshape import *
+
 
 
 
