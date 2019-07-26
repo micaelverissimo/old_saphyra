@@ -28,28 +28,28 @@ def sp(pd, fa):
   return np.sqrt(  np.sqrt(pd*(1-fa)) * (0.5*(pd+(1-fa)))  )
 
 
+
+
 class PileupFit( Algorithm ):
 
-  def __init__( self, name, pd, fa, pileup, **kw ):
+
+  def __init__( self, name, pileup, **kw ):
     Algorithm.__init__(self, name, **kw)
-    self._pd = pd
-    self._fa = fa
-    self._sp = sp(pd,fa)
     self._pileup = pileup
-   
+    import collections
+    self._reference = collections.OrderedDict()
     # Set ATLAS style
     from monet.AtlasStyle import SetAtlasStyle
     SetAtlasStyle()
 
 
+  def add( self, key, pd, fa ):
+
+    self._reference[key] = {'pd':pd, 'fa':fa, 'sp':sp(pd,fa)}
+
 
   def execute( self, context ):
     
-    d = {}
-    d['pd_ref'] = self._pd
-    d['fa_ref'] = self._fa
-    d['sp_ref'] = self._sp
-
 
     model  = context.getHandler("model")
     # remove the last activation and recreate the mode
@@ -59,9 +59,9 @@ class PileupFit( Algorithm ):
     index  = context.getHandler("index")
     sort   = context.getHandler("sort" )
     init   = context.getHandler("init" )
-    store = self.getStoreGateSvc()
+    #store = self.getStoreGateSvc()
 
-    store.mkdir( "model_%s_sort_%d_init_%d" % (imodel,sort,init) )
+    #store.mkdir( "model_%s_sort_%d_init_%d" % (imodel,sort,init) )
 
 
     history          = context.getHandler("history" )
@@ -69,14 +69,13 @@ class PileupFit( Algorithm ):
     x_val , y_val    = context.getHandler("valData")
 
     # Get all outputs before the last activation function
-    y_pred = model.predict( x_train, batch_size = 1024 ) 
-    y_pred_val = model.predict( x_val, batch_size = 1024 ) 
+    y_pred = model.predict( x_train, batch_size = 1024*6, verbose=1 ) 
+    y_pred_val = model.predict( x_val, batch_size = 1024*6, verbose=1 ) 
     
     # Get the pileup value for each event using the 
     # external information
     pileup = self._pileup[index[sort][0]]
     pileup_val = self._pileup[index[sort][1]]
-
 
     pileup_s = pileup[y_train==1]
     y_pred_s = y_pred[y_train==1]
@@ -91,20 +90,6 @@ class PileupFit( Algorithm ):
     y_pred_val_b = y_pred_val[y_val!=1]
  
 
-
-    # Create the full histogram to use to calculate the signal/background
-    #xmin =  1.1*np.percentile( y_pred_b, 0.01  ) 
-    #xmax =  1.5*np.percentile( y_pred_b, 99 ) 
-    xmin =   np.min(y_pred_b)
-    xmax =   np.max(y_pred_b)
-    xbins= int( (xmax-xmin) / 0.001 )
-    ymin = int( 1.2*np.percentile( pileup_b, 2.3  ) )
-    ymax = int( 1.2*np.percentile( pileup_b, 97 ) )
-    ybins= int( (ymax-ymin) / 0.5 )
-    # Get the correction for train dataset for signal
-    hist_b  = TH2D('','', xbins, xmin, xmax, ybins, ymin, ymax )
-
-    # This must be calculated to do a good fitting in the signal distribution
     xmin =  1.5*np.percentile( y_pred_s, 0.01  ) 
     xmax =  1.1*np.percentile( y_pred_s, 97 ) 
     xbins= int( (xmax-xmin) / 0.001 )
@@ -112,65 +97,79 @@ class PileupFit( Algorithm ):
     ymax = int( 1.2*np.percentile( pileup_s, 97 ) )
     ybins= int( (ymax-ymin) / 0.5 )
     # Get the correction for train dataset for signal
-    hist_s  = TH2D('','', xbins, xmin, xmax, ybins, ymin, ymax )
+    hist  = TH2D('','', xbins, xmin, xmax, ybins, ymin, ymax )
 
-   
+
+    history['fitting'] = {}
+
+    for key, ref in self._reference.items():
+
+      d = self.calculate( history, hist, ref, y_pred_s, y_pred_b, y_pred_val_s, y_pred_val_b, pileup_s, pileup_b, pileup_val_s, pileup_val_b )
+      MSG_INFO(self, "          : %s", key )
+      MSG_INFO(self, "Reference : [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", ref['pd']*100, ref['fa']*100, ref['sp']*100 )
+      MSG_INFO(self, "Train     : [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd'][0]*100, d['fa'][0]*100, d['sp']*100 )
+      MSG_INFO(self, "Validation: [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd_val'][0]*100, d['fa_val'][0]*100, d['sp_val']*100 )
+      MSG_INFO(self, "Operation : [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd_op'][0]*100, d['fa_op'][0]*100, d['sp_op']*100 )
+
+      history['fitting'][key] = d
+
+
+    return StatusCode.SUCCESS
+
+
+
+
+
+  def calculate( self, history, hist, ref, y_pred_s, y_pred_b, y_pred_val_s, y_pred_val_b, pileup_s, pileup_b, pileup_val_s, pileup_val_b ):
+
+    d = {}
+
+    d['pd_ref'] = ref['pd']
+    d['fa_ref'] = ref['fa']
+    d['sp_ref'] = ref['sp']
+
     # Fitting
-    self.Fill( hist_s, y_pred_s, pileup_s)
-    slope, offset, discr_points, pileup_points, error_points = self.fit( hist_s, self._pd )
+    self.Fill( hist, y_pred_s, pileup_s)
+    slope, offset, discr_points, pileup_points, error_points = self.fit( hist, ref['pd'] )
     d['slope'] = slope   
     d['offset'] = offset
-    self.plot( store, 'signal',hist_s, slope, offset, discr_points, pileup_points, error_points, xmin, xmax, ymin, ymax )
+    #self.plot( store, 'signal',hist_s, slope, offset, discr_points, pileup_points, error_points, xmin, xmax, ymin, ymax )
     
 
     # Get the efficiencies for train dataset
-    eff, passed, total = self.calculate( hist_s, slope, offset )
+    eff, passed, total = self.efficiency(y_pred_s, pileup_s, slope, offset )
     d['pd'] = (eff,passed,total)
-    self.Fill( hist_b, y_pred_b, pileup_b )
-    eff, passed, total = self.calculate( hist_b, slope, offset )
+    eff, passed, total = self.efficiency( y_pred_b, pileup_b, slope, offset )
     d['fa'] = (eff,passed,total)
     d['sp'] = sp(d['pd'][0], d['fa'][0])
-    hist_s.Reset()
-    hist_b.Reset()
     
 
-    
     # Validation values 
-    self.Fill( hist_s, y_pred_val_s, pileup_val_s)
-    self.Fill( hist_b, y_pred_val_b, pileup_val_b)
-    eff, passed, total = self.calculate( hist_s, slope, offset )
+    eff, passed, total = self.efficiency( y_pred_val_s, pileup_val_s, slope, offset )
     d['pd_val'] = (eff,passed,total)
-    eff, passed, total = self.calculate( hist_b, slope, offset )
+    eff, passed, total = self.efficiency( y_pred_val_b, pileup_val_b, slope, offset )
     d['fa_val'] = (eff,passed,total)
     d['sp_val'] = sp(d['pd_val'][0], d['fa_val'][0])
  
 
-
     # Fit for operation (train+val)
     # Here, we just need to fill the train values since the val set was filled before
-    self.Fill( hist_s, y_pred_val_s, pileup_val_s)
-    slope, offset, discr_points, pileup_points, error_points = self.fit( hist_s, self._pd )
+    self.Fill( hist, y_pred_val_s, pileup_val_s)
+    slope, offset, discr_points, pileup_points, error_points = self.fit( hist, ref['pd'] )
     d['slope_op'] = slope   
     d['offset_op'] = offset
-    self.plot( store, 'signal_op',hist_s, slope, offset, discr_points, pileup_points, error_points, xmin, xmax, ymin, ymax )
-    # Get the efficiencies for train dataset
-    self.Fill( hist_b, y_pred_b, pileup_b )
-    eff, passed, total = self.calculate( hist_s, slope, offset )
+    y_pred_op_s = np.concatenate((y_pred_s, y_pred_val_s))
+    y_pred_op_b = np.concatenate((y_pred_b, y_pred_val_b))
+    pileup_op_s = np.concatenate( (pileup_s, pileup_val_s))
+    pileup_op_b = np.concatenate( (pileup_b, pileup_val_b))
+    eff, passed, total = self.efficiency( y_pred_op_s, pileup_op_s, slope, offset )
     d['pd_op'] = (eff,passed,total)
-    eff, passed, total = self.calculate( hist_b, slope, offset )
+    eff, passed, total = self.efficiency( y_pred_op_b, pileup_op_b, slope, offset )
     d['fa_op'] = (eff,passed,total)
     d['sp_op'] = sp(d['pd_op'][0], d['fa_op'][0])
     
+    return d
 
-
-    MSG_INFO(self, "Reference :[Pd: %1.4f], Fa: %1.4f and SP: %1.4f ", self._pd*100, self._fa*100, self._sp*100 )
-    MSG_INFO(self, "Train     : Pd: %1.4f , Fa: %1.4f and SP: %1.4f ", d['pd'][0]*100, d['fa'][0]*100, d['sp']*100 )
-    MSG_INFO(self, "Validation: Pd: %1.4f , Fa: %1.4f and SP: %1.4f ", d['pd_val'][0]*100, d['fa_val'][0]*100, d['sp_val']*100 )
-    MSG_INFO(self, "Operation : Pd: %1.4f , Fa: %1.4f and SP: %1.4f ", d['pd_op'][0]*100, d['fa_op'][0]*100, d['sp_op']*100 )
-
-
-    history[ self.name() ] = d
-    return StatusCode.SUCCESS
 
 
 
@@ -238,44 +237,15 @@ class PileupFit( Algorithm ):
 
 
 
-  def calculate(self, hist,slope, offset ):
-  
-    from copy import deepcopy
-    h=deepcopy(hist)
-    #Given a 2d hist, return the numerator of the efficiency vs nvtx (a 1d hist).
-    def GetParameterizedDiscrNumeratorProfile(h,slope,offset) :
-      err_on_higher_eff = False
-      nbinsy = h.GetNbinsY()
-      h1 = h.ProjectionY(h.GetName()+'_proj'+str(time.time()),1,1)
-      h1.Reset("ICESM")
-      Numerator=0; Denominator=0
-      for by in xrange(nbinsy) :
-        xproj = h.ProjectionX('xproj'+str(time.time()),by+1,by+1)
-        discr = slope*h.GetYaxis().GetBinCenter(by+1)+offset
-        dbin = xproj.FindBin(discr)
-        num = xproj.Integral(dbin+(0 if err_on_higher_eff else 1),xproj.GetNbinsX()+1)
-        h1.SetBinContent(by+1,num)
-        Numerator+=num
-        Denominator+=xproj.Integral(-1, xproj.GetNbinsX()+1)
-        den = xproj.Integral(-1, xproj.GetNbinsX()+1)
-      return h1, Numerator, Denominator
-    # Put into histograms
-    histNum, passed, total = GetParameterizedDiscrNumeratorProfile(h,slope,offset)
-    histDen = h.ProjectionY()
-    histEff = histNum.Clone()
-    histEff.Divide(histDen)
-    for bin in xrange(histEff.GetNbinsX()):
-      if histDen.GetBinContent(bin+1) != 0 :
-        Eff = histEff.GetBinContent(bin+1)
-        try:
-          dEff = math.sqrt(Eff*(1-Eff)/histDen.GetBinContent(bin+1))
-        except:
-          dEff=0
-        histEff.SetBinError(bin+1,dEff)
-      else:
-        histEff.SetBinError(bin+1,0)
-    eff=passed/float(total)
-    return eff, passed, float(histDen.GetEntries())
+  def efficiency(self, predict, pileup, slope, offset ):
+
+    predict = predict.reshape((len(pileup),))
+    thresholds = slope*pileup + offset
+    answer  = np.greater(predict,thresholds)
+    passed = len(answer[answer==True])
+    total = len(answer)
+    eff = passed / float(total)
+    return eff, passed, total
 
 
   def plot( self, store, cname, hist, slope, offset, discr_points, 
