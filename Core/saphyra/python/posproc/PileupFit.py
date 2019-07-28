@@ -38,8 +38,9 @@ class PileupFit( Algorithm ):
     SetAtlasStyle()
 
 
-  def add( self, key, pd, fa ):
-    self._reference[key] = {'pd':pd, 'fa':fa, 'sp':sp(pd,fa)}
+  def add( self, key, reference, pd, fa ):
+    MSG_INFO( self, '%s | %s(pd=%1.2f, fa=%1.2f, sp=%1.2f)', key, reference, pd*100, fa*100, sp(pd,fa)*100 )
+    self._reference[key] = {'pd':pd, 'fa':fa, 'sp':sp(pd,fa), 'reference' : reference}
 
 
   def execute( self, context ):
@@ -94,6 +95,7 @@ class PileupFit( Algorithm ):
       MSG_INFO(self, "Train     : [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd'][0]*100, d['fa'][0]*100, d['sp']*100 )
       MSG_INFO(self, "Validation: [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd_val'][0]*100, d['fa_val'][0]*100, d['sp_val']*100 )
       MSG_INFO(self, "Operation : [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd_op'][0]*100, d['fa_op'][0]*100, d['sp_op']*100 )
+    
       history['fitting'][key] = d
 
     return StatusCode.SUCCESS
@@ -108,6 +110,7 @@ class PileupFit( Algorithm ):
     d['pd_ref'] = ref['pd']
     d['fa_ref'] = ref['fa']
     d['sp_ref'] = ref['sp']
+    d['reference'] = ref['reference']
 
     # Fitting
     self.Fill( hist, y_pred_s, pileup_s)
