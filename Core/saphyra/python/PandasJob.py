@@ -134,7 +134,7 @@ class PandasJob( Logger ):
     self._storegate = StoreGate( self._outputfile , level = self.level)
     # Attach into the context
     
-    self.getContext().setHandler( "crossval", self._crossval )
+
 
 
     # Initialize the list of pos processor algorithms
@@ -161,7 +161,7 @@ class PandasJob( Logger ):
   def execute( self ):
 
     # get all indexs that will be used in the cross validation data split.
-    index = [(train_index, val_index) for train_index, val_index in self.getContext().getHandler("crossval").split(self.data,self.target)]
+    index = [(train_index, val_index) for train_index, val_index in self._crossval.split(self.data,self.target)]
 
 
     for imodel, model in enumerate( self._models ):
@@ -190,7 +190,10 @@ class PandasJob( Logger ):
         
         for init in self._inits:  
 
+          # force the context is empty for each training
+          self.getContext().clear()
 
+          self.getContext().setHandler( "crossval", self._crossval )
           self.getContext().setHandler( "index", index)
           self.getContext().setHandler( "valData", (x_val, y_val) )
           self.getContext().setHandler( "trnData", (x_train, y_train) )
@@ -221,9 +224,7 @@ class PandasJob( Logger ):
           self.getContext().setHandler( "init"    , init                )
           self.getContext().setHandler( "imodel"  , imodel              )
 
-          print np.unique(y_train)
           k = compute_class_weight('balanced',np.unique(y_train),y_train) if self._class_weight else None
-          print k
 
           # Training
           history = model_for_this_init.fit(x_train, y_train, 

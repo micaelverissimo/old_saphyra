@@ -50,6 +50,9 @@ class JobContext(Logger):
     return self._decoration.keys()
 
 
-
+  def clear(self):
+    import collections
+    self._containers = collections.OrderedDict()
+    self._decorations = dict()
 
 
