@@ -97,7 +97,7 @@ del raw
 # Create the job
 job = PandasJob(  job       = args.configFile, 
                   models    = args.modelFile,
-                  loss      = 'mse',
+                  loss      = 'binary_crossentropy',
                   metrics   = ['accuracy'],
                   epochs    = 5000,
                   ppChain   = args.ppFile,
