@@ -4,7 +4,7 @@ __all__ = ['Model_v1']
 
 from sklearn.model_selection import *
 from Gaugi import LoggerStreamable, LoggerRawDictStreamer, RawDictCnv
-from keras.models import model_from_json
+from tensorflow.keras.models import model_from_json
 import json
 
 
@@ -22,7 +22,7 @@ class Model_v1( LoggerStreamable ):
 
     LoggerStreamable.__init__(self, kw)
     self._models = None
-  
+
 
   def set_models(self, models):
     self._models = list()
@@ -40,7 +40,7 @@ class Model_v1( LoggerStreamable ):
       model.set_weights( d['weights'] )
       models.append( model )
     return models
-  
+
 
   def save(self, fname):
     d = self.toRawObj()

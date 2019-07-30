@@ -6,7 +6,7 @@ from Gaugi.messenger import Logger, LoggingLevel
 from Gaugi.messenger.macros import *
 from Gaugi import StatusCode,  checkForUnusedVars, retrieve_kw
 from Gaugi.gtypes import NotSet
-from keras.models import clone_model
+from tensorflow.keras.models import clone_model
 from copy import deepcopy
 from sklearn.utils.class_weight import compute_class_weight
 import numpy as np
@@ -18,7 +18,7 @@ class PandasJob( Logger ):
   def __init__(self , inputfile=None, **kw ):
 
     Logger.__init__(self,  **kw)
-   
+
     self._optimizer = retrieve_kw( kw, 'optimizer'  , 'adam'                )
     self._loss      = retrieve_kw( kw, 'loss'       , 'binary_crossentropy' )
     self._epochs    = retrieve_kw( kw, 'epochs'     , 1000                  )
@@ -38,7 +38,7 @@ class PandasJob( Logger ):
     from saphyra  import PreProcChain_v1, NoPreProc
     self.ppChain    = retrieve_kw( kw, 'ppChain'    , PreProcChain_v1([NoPreProc()]))
 
-    
+
     job_auto_config = retrieve_kw( kw, 'job'        , NotSet                )
     # read the job configuration from file
     if job_auto_config:
@@ -54,7 +54,7 @@ class PandasJob( Logger ):
     self._tunedData = retrieve_kw( kw, 'tunedData'  , TunedData_v1()        )
     self._outputfile= retrieve_kw( kw, 'outputfile' , 'tunedDisc'           )
 
-   
+
     checkForUnusedVars(kw)
 
     if type(self._inits) is int:
@@ -122,7 +122,7 @@ class PandasJob( Logger ):
 
 
   def initialize( self ):
-  
+
 
     from saphyra import JobContext
     # Create the job context
@@ -133,7 +133,7 @@ class PandasJob( Logger ):
     MSG_INFO( self, "Creating StoreGate...")
     self._storegate = StoreGate( self._outputfile , level = self.level)
     # Attach into the context
-    
+
 
 
 
@@ -173,7 +173,7 @@ class PandasJob( Logger ):
         y_train = self.target[index[sort][0]]
         x_val   = self.data[index[sort][1]]
         y_val   = self.target[index[sort][1]]
-        
+
         # Pre processing step
         if self._ppChain.takesParamsFromData:
           MSG_DEBUG( self, "Take parameters from train set..." )
@@ -187,8 +187,8 @@ class PandasJob( Logger ):
 
 
 
-        
-        for init in self._inits:  
+
+        for init in self._inits:
 
           # force the context is empty for each training
           self.getContext().clear()
@@ -197,13 +197,13 @@ class PandasJob( Logger ):
           self.getContext().setHandler( "index", index)
           self.getContext().setHandler( "valData", (x_val, y_val) )
           self.getContext().setHandler( "trnData", (x_train, y_train) )
-          
-          
+
+
           # copy the model to a new pointer and make
           # the compilation on loop time
           model_for_this_init = clone_model(model)
           try:
-            model_for_this_init.compile( self._optimizer, 
+            model_for_this_init.compile( self._optimizer,
                       loss = self._loss,
                       # protection for functions or classes with internal variables
                       # this copy avoid the current training effect the next one.
@@ -213,7 +213,7 @@ class PandasJob( Logger ):
           except RuntimeError as e:
             MSG_FATAL( self, "Compilation model error: %s" , e)
 
-         
+
           MSG_INFO( self, "Training model (%d) using sort (%d) and init (%d)", imodel, isort, init )
           MSG_INFO( self, "Train Samples      :  (%d, %d)", len(y_train[y_train==1]), len(y_train[y_train==0]))
           MSG_INFO( self, "Validation Samples :  (%d, %d)", len(y_val[y_val==1]),len(y_val[y_val==0]))
@@ -224,24 +224,29 @@ class PandasJob( Logger ):
           self.getContext().setHandler( "init"    , init                )
           self.getContext().setHandler( "imodel"  , imodel              )
 
-          k = compute_class_weight('balanced',np.unique(y_train),y_train) if self._class_weight else None
+          callbacks = deepcopy(self.callbacks)
+          for c in callbacks:
+            try: # Tensorflow 2.0
+              c.set_validation_data( (x_val,y_val) )
+            except:
+              pass
 
           # Training
-          history = model_for_this_init.fit(x_train, y_train, 
-                              epochs          = self._epochs, 
-                              batch_size      = self._batch_size, 
-                              verbose         = self._verbose, 
-                              validation_data = (x_val,y_val), 
-                              # copy protection to avoid the interruption or interference 
+          history = model_for_this_init.fit(x_train, y_train,
+                              epochs          = self._epochs,
+                              batch_size      = self._batch_size,
+                              verbose         = self._verbose,
+                              validation_data = (x_val,y_val),
+                              # copy protection to avoid the interruption or interference
                               # in the next training (e.g: early stop)
-                              callbacks       = deepcopy(self.callbacks),
+                              callbacks       = callbacks,
                               class_weight    = compute_class_weight('balanced',np.unique(y_train),y_train) if self._class_weight else None,
                               shuffle         = True).history
 
 
           self.getContext().setHandler( "history", history )
 
-          
+
           # prometheus like...
           for proc in self.posproc:
             MSG_INFO( self, "Executing the pos processor %s", proc.name() )

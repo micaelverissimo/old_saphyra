@@ -11,17 +11,17 @@ from sklearn.metrics import roc_auc_score
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import roc_curve
 from monet.PlotFunctions import *
-from monet.TAxisFunctions import * 
+from monet.TAxisFunctions import *
 from monet.AtlasStyle import *
 from ROOT import TCanvas, gStyle, TLegend, kRed, kBlue, kBlack,TLine,kBird, kOrange,kGray
 from ROOT import TGraphErrors,TF1,TColor
-from ROOT import TH2F , TH2D   
-from keras import Model
+from ROOT import TH2F , TH2D
+from tensorflow.keras import Model
 import ROOT
 import numpy as np
 import time
 import math
- 
+
 def sp(pd, fa):
   return np.sqrt(  np.sqrt(pd*(1-fa)) * (0.5*(pd+(1-fa)))  )
 
@@ -44,7 +44,7 @@ class PileupFit( Algorithm ):
 
 
   def execute( self, context ):
-    
+
     model  = context.getHandler("model")
     # remove the last activation and recreate the mode
     model  = Model(model.inputs, model.layers[-2].output)
@@ -60,10 +60,10 @@ class PileupFit( Algorithm ):
     x_val , y_val    = context.getHandler("valData")
 
     # Get all outputs before the last activation function
-    y_pred = model.predict( x_train, batch_size = 1024*6, verbose=1 ) 
-    y_pred_val = model.predict( x_val, batch_size = 1024*6, verbose=1 ) 
-    
-    # Get the pileup value for each event using the 
+    y_pred = model.predict( x_train, batch_size = 1024*6, verbose=1 )
+    y_pred_val = model.predict( x_val, batch_size = 1024*6, verbose=1 )
+
+    # Get the pileup value for each event using the
     # external information
     pileup = self._pileup[index[sort][0]]
     pileup_val = self._pileup[index[sort][1]]
@@ -76,8 +76,8 @@ class PileupFit( Algorithm ):
     pileup_val_b = pileup_val[y_val!=1]
     y_pred_val_b = y_pred_val[y_val!=1]
 
-    xmin =  1.5*np.percentile( y_pred_s, 0.01  ) 
-    xmax =  1.1*np.percentile( y_pred_s, 97 ) 
+    xmin =  1.5*np.percentile( y_pred_s, 0.01  )
+    xmax =  1.1*np.percentile( y_pred_s, 97 )
     xbins= int( (xmax-xmin) / 0.001 )
     ymin = int( 1.2*np.percentile( pileup_s, 2.3  ) )
     ymax = int( 1.2*np.percentile( pileup_s, 97 ) )
@@ -95,7 +95,7 @@ class PileupFit( Algorithm ):
       MSG_INFO(self, "Train     : [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd'][0]*100, d['fa'][0]*100, d['sp']*100 )
       MSG_INFO(self, "Validation: [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd_val'][0]*100, d['fa_val'][0]*100, d['sp_val']*100 )
       MSG_INFO(self, "Operation : [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd_op'][0]*100, d['fa_op'][0]*100, d['sp_op']*100 )
-    
+
       history['fitting'][key] = d
 
     return StatusCode.SUCCESS
@@ -115,7 +115,7 @@ class PileupFit( Algorithm ):
     # Fitting
     self.Fill( hist, y_pred_s, pileup_s)
     slope, offset, discr_points, pileup_points, error_points = self.fit( hist, ref['pd'] )
-    d['slope'] = slope   
+    d['slope'] = slope
     d['offset'] = offset
     #self.plot( store, 'signal',hist_s, slope, offset, discr_points, pileup_points, error_points, xmin, xmax, ymin, ymax )
 
@@ -126,7 +126,7 @@ class PileupFit( Algorithm ):
     d['fa'] = (eff,passed,total)
     d['sp'] = sp(d['pd'][0], d['fa'][0])
 
-    # Validation values 
+    # Validation values
     eff, passed, total = self.efficiency( y_pred_val_s, pileup_val_s, slope, offset )
     d['pd_val'] = (eff,passed,total)
     eff, passed, total = self.efficiency( y_pred_val_b, pileup_val_b, slope, offset )
@@ -137,7 +137,7 @@ class PileupFit( Algorithm ):
     # Here, we just need to fill the train values since the val set was filled before
     self.Fill( hist, y_pred_val_s, pileup_val_s)
     slope, offset, discr_points, pileup_points, error_points = self.fit( hist, ref['pd'] )
-    d['slope_op'] = slope   
+    d['slope_op'] = slope
     d['offset_op'] = offset
     y_pred_op_s = np.concatenate((y_pred_s, y_pred_val_s))
     y_pred_op_b = np.concatenate((y_pred_b, y_pred_val_b))
@@ -156,9 +156,9 @@ class PileupFit( Algorithm ):
     hist.FillN( len(pred), array.array('d', pred), array.array('d', pileup), array.array('d', [1]*len(pred) ) )
 
 
-  # Calculate the slope and offset give an 2D histogram and a reference (target value) 
+  # Calculate the slope and offset give an 2D histogram and a reference (target value)
   def fit(self, hist, effref):
-    
+
     NBINSY = hist.GetNbinsY()
     NBINSX = hist.GetNbinsX()
     # get the threshold used to hold the requested target
@@ -179,7 +179,7 @@ class PileupFit( Algorithm ):
       threshold = h.GetBinCenter(i-1)+(effref-prevEff)/deltaEff*(h.GetBinCenter(i)-h.GetBinCenter(i-1))
       error = 1./math.sqrt(fullArea)
       return threshold, error
-    
+
     # Get the list of points
     def calculate(h , effref):
       nbinsy = h.GetNbinsY()
@@ -221,9 +221,9 @@ class PileupFit( Algorithm ):
     return eff, passed, total
 
 
-  def plot( self, store, cname, hist, slope, offset, discr_points, 
+  def plot( self, store, cname, hist, slope, offset, discr_points,
                   pileup_points, error_points, xmin, xmax, ymin, ymax ):
-  
+
     gStyle.SetPalette(kBird)
     drawopt='lpE2'
     canvas = TCanvas(cname,cname,500, 500)
@@ -234,7 +234,7 @@ class PileupFit( Algorithm ):
     hist.Draw('colz')
     canvas.SetLogz()
     import array
-    g = TGraphErrors(len(discr_points), array.array('d',discr_points), array.array('d',pileup_points), 
+    g = TGraphErrors(len(discr_points), array.array('d',discr_points), array.array('d',pileup_points),
                           array.array('d',error_points) , array.array('d',[0]*len(discr_points)))
     g.SetLineWidth(1)
     g.SetLineColor(kBlue)
