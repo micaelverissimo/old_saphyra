@@ -1,7 +1,11 @@
 
 __all__ = ["sp"]
 
-from tensorflow.keras.callbacks import Callback
+from saphyra import isTensorFlowTwo
+if isTensorFlowTwo():
+  from tensorflow.keras.callbacks import Callback
+else:
+  from keras.callbacks import Callback
 from Gaugi.messenger.macros import *
 from Gaugi.messenger import Logger
 from Gaugi.gtypes import NotSet

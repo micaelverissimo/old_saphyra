@@ -1,4 +1,4 @@
-__all__ = []
+__all__ = ["isTensorFlowTwo"]
 
 from . import enumerations
 __all__.extend( enumerations.__all__        )
@@ -35,6 +35,10 @@ from .posproc import *
 from . import preproc
 __all__.extend( preproc.__all__              )
 from .preproc import *
+
+def isTensorFlowTwo():
+  import tensorflow as tf
+  return True if int(tf.__version__.split('.')[0]) >= 2 else False
 
 
 

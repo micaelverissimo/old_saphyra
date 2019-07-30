@@ -4,7 +4,12 @@ __all__ = ['TunedData_v1']
 
 from sklearn.model_selection import *
 from Gaugi import LoggerStreamable, LoggerRawDictStreamer, RawDictCnv
-from keras.models import model_from_json
+
+from saphyra import isTensorFlowTwo
+if isTensorFlowTwo():
+  from tensorflow.keras.models import model_from_json
+else:
+  from keras.models import model_from_json
 import json
 
 

@@ -6,7 +6,12 @@ from Gaugi.messenger import Logger, LoggingLevel
 from Gaugi.messenger.macros import *
 from Gaugi import StatusCode,  checkForUnusedVars, retrieve_kw
 from Gaugi.gtypes import NotSet
-from tensorflow.keras.models import clone_model
+
+if isTensorFlowTwo():
+  from tensorflow.keras.models import clone_model
+else:
+  from keras.models import clone_model
+
 from copy import deepcopy
 from sklearn.utils.class_weight import compute_class_weight
 import numpy as np

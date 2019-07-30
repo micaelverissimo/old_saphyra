@@ -2,6 +2,7 @@
 
 __all__ = ["PileupFit"]
 
+from saphyra import isTensorFlowTwo
 from saphyra import Algorithm
 from Gaugi.messenger.macros import *
 from Gaugi import StatusCode, progressbar
@@ -16,7 +17,11 @@ from monet.AtlasStyle import *
 from ROOT import TCanvas, gStyle, TLegend, kRed, kBlue, kBlack,TLine,kBird, kOrange,kGray
 from ROOT import TGraphErrors,TF1,TColor
 from ROOT import TH2F , TH2D
-from tensorflow.keras import Model
+if isTensorFlowTwo():
+  from tensorflow.keras import Model
+else:
+  from keras import Model
+
 import ROOT
 import numpy as np
 import time
