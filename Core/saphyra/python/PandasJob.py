@@ -7,6 +7,7 @@ from Gaugi.messenger.macros import *
 from Gaugi import StatusCode,  checkForUnusedVars, retrieve_kw
 from Gaugi.gtypes import NotSet
 
+from saphyra import isTensorFlowTwo
 if isTensorFlowTwo():
   from tensorflow.keras.models import clone_model
 else:
