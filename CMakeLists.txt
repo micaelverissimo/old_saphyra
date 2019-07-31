@@ -4,7 +4,7 @@ if($ENV{Athena_SETUP} STREQUAL "on")
   message(STATUS "skip stansalone cmake list")
 else()
 
-  cmake_minimum_required(VERSION 3.0)
+  cmake_minimum_required(VERSION 1.0)
   
   project(saphyra)
   
