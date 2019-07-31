@@ -83,11 +83,13 @@ class PileupFit( Algorithm ):
 
     xmin =  1.5*np.percentile( y_pred_s, 0.01  )
     xmax =  1.1*np.percentile( y_pred_s, 97 )
-    xbins= int( (xmax-xmin) / 0.001 )
+    xbins= int( (xmax-xmin) / 0.005 ) # 0.001
     ymin = int( 1.2*np.percentile( pileup_s, 2.3  ) )
     ymax = int( 1.2*np.percentile( pileup_s, 97 ) )
     ybins= int( (ymax-ymin) / 0.5 )
     # Get the correction for train dataset for signal
+    #print xbins, ' - ', xmin, ' - ', xmax
+    #print ybins, ' - ', ymin, ' - ', ymax
     hist  = TH2D('','', xbins, xmin, xmax, ybins, ymin, ymax )
 
     history['fitting'] = {}
@@ -220,6 +222,7 @@ class PileupFit( Algorithm ):
     predict = predict.reshape((len(pileup),))
     thresholds = slope*pileup + offset
     answer  = np.greater(predict,thresholds)
+    
     passed = len(answer[answer==True])
     total = len(answer)
     eff = passed / float(total)

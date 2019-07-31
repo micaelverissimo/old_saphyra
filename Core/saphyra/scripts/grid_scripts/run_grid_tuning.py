@@ -57,7 +57,7 @@ ioGridParser.suppress_arguments( grid__mergeOutput          = False # We disable
                                , grid__nFilesPerJob         = 1
                                , grid__forceStaged          = True
                                , grid__forceStagedSecondary = True
-                               , grid__nCore                = None
+                               #, grid__nCore                = None
                                , grid__noBuild              = True
                                )
 

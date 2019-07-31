@@ -60,14 +60,14 @@ pileup = raw['data'][:,0]
 
 
 ref_target = [
-              ('tight_v8'       , 'T0HLTElectronRingerTight_v8'     ),
-              ('medium_v8'      , 'T0HLTElectronRingerMedium_v8'    ),
-              ('loose_v8'       , 'T0HLTElectronRingerLoose_v8'     ),
-              ('vloose_v8'      , 'T0HLTElectronRingerVeryLoose_v8' ),
-              ('tight_v6'       , 'T0HLTElectronRingerTight_v6'     ),
-              ('medium_v6'      , 'T0HLTElectronRingerMedium_v6'    ),
-              ('loose_v6'       , 'T0HLTElectronRingerLoose_v6'     ),
-              ('vloose_v6'      , 'T0HLTElectronRingerVeryLoose_v6' ),
+              #('tight_v8'       , 'T0HLTElectronRingerTight_v8'     ),
+              #('medium_v8'      , 'T0HLTElectronRingerMedium_v8'    ),
+              #('loose_v8'       , 'T0HLTElectronRingerLoose_v8'     ),
+              #('vloose_v8'      , 'T0HLTElectronRingerVeryLoose_v8' ),
+              #('tight_v6'       , 'T0HLTElectronRingerTight_v6'     ),
+              #('medium_v6'      , 'T0HLTElectronRingerMedium_v6'    ),
+              #('loose_v6'       , 'T0HLTElectronRingerLoose_v6'     ),
+              #('vloose_v6'      , 'T0HLTElectronRingerVeryLoose_v6' ),
               ('tight_cutbased' , 'T0HLTElectronT2CaloTight'        ),
               ('medium_cutbased', 'T0HLTElectronT2CaloMedium'       ),
               ('loose_cutbased' , 'T0HLTElectronT2CaloLoose'        ),
