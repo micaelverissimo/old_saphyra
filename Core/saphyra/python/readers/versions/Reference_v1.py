@@ -38,7 +38,7 @@ class Reference_v1( LoggerStreamable ):
 
   def setEtBins(self, etBins ):
     self._etBins = etBins
-    
+
   def setEtaBins( self, etaBins ):
     self._etaBins = etaBins
 
@@ -67,14 +67,14 @@ class Reference_v1( LoggerStreamable ):
   def getSgnPassed(self, reference):
     return self._sgnRef[reference]['passed']
 
-  def getSgnTotal(self, ref):
+  def getSgnTotal(self, reference):
     return self._bkgRef[reference]['total']
 
 
-  def getBkgPassed(self, ref):
+  def getBkgPassed(self, reference):
     return self._bkgRef[reference]['passed']
 
-  def getBkgTotal(self, ref):
+  def getBkgTotal(self, reference):
     return self._bkgRef[reference]['total']
 
 
