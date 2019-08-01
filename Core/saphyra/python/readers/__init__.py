@@ -20,6 +20,11 @@ from . import PreProcReader
 __all__.extend( PreProcReader.__all__              )
 from .PreProcReader import *
 
+from . import ReferenceReader
+__all__.extend( ReferenceReader.__all__              )
+from .ReferenceReader import *
+
+
 from . import versions
 __all__.extend( versions.__all__              )
 from .versions import *
