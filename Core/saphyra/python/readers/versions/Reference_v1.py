@@ -67,7 +67,7 @@ class Reference_v1( LoggerStreamable ):
   def getSgnPassed(self, reference):
     return self._sgnRef[reference]['passed']
 
-  def getSgnTotal(self, ref):
+  def getSgnTotal(self, reference):
     return self._sgnRef[reference]['total']
 
 
