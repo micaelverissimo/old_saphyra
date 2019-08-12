@@ -4,7 +4,7 @@
 export Athena_SETUP=off
 mkdir build
 cd build
-cmake3 ..
+cmake ..
 make -j4
 cd ..
 
