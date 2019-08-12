@@ -22,11 +22,11 @@ parentParser = ArgumentParser(add_help = True)
 parentReqParser = parentParser.add_argument_group("required arguments", '')
 
 
-parentReqParser.add_argument('-pp','--ppFileDS', metavar='PP_DS', required = True, action='store',
-                             help = """The pre-processing files container.""")
+#parentReqParser.add_argument('-pp','--ppFileDS', metavar='PP_DS', required = True, action='store',
+#                             help = """The pre-processing files container.""")
 
-parentReqParser.add_argument('-x','--crossValidDS', metavar='CrossValid_DS', required = True, action='store',
-                             help = """The cross-validation files container.""")
+#parentReqParser.add_argument('-x','--crossValidDS', metavar='CrossValid_DS', required = True, action='store',
+#                             help = """The cross-validation files container.""")
 
 parentReqParser.add_argument('-d','--dataDS', required = True, metavar='DATA', action='store',
                              help = "The dataset with the data for discriminator tuning.")
@@ -35,8 +35,16 @@ parentReqParser.add_argument('-c','--configFileDS', metavar='Config_DS', require
                              help = """Input dataset to loop upon files to retrieve configuration. There
                                        will be one job for each file on this container.""")
 
-parentReqParser.add_argument('-m','--modelDS', required = True, metavar='MODEL', action='store',
-                             help = "The dataset model file to be used in the tuning process.")
+#parentReqParser.add_argument('-m','--modelDS', required = True, metavar='MODEL', action='store',
+#                             help = "The dataset model file to be used in the tuning process.")
+
+
+
+parentReqParser.add_argument('-r','--refDS', required = True, metavar='REF', action='store',
+                             help = "The ref file to be used in the tuning process.")
+
+
+
 
 parentReqParser.add_argument('-j','--jobPath', required = True, metavar='JOB_PATH', action='store',
                              help = "The path to the job (python script file).")
@@ -91,10 +99,11 @@ args.set_job_submission_option('outTarBall', None )
 args.append_to_job_submission_option( 'secondaryDSs'
                                       , SecondaryDatasetCollection (
                                         [
-                                          SecondaryDataset( key = "PP"      , nFilesPerJob = 1, container = args.ppFileDS     , reusable = True) ,
-                                          SecondaryDataset( key = "CROSSVAL", nFilesPerJob = 1, container = args.crossValidDS , reusable = True) ,
-                                          SecondaryDataset( key = "MODEL"   , nFilesPerJob = 1, container = args.modelDS      , reusable = True) ,
-                                          SecondaryDataset( key = "DATA"    , nFilesPerJob = 1, container = args.dataDS       , reusable = True) ,
+                                          #SecondaryDataset( key = "PP"      , nFilesPerJob = 1, container = args.ppFileDS     , reusable = True) ,
+                                          #SecondaryDataset( key = "CROSSVAL", nFilesPerJob = 1, container = args.crossValidDS , reusable = True) ,
+                                          #SecondaryDataset( key = "MODEL"   , nFilesPerJob = 1, container = args.modelDS      , reusable = True) ,
+                                          SecondaryDataset( key = "REF"    , nFilesPerJob = 1, container = args.refDS        , reusable = True) ,
+                                          SecondaryDataset( key = "DATA"   , nFilesPerJob = 1, container = args.dataDS       , reusable = True) ,
                                         ] 
                                         )
                                       )
@@ -104,7 +113,8 @@ args.append_to_job_submission_option( 'secondaryDSs'
 
 from panda import SecondaryDataset, SecondaryDatasetCollection
 
-args.setExec("""sh -c 'cd /home/atlas/saphyra/ && source setup.sh && python {JOB_PATH} -o tunedDiscr -x %CROSSVAL -d %DATA -m %MODEL -p %PP -c %IN'""".format(JOB_PATH=args.jobPath)  )
+#args.setExec("""sh -c 'cd /home/atlas/saphyra/ && source setup.sh && python {JOB_PATH} -o tunedDiscr -x %CROSSVAL -d %DATA -m %MODEL -p %PP -c %IN'""".format(JOB_PATH=args.jobPath)  )
+args.setExec("""sh -c 'python {JOB_PATH} -o tunedDiscr -d %DATA -c %IN -r %REF'""".format(JOB_PATH=args.jobPath)  )
 
 # And run
 args.run()
