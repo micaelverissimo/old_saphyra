@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+try:
+  import saphyra
+except:
+  import os
+  os.environ['PYTHONPATH'] = '/opt/root-cern/build/lib:/home/atlas/saphyra/build/python:/home/atlas/saphyra/build/lib:/opt/root-cern/build/lib'
+  os.environ['PATH'] = '/opt/root-cern/build/bin:/home/atlas/saphyra/build/scripts:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+
+
 from saphyra import PandasJob, sp, PreProcChain_v1, Norm1, Summary, PileupFit, ReshapeToConv1D
 from sklearn.model_selection import KFold,StratifiedKFold
 from Gaugi.messenger import LoggingLevel, Logger
@@ -98,7 +107,7 @@ def get_model( neurons ):
 
 # Create the job
 job = PandasJob(  job       = args.configFile, 
-                  models    = get_model( [2,3,4,5,6,7,8,9,10] ),
+                  models    = get_model( [1,2,3,4,5,6,7,8,9,10] ),
                   #loss      = 'binary_crossentropy',
                   loss      = 'mse',
                   metrics   = ['accuracy'],
