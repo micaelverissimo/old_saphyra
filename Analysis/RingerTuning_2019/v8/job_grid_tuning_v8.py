@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 
-try:
-  import saphyra
-except:
-  print "setting envs by hand"
-  import os
-  from pprint import pprint
-  pprint(os.environ)
-  os.environ['PYTHONPATH'] = '/opt/root-cern/build/lib:/home/atlas/saphyra/build/python:/home/atlas/saphyra/build/lib:/opt/root-cern/build/lib'
-  os.environ['PATH'] = '/opt/root-cern/build/bin:/home/atlas/saphyra/build/scripts:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  print 'after'
-  pprint(os.environ)
+import ROOT
+import keras
+import numpy
+import sklearn
+import Gaugi
+import saphyra
 
 
 
