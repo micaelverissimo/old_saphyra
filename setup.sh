@@ -23,7 +23,7 @@ do
 done 
 
 export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
-export PYTHONPATH=`pwd`:$LD_LIBRARY_PATH
+export PYTHONPATH=`pwd`:$LD_LIBRARY_PATH:$PYTHONPATH
 export PYTHONPATH=`pwd`/python:$PYTHONPATH
 export PATH=`pwd`/scripts:$PATH
 cd ..
