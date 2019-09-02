@@ -114,7 +114,7 @@ args.append_to_job_submission_option( 'secondaryDSs'
 from panda import SecondaryDataset, SecondaryDatasetCollection
 
 #args.setExec("""sh -c 'cd /home/atlas/saphyra/ && source setup.sh && python {JOB_PATH} -o tunedDiscr -x %CROSSVAL -d %DATA -m %MODEL -p %PP -c %IN'""".format(JOB_PATH=args.jobPath)  )
-args.setExec("""sh -c 'python {JOB_PATH} -o tunedDiscr -d %DATA -c %IN -r %REF'""".format(JOB_PATH=args.jobPath)  )
+args.setExec("""sh -c '. /setup_envs.sh && python {JOB_PATH} -o tunedDiscr -d %DATA -c %IN -r %REF'""".format(JOB_PATH=args.jobPath)  )
 
 # And run
 args.run()
