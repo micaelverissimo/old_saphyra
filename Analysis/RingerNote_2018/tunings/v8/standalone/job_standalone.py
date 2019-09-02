@@ -87,10 +87,10 @@ pp = PreProcChain_v1( [Norm1()] )
 
 
 modelCol = []
-#from keras.models import Sequential
-#from keras.layers import Dense, Dropout, Activation
-from tensorflow.keras.layers import *
-from tensorflow.keras.models import *
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Activation
+#from tensorflow.keras.layers import *
+#from tensorflow.keras.models import *
 
 
 # Build the standard MLP model (Ringer vanilla)
