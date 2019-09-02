@@ -29,6 +29,7 @@ rules = [
   'FZK-LCG2_SCRATCHDISK',
   'DESY-HH_SCRATCHDISK',
   'MWT2_UC_SCRATCHDISK',
+  'UKI-NORTHGRID-MAN-HEP_SCRATCHDISK',
 ]
 
 from Gaugi import emptyArgumentsPrintHelp
