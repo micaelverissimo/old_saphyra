@@ -10,8 +10,10 @@ from Gaugi.gtypes import NotSet
 from saphyra import isTensorFlowTwo
 if isTensorFlowTwo():
   from tensorflow.keras.models import clone_model
+  from tensorflow.keras import backend as K 
 else:
   from keras.models import clone_model
+  from keras import backend as K 
 
 from copy import deepcopy
 from sklearn.utils.class_weight import compute_class_weight
@@ -262,7 +264,8 @@ class PandasJob( Logger ):
           # add the tuned parameters to the output file
           self._tunedData.attach_ctx( self.getContext() )
 
-
+          # Clear everything for the next init
+          K.clear_session()
 
     return StatusCode.SUCCESS
 
