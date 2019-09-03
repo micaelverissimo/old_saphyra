@@ -256,7 +256,9 @@ def GridParser():
   gridParserGroup.add_job_submission_option('--containerImage',
       required = True,
       help = """The docker container link""")
-  
+  gridParserGroup.add_job_submission_option('--cmtConfig',
+      required = False,
+      help = """The cmtConfig for GPU configuration. (nvidia-gpu)""")
   
   
   mutuallyEx1 = gridParserGroup.add_mutually_exclusive_group( required=False )

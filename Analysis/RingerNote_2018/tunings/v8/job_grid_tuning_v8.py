@@ -96,18 +96,20 @@ pp = PreProcChain_v1( [Norm1()] )
 
 def get_model( neurons ):
   modelCol = []
-  for n in neurons:
+  for n in range(1,20+1):
+
     model = Sequential()
     model.add(Dense(n, input_shape=(100,), activation='tanh', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
     model.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
     model.add(Activation('tanh'))
     modelCol.append(model)
+
   return modelCol
 
 
 # Create the job
 job = PandasJob(  job       = args.configFile, 
-                  models    = get_model( [1,2,3,4,5,6,7,8,9,10] ),
+                  models    = get_model( ),
                   #loss      = 'binary_crossentropy',
                   loss      = 'mse',
                   metrics   = ['accuracy'],

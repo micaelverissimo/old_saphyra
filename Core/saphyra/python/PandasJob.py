@@ -9,6 +9,7 @@ from Gaugi.gtypes import NotSet
 
 from saphyra import isTensorFlowTwo
 if isTensorFlowTwo():
+  print ("tensorflow.__version__ >= 2.0")
   from tensorflow.keras.models import clone_model
   from tensorflow.keras import backend as K 
 else:
