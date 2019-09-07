@@ -1,6 +1,33 @@
 #!/usr/bin/env python
 
-from saphyra import PandasJob, sp, PreProcChain_v1, Norm1, Summary, PileupFit, ReshapeToConv1D
+def getPatterns( path ):
+  from Gaugi import load
+  d = load(path)
+  data = d['data'][:,1:101]
+  target = d['target']
+  return data, target
+
+
+def getPileup( path ):
+  from Gaugi import load
+  return load(path)['data'][:,0]
+
+
+
+def getModel():
+  modelCol = []
+  from keras.models import Sequential
+  from keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
+  for n in range(1,20+1):
+    model = Sequential()
+    model.add(Dense(n, input_shape=(100,), activation='tanh', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
+    model.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
+    model.add(Activation('tanh'))
+    modelCol.append(model)
+  return modelCol
+
+
+from saphyra import PandasJob, PatternGenerator, sp, PreProcChain_v1, Norm1, Summary, PileupFit, ReshapeToConv1D
 from sklearn.model_selection import KFold,StratifiedKFold
 from Gaugi.messenger import LoggingLevel, Logger
 from Gaugi import load
@@ -31,33 +58,11 @@ parser.add_argument('-r','--refFile', action='store',
             help = "The reference file.")
 
 
-def get_model():
-  modelCol = []
-  from keras.models import Sequential
-  from keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
-  for n in range(1,20+1):
-    model = Sequential()
-    model.add(Dense(n, input_shape=(100,), activation='tanh', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-    model.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-    model.add(Activation('tanh'))
-    modelCol.append(model)
-  return modelCol
-
-
 if len(sys.argv)==1:
   parser.print_help()
   sys.exit(1)
 
 args = parser.parse_args()
-
-
-# Reading data and get all information needed
-# by the tuning proceding
-raw = load(args.dataFile)
-data = raw['data'][:,1:101]
-target = raw['target']
-pileup = raw['data'][:,0]
-del raw
 
 
 ref_target = [
@@ -71,18 +76,6 @@ ref_target = [
 from saphyra import ReferenceReader
 ref_obj = ReferenceReader().load(args.refFile)
 
-posproc = [Summary()]
-
-obj = PileupFit( "PileupFit", pileup )
-# Calculate the reference for each operation point
-# using the ringer v6 tuning as reference
-for ref in ref_target:
-  pd = ref_obj.getSgnPassed(ref[0]) / float(ref_obj.getSgnTotal(ref[0]))
-  fa = ref_obj.getBkgPassed(ref[0]) / float(ref_obj.getBkgTotal(ref[0]))
-  obj.add( ref[0], ref[1], pd, fa )
-
-posproc.append( obj )
-
 from sklearn.model_selection import StratifiedKFold, KFold
 kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
 
@@ -90,18 +83,28 @@ from saphyra import PreProcChain_v1, Norm1
 pp = PreProcChain_v1( [Norm1()] )
 
 
+posproc = [Summary()]
+correction = PileupFit( "PileupFit", getPileup(args.dataFile) )
+# Calculate the reference for each operation point
+# using the ringer v6 tuning as reference
+for ref in ref_target:
+  pd = ref_obj.getSgnPassed(ref[0]) / float(ref_obj.getSgnTotal(ref[0]))
+  fa = ref_obj.getBkgPassed(ref[0]) / float(ref_obj.getBkgTotal(ref[0]))
+  correction.add( ref[0], ref[1], pd, fa )
+posproc = [Summary(), correction]
 
-job = PandasJob(  job           = args.configFile, 
-                  models        = get_model(),
-                  loss          = 'mse',
-                  metrics       = ['accuracy'],
-                  epochs        = 5000,
-                  ppChain       = pp,
-                  crossval      = kf,
-                  outputfile    = args.outputFile,
-                  data          = data,
-                  target        = target,
-                  class_weight  = True 
+
+
+job = PandasJob(  pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
+                  job               = args.configFile, 
+                  models            = get_model(),
+                  loss              = 'mse',
+                  metrics           = ['accuracy'],
+                  epochs            = 5000,
+                  ppChain           = pp,
+                  crossval          = kf,
+                  outputfile        = args.outputFile,
+                  class_weight      = True 
                   )
 
 job.posproc   += posproc

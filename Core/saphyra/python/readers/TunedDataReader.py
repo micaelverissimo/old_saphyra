@@ -1,9 +1,9 @@
 
-__all__ = ['TunedDataReader']
+__all__ = ['TunedDataReader', 'PatternGenerator']
 
 
 from Gaugi import Logger, NotSet
-
+from Gaugi.messenger.macros import *
 
 class TunedDataReader( Logger ):
 
@@ -43,6 +43,18 @@ class TunedDataReader( Logger ):
   def object(self):
     return self._obj
 
+
+
+class PatternGenerator( Logger ):
+
+  def __init__(self, path, generator , **kw):
+    Logger.__init__(self, kw)
+    self._path = path
+    self._generator = generator
+
+  def __call__(self):
+    MSG_INFO(self, "Reading %s...", self._path)
+    return self._generator(self._path)
 
 
 

@@ -22,12 +22,15 @@ import numpy as np
 
 from saphyra.posproc import Summary
 
+
 class PandasJob( Logger ):
 
-  def __init__(self , inputfile=None, **kw ):
+  def __init__(self , pattern_generator, **kw ):
 
-    Logger.__init__(self,  **kw)
+    Logger.__init__(self,   **kw)
 
+    self._pattern_generator = pattern_generator
+    
     self._optimizer = retrieve_kw( kw, 'optimizer'  , 'adam'                )
     self._loss      = retrieve_kw( kw, 'loss'       , 'binary_crossentropy' )
     self._epochs    = retrieve_kw( kw, 'epochs'     , 1000                  )
@@ -39,9 +42,8 @@ class PandasJob( Logger ):
     self._sorts     = retrieve_kw( kw, 'sorts'      , []                    )
     self._inits     = retrieve_kw( kw, 'inits'      , []                    )
     self.crossval   = retrieve_kw( kw, 'crossval'   , NotSet                )
-    self.data       = retrieve_kw( kw, 'data'       , NotSet                )
-    self.target     = retrieve_kw( kw, 'target'     , NotSet                )
     self._verbose   = retrieve_kw( kw, 'verbose'    , True                  )
+
     self._class_weight = retrieve_kw( kw, 'class_weight' , False            )
 
     from saphyra  import PreProcChain_v1, NoPreProc
@@ -70,6 +72,7 @@ class PandasJob( Logger ):
       self._inits = range(self._inits)
 
     self._context = NotSet
+    self._index_from_cv = NotSet
 
 
   @property
@@ -138,19 +141,17 @@ class PandasJob( Logger ):
     self.setContext( JobContext() )
 
     # Create the storegate for root objects
-    from Gaugi.storage import StoreGate
-    MSG_INFO( self, "Creating StoreGate...")
-    self._storegate = StoreGate( self._outputfile , level = self.level)
+    #from Gaugi.storage import StoreGate
+    #MSG_INFO( self, "Creating StoreGate...")
+    #self._storegate = StoreGate( self._outputfile , level = self.level)
     # Attach into the context
-
-
 
 
     # Initialize the list of pos processor algorithms
     for proc in self.posproc:
       # Set the context into algorithm
       proc.setContext(self.getContext())
-      proc.setStoreGateSvc( self._storegate )
+      #proc.setStoreGateSvc( self._storegate )
       # Set the logger output level
       proc.level = self.level
 
@@ -169,32 +170,25 @@ class PandasJob( Logger ):
 
   def execute( self ):
 
-    # get all indexs that will be used in the cross validation data split.
-    index = [(train_index, val_index) for train_index, val_index in self._crossval.split(self.data,self.target)]
+
+    for isort, sort in enumerate( self._sorts ):
+
+      # get the current kfold
+      x_train, x_val, y_train, y_val = self.pattern_g( self._pattern_generator, sort )
+
+      # Pre processing step
+      if self._ppChain.takesParamsFromData:
+        MSG_DEBUG( self, "Take parameters from train set..." )
+        self._ppChain.takeParams( x_train )
+
+      MSG_INFO( self, "Pre processing train set with %s", self._ppChain )
+      x_train = self._ppChain( x_train )
+
+      MSG_INFO( self, "Pre processing validation set with %s", self._ppChain )
+      x_val = self._ppChain( x_val )
 
 
-    for imodel, model in enumerate( self._models ):
-
-      for isort, sort in enumerate( self._sorts ):
-
-        # get the current kfold
-        x_train = self.data[index[sort][0]]
-        y_train = self.target[index[sort][0]]
-        x_val   = self.data[index[sort][1]]
-        y_val   = self.target[index[sort][1]]
-
-        # Pre processing step
-        if self._ppChain.takesParamsFromData:
-          MSG_DEBUG( self, "Take parameters from train set..." )
-          self._ppChain.takeParams( x_train )
-
-        MSG_INFO( self, "Pre processing train set with %s", self._ppChain )
-        x_train = self._ppChain( x_train )
-
-        MSG_INFO( self, "Pre processing validation set with %s", self._ppChain )
-        x_val = self._ppChain( x_val )
-
-
+      for imodel, model in enumerate( self._models ):
 
 
         for init in self._inits:
@@ -202,10 +196,10 @@ class PandasJob( Logger ):
           # force the context is empty for each training
           self.getContext().clear()
 
-          self.getContext().setHandler( "crossval", self._crossval )
-          self.getContext().setHandler( "index", index)
-          self.getContext().setHandler( "valData", (x_val, y_val) )
-          self.getContext().setHandler( "trnData", (x_train, y_train) )
+          self.getContext().setHandler( "crossval", self._crossval      )
+          self.getContext().setHandler( "index"   , self._index_from_cv )
+          self.getContext().setHandler( "valData" , (x_val, y_val)      )
+          self.getContext().setHandler( "trnData" , (x_train, y_train)  )
 
 
           # copy the model to a new pointer and make
@@ -234,11 +228,12 @@ class PandasJob( Logger ):
           self.getContext().setHandler( "imodel"  , imodel              )
 
           callbacks = deepcopy(self.callbacks)
-          for c in callbacks:
-            try: # Tensorflow 2.0
-              c.set_validation_data( (x_val,y_val) )
-            except:
-              pass
+          #for c in callbacks:
+          #  try: # Tensorflow 2.0
+          #    c.set_validation_data( (x_val,y_val) )
+          #  except:
+          #    continue
+
 
           # Training
           history = model_for_this_init.fit(x_train, y_train,
@@ -268,6 +263,15 @@ class PandasJob( Logger ):
           # Clear everything for the next init
           K.clear_session()
 
+      
+      
+      # You must clean everythin before reopen the dataset
+      self.getContext().clear()
+      # Clear the keras once again just to be sure
+      K.clear_session()
+
+
+
     return StatusCode.SUCCESS
 
 
@@ -286,7 +290,7 @@ class PandasJob( Logger ):
       MSG_FATAL( self, "Its not possible to save the tuned data: %s" , e )
 
     # Save all root objects in the store gate service
-    self._storegate.write()
+    #self._storegate.write()
 
     return StatusCode.SUCCESS
 
@@ -304,6 +308,24 @@ class PandasJob( Logger ):
 
   def setContext(self, ctx):
     self._context = ctx
+
+
+
+
+  def pattern_g( self, generator, sort ):
+    # this generator must be implemented by the user
+    data, target = generator()
+
+    # If the index is not set, you muat run the cross validation Kfold to get the index
+    if self._index_from_cv is NotSet:
+      self._index_from_cv = [(train_index, val_index) for train_index, val_index in self._crossval.split(data,target)]
+    
+    # get the current kfold
+    x_train = data[   self._index_from_cv[sort][0]]
+    y_train = target[ self._index_from_cv[sort][0]]
+    x_val   = data[   self._index_from_cv[sort][1]]
+    y_val   = target[ self._index_from_cv[sort][1]]
+    return x_train, x_val, y_train, y_val
 
 
 
