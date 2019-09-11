@@ -97,7 +97,7 @@ posproc = [Summary(), correction]
 
 job = PandasJob(  pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
                   job               = args.configFile, 
-                  models            = get_model(),
+                  models            = getModel(),
                   loss              = 'mse',
                   metrics           = ['accuracy'],
                   epochs            = 5000,
