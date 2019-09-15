@@ -18,7 +18,7 @@ def getModel():
   modelCol = []
   from keras.models import Sequential
   from keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
-  for n in range(1,20+1):
+  for n in range(1,1+1):
     model = Sequential()
     model.add(Dense(n, input_shape=(100,), activation='tanh', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
     model.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
