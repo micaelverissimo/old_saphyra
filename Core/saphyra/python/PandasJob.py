@@ -38,18 +38,16 @@ class PandasJob( Logger ):
     self.callbacks  = retrieve_kw( kw, 'callbacks'  , []                    )
     self.posproc    = retrieve_kw( kw, 'posproc'    , []                    )
     self.metrics    = retrieve_kw( kw, 'metrics'    , []                    )
-    self.models     = retrieve_kw( kw, 'models'     , []                    )
     self._sorts     = retrieve_kw( kw, 'sorts'      , []                    )
     self._inits     = retrieve_kw( kw, 'inits'      , []                    )
     self.crossval   = retrieve_kw( kw, 'crossval'   , NotSet                )
     self._verbose   = retrieve_kw( kw, 'verbose'    , True                  )
-
     self._class_weight = retrieve_kw( kw, 'class_weight' , False            )
 
     from saphyra  import PreProcChain_v1, NoPreProc
     self.ppChain    = retrieve_kw( kw, 'ppChain'    , PreProcChain_v1([NoPreProc()]))
 
-
+    # Get configurations and model from job config
     job_auto_config = retrieve_kw( kw, 'job'        , NotSet                )
     # read the job configuration from file
     if job_auto_config:
@@ -59,7 +57,19 @@ class PandasJob( Logger ):
       # retrive sort/init lists from file
       self._sorts = job.get_sorts()
       self._inits = job.get_inits()
+      self._models, self._id_models = job.get_models()
 
+    # get model and tag from model file or lists
+    models = retrieve_kw( kw, 'models', NotSet )
+    if models:
+      if type(models) is str:
+        from saphyra.readers import ModelReader
+        self._models, self._id_models = ModelReader().load( s ).get_models()
+      else:
+        self._models = models
+        self._id_modes = range(len(models))
+
+    
     # get all parameters to used in the output step
     from saphyra.readers.versions import TunedData_v1
     self._tunedData = retrieve_kw( kw, 'tunedData'  , TunedData_v1()        )
@@ -87,18 +97,6 @@ class PandasJob( Logger ):
     else:
       self._crossval = s
 
-
-  @property
-  def models(self):
-    return self._models
-
-  @models.setter
-  def models( self, s ):
-    if type(s) is str:
-      from saphyra.readers import ModelReader
-      self._models = ModelReader().load( s )
-    else:
-      self._models = s
 
   @property
   def sorts(self):
@@ -139,12 +137,6 @@ class PandasJob( Logger ):
     from saphyra import JobContext
     # Create the job context
     self.setContext( JobContext() )
-
-    # Create the storegate for root objects
-    #from Gaugi.storage import StoreGate
-    #MSG_INFO( self, "Creating StoreGate...")
-    #self._storegate = StoreGate( self._outputfile , level = self.level)
-    # Attach into the context
 
 
     # Initialize the list of pos processor algorithms
@@ -187,15 +179,14 @@ class PandasJob( Logger ):
       MSG_INFO( self, "Pre processing validation set with %s", self._ppChain )
       x_val = self._ppChain( x_val )
 
-
+    
+      
       for imodel, model in enumerate( self._models ):
-
 
         for init in self._inits:
 
           # force the context is empty for each training
           self.getContext().clear()
-
           self.getContext().setHandler( "crossval", self._crossval      )
           self.getContext().setHandler( "index"   , self._index_from_cv )
           self.getContext().setHandler( "valData" , (x_val, y_val)      )
@@ -217,15 +208,14 @@ class PandasJob( Logger ):
             MSG_FATAL( self, "Compilation model error: %s" , e)
 
 
-          MSG_INFO( self, "Training model (%d) using sort (%d) and init (%d)", imodel, isort, init )
+          MSG_INFO( self, "Training model id (%d) using sort (%d) and init (%d)", self._id_models[imodel], sort, init )
           MSG_INFO( self, "Train Samples      :  (%d, %d)", len(y_train[y_train==1]), len(y_train[y_train==0]))
           MSG_INFO( self, "Validation Samples :  (%d, %d)", len(y_val[y_val==1]),len(y_val[y_val==0]))
-
 
           self.getContext().setHandler( "model"   , model_for_this_init )
           self.getContext().setHandler( "sort"    , sort                )
           self.getContext().setHandler( "init"    , init                )
-          self.getContext().setHandler( "imodel"  , imodel              )
+          self.getContext().setHandler( "imodel"  , self._id_models[imodel])
 
           callbacks = deepcopy(self.callbacks)
           #for c in callbacks:

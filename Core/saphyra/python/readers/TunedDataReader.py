@@ -48,13 +48,15 @@ class TunedDataReader( Logger ):
 class PatternGenerator( Logger ):
 
   def __init__(self, path, generator , **kw):
-    Logger.__init__(self, kw)
+    Logger.__init__(self)
     self._path = path
     self._generator = generator
+    self._kw = kw
+
 
   def __call__(self):
     MSG_INFO(self, "Reading %s...", self._path)
-    return self._generator(self._path)
+    return self._generator(self._path, **self._kw)
 
 
 

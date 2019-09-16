@@ -17,7 +17,6 @@ class JobReader( Logger ):
     raw = load( ofile )
     # get the file version
     version = raw['__version']
-
     # the current file version
     if version == 1:
       from saphyra import Job_v1

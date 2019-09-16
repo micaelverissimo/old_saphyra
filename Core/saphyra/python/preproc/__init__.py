@@ -20,6 +20,10 @@ from . import ShowerShapeSimpleNorm
 __all__.extend( ShowerShapeSimpleNorm.__all__            )
 from .ShowerShapeSimpleNorm import *
 
+from . import utilities
+__all__.extend( utilities.__all__            )
+from .utilities import *
+
 
 
 from . import reshape

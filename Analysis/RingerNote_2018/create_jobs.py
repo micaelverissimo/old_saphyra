@@ -58,7 +58,8 @@ pandas( models        = get_model(),
         nInitsPerJob  = 1,
         sortBounds    = PythonLoopingBounds(10),
         nSortsPerJob  = 1,
-        outputFolder  = 'job_config.ringer_v1'
+        nModelsPerJob = 2,
+        outputFolder  = 'job_config.ringer.mlp1to20.10sorts.10inits'
         )
 
 
