@@ -44,6 +44,7 @@ class PandasJob( Logger ):
     self._verbose   = retrieve_kw( kw, 'verbose'    , True                  )
     self._class_weight = retrieve_kw( kw, 'class_weight' , False            )
 
+    self._save_history = retrieve_kw( kw, 'save_history' , True)
     from saphyra  import PreProcChain_v1, NoPreProc
     self.ppChain    = retrieve_kw( kw, 'ppChain'    , PreProcChain_v1([NoPreProc()]))
 
@@ -237,7 +238,10 @@ class PandasJob( Logger ):
                               class_weight    = compute_class_weight('balanced',np.unique(y_train),y_train) if self._class_weight else None,
                               shuffle         = True).history
 
-
+          if not self._save_history:
+            # NOTE: overwrite to slim version. This is used to reduce the output size
+            history = {}
+          
           self.getContext().setHandler( "history", history )
 
 
@@ -252,7 +256,7 @@ class PandasJob( Logger ):
 
           # Clear everything for the next init
           K.clear_session()
-
+          break
       
       
       # You must clean everythin before reopen the dataset

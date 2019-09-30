@@ -17,7 +17,8 @@ class Summary( Algorithm ):
 
   def __init__( self, **kw ):
     Algorithm.__init__(self, "Summary", **kw)
-
+    # To much disk consume in this feature. disable it!
+    self._save_roc_curves=False
 
 
 
@@ -63,8 +64,9 @@ class Summary( Algorithm ):
     d['max_sp_pd'] = pd[knee]
     d['max_sp_fa'] = fa[knee]
     d['max_sp'] = sp[knee]
-    d['roc_pd'] = pd
-    d['roc_fa'] = fa
+    if self._save_roc_curves:
+      d['roc_pd'] = pd
+      d['roc_fa'] = fa
 
     # Validation
     fa, pd, thresholds = roc_curve(y_val, y_pred_val)
@@ -78,8 +80,9 @@ class Summary( Algorithm ):
     d['max_sp_pd_val'] = pd[knee]
     d['max_sp_fa_val'] = fa[knee]
     d['max_sp_val'] = sp[knee]
-    d['roc_pd_val'] = pd
-    d['roc_fa_val'] = fa
+    if self._save_roc_curves:
+      d['roc_pd_val'] = pd
+      d['roc_fa_val'] = fa
 
 
 
@@ -95,8 +98,9 @@ class Summary( Algorithm ):
     d['max_sp_pd_op'] = pd[knee]
     d['max_sp_fa_op'] = fa[knee]
     d['max_sp_op'] = sp[knee]
-    d['roc_pd_op'] = pd
-    d['roc_fa_op'] = fa
+    if self._save_roc_curves:
+      d['roc_pd_op'] = pd
+      d['roc_fa_op'] = fa
 
     history['summary'] = d
     

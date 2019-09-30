@@ -53,7 +53,7 @@ class sp(Callback, Logger):
     logs['max_sp_fa_val'] = fa[knee]
     logs['max_sp_pd_val'] = pd[knee]
     if self.__verbose:
-      print( (' - val_sp: %1.4f (fa:%1.4f,pd:%1.4f)') % (sp[knee],fa[knee],pd[knee]) )
+      print( (' - val_sp: %1.4f (fa:%1.4f,pd:%1.4f), patience: %d') % (sp[knee],fa[knee],pd[knee], self.__ipatience) )
 
 
     if sp[knee] > self.__best_sp:
