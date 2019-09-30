@@ -7,12 +7,12 @@ from Gaugi.messenger.macros import *
 from Gaugi.LoopingBounds import *
 
 # default model (ringer vanilla)
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
-default_model = Sequential()
-default_model.add(Dense(5, input_shape=(100,), activation='tanh', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-default_model.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-default_model.add(Activation('tanh'))
+# Remove the keras dependence and get keras from tensorflow 2.0
+import tensorflow as tf
+default_model = tf.keras.Sequential()
+default_model.add(tf.keras.layers.Dense(5, input_shape=(100,), activation='tanh', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
+default_model.add(tf.keras.layers.Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
+default_model.add(tf.keras.layers.Activation('tanh'))
  
 
 

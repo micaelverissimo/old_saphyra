@@ -5,7 +5,11 @@ __all__ = ['Job_v1']
 
 from sklearn.model_selection import *
 from Gaugi import LoggerStreamable, LoggerRawDictStreamer, RawDictCnv
-from keras.models import model_from_json
+
+# Just to remove the keras dependence
+import tensorflow as tf
+model_from_json = tf.keras.models.model_from_json
+
 import json
 
 
