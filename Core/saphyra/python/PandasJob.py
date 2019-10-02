@@ -11,10 +11,10 @@ from saphyra import isTensorFlowTwo
 if isTensorFlowTwo():
   print ("tensorflow.__version__ >= 2.0")
   from tensorflow.keras.models import clone_model
-  from tensorflow.keras import backend as K 
+  from tensorflow.keras import backend as K
 else:
   from keras.models import clone_model
-  from keras import backend as K 
+  from keras import backend as K
 
 from copy import deepcopy
 from sklearn.utils.class_weight import compute_class_weight
@@ -22,6 +22,7 @@ import numpy as np
 
 from saphyra.posproc import Summary
 
+from tensorflow.keras.models import clone_model
 
 class PandasJob( Logger ):
 
@@ -30,7 +31,7 @@ class PandasJob( Logger ):
     Logger.__init__(self,   **kw)
 
     self._pattern_generator = pattern_generator
-    
+
     self._optimizer = retrieve_kw( kw, 'optimizer'  , 'adam'                )
     self._loss      = retrieve_kw( kw, 'loss'       , 'binary_crossentropy' )
     self._epochs    = retrieve_kw( kw, 'epochs'     , 1000                  )
@@ -70,7 +71,7 @@ class PandasJob( Logger ):
         self._models = models
         self._id_modes = range(len(models))
 
-    
+
     # get all parameters to used in the output step
     from saphyra.readers.versions import TunedData_v1
     self._tunedData = retrieve_kw( kw, 'tunedData'  , TunedData_v1()        )
@@ -180,8 +181,8 @@ class PandasJob( Logger ):
       MSG_INFO( self, "Pre processing validation set with %s", self._ppChain )
       x_val = self._ppChain( x_val )
 
-    
-      
+
+
       for imodel, model in enumerate( self._models ):
 
         for init in self._inits:
@@ -219,11 +220,11 @@ class PandasJob( Logger ):
           self.getContext().setHandler( "imodel"  , self._id_models[imodel])
 
           callbacks = deepcopy(self.callbacks)
-          #for c in callbacks:
-          #  try: # Tensorflow 2.0
-          #    c.set_validation_data( (x_val,y_val) )
-          #  except:
-          #    continue
+          for c in callbacks:
+            try: # Tensorflow 2.0
+              c.set_validation_data( (x_val,y_val) )
+            except:
+              continue
 
 
           # Training
@@ -241,7 +242,7 @@ class PandasJob( Logger ):
           if not self._save_history:
             # NOTE: overwrite to slim version. This is used to reduce the output size
             history = {}
-          
+
           self.getContext().setHandler( "history", history )
 
 
@@ -257,8 +258,8 @@ class PandasJob( Logger ):
           # Clear everything for the next init
           K.clear_session()
           break
-      
-      
+
+
       # You must clean everythin before reopen the dataset
       self.getContext().clear()
       # Clear the keras once again just to be sure
@@ -313,7 +314,7 @@ class PandasJob( Logger ):
     # If the index is not set, you muat run the cross validation Kfold to get the index
     if self._index_from_cv is NotSet:
       self._index_from_cv = [(train_index, val_index) for train_index, val_index in self._crossval.split(data,target)]
-    
+
     # get the current kfold
     x_train = data[   self._index_from_cv[sort][0]]
     y_train = target[ self._index_from_cv[sort][0]]
