@@ -2,11 +2,7 @@
 __all__ = ["auc", "f1_score"]
 
 
-from saphyra import isTensorFlowTwo
-if isTensorFlowTwo():
-  from tensorflow.keras import backend as K
-else:
-  from keras import backend as K
+from tensorflow.keras import backend as K
 
 
 def auc(y_true, y_pred, num_thresholds=2000):

@@ -4,12 +4,7 @@ __all__ = ['Reference_v1']
 
 from sklearn.model_selection import *
 from Gaugi import LoggerStreamable, LoggerRawDictStreamer, RawDictCnv, NotSet
-
-from saphyra import isTensorFlowTwo
-if isTensorFlowTwo():
-  from tensorflow.keras.models import model_from_json
-else:
-  from keras.models import model_from_json
+from tensorflow.keras.models import model_from_json
 import json
 
 

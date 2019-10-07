@@ -92,7 +92,6 @@ class CreatePandaJobs( Logger ):
 
         for initWindowBounds in initJobsWindowList():
 
-          print list(modelWindowBounds) 
           #print list(sortWindowBounds)
           MSG_INFO( self, 'Creating job config with sort (%d to %d) and %d inits and model Index (%d to %d)', 
               sortWindowBounds[0], sortWindowBounds[-1], len(initWindowBounds), modelWindowBounds[0],modelWindowBounds[-1])

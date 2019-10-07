@@ -6,16 +6,8 @@ from Gaugi.messenger import Logger, LoggingLevel
 from Gaugi.messenger.macros import *
 from Gaugi import StatusCode,  checkForUnusedVars, retrieve_kw
 from Gaugi.gtypes import NotSet
-
-from saphyra import isTensorFlowTwo
-if isTensorFlowTwo():
-  print ("tensorflow.__version__ >= 2.0")
-  from tensorflow.keras.models import clone_model
-  from tensorflow.keras import backend as K
-else:
-  from keras.models import clone_model
-  from keras import backend as K
-
+from tensorflow.keras.models import clone_model
+from tensorflow.keras import backend as K
 from copy import deepcopy
 from sklearn.utils.class_weight import compute_class_weight
 import numpy as np
@@ -31,6 +23,8 @@ class PandasJob( Logger ):
     Logger.__init__(self,   **kw)
 
     self._pattern_generator = pattern_generator
+    
+    self._db_job = retrieve_kw( kw, 'db_job', None)
 
     self._optimizer = retrieve_kw( kw, 'optimizer'  , 'adam'                )
     self._loss      = retrieve_kw( kw, 'loss'       , 'binary_crossentropy' )
@@ -255,6 +249,21 @@ class PandasJob( Logger ):
           # add the tuned parameters to the output file
           self._tunedData.attach_ctx( self.getContext() )
 
+
+
+          if self.db_job:
+            try:
+              MSG_INFO( self, "Adding DB model into the Job" )
+              from saphyra.db import Model
+              db_model = Model()
+              db_model.setSummary( history['summary'] )
+              for key in history['fitting']:
+                db_model.setFitting( history['fitting'][key] )
+              self._db_job.addModel(db_model)
+            except:
+              MSG_WARNING(self, "Its not possible to store the model into the DB base.")
+
+
           # Clear everything for the next init
           K.clear_session()
           break
@@ -273,17 +282,14 @@ class PandasJob( Logger ):
 
   def finalize( self ):
 
-
     for proc in self.posproc:
       if proc.finalize().isFailure():
         MSG_ERROR(self, "There is a problem to finalize the pos processor: %s", proc.name() )
-
     try:
       # prepare to save the tuned data
       self._tunedData.save( self._outputfile )
     except e:
       MSG_FATAL( self, "Its not possible to save the tuned data: %s" , e )
-
     # Save all root objects in the store gate service
     #self._storegate.write()
 
