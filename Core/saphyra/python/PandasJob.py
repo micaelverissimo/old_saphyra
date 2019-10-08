@@ -23,8 +23,8 @@ class PandasJob( Logger ):
     Logger.__init__(self,   **kw)
 
     self._pattern_generator = pattern_generator
-    
-    self._db_job = retrieve_kw( kw, 'db_job', None)
+
+    self._db = retrieve_kw( kw, 'db', None)
 
     self._optimizer = retrieve_kw( kw, 'optimizer'  , 'adam'                )
     self._loss      = retrieve_kw( kw, 'loss'       , 'binary_crossentropy' )
@@ -57,7 +57,7 @@ class PandasJob( Logger ):
 
     # get model and tag from model file or lists
     models = retrieve_kw( kw, 'models', NotSet )
-    if models:
+    if not models is NotSet:
       if type(models) is str:
         from saphyra.readers import ModelReader
         self._models, self._id_models = ModelReader().load( s ).get_models()
@@ -215,10 +215,8 @@ class PandasJob( Logger ):
 
           callbacks = deepcopy(self.callbacks)
           for c in callbacks:
-            try: # Tensorflow 2.0
+            if hasattr(c, 'set_validation_data'):
               c.set_validation_data( (x_val,y_val) )
-            except:
-              continue
 
 
           # Training
@@ -251,17 +249,13 @@ class PandasJob( Logger ):
 
 
 
-          if self.db_job:
+          if self._db:
             try:
               MSG_INFO( self, "Adding DB model into the Job" )
-              from saphyra.db import Model
-              db_model = Model()
-              db_model.setSummary( history['summary'] )
-              for key in history['fitting']:
-                db_model.setFitting( history['fitting'][key] )
-              self._db_job.addModel(db_model)
-            except:
-              MSG_WARNING(self, "Its not possible to store the model into the DB base.")
+              self._db.attach_ctx( self.getContext() )
+            except Exception as e:
+              MSG_WARNING(self, "Its not possible to store the model into the DB base. Error: %s",e)
+
 
 
           # Clear everything for the next init
