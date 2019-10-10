@@ -1,9 +1,9 @@
 
 __all__ = ["Job"]
 
-from sqlalchemy import Column, Integer, String, Date, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, Float, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
-from saphyra.db.models import Base
+from ringerdb.models import Base
 
 
 #
@@ -14,23 +14,36 @@ class Job (Base):
 
     # Local
     id = Column(Integer, primary_key = True)
+
+    # Job configuration for this job
     configFilePath = Column(String)
+    # For CERN grid cluster
     configId = Column(Integer)
-    #execArgs = Column(String)
-    status = Column(String)
+
+
+    # For LPS grid cluster
+    execArgs = Column(String,default="")
+   
+
+    status = Column(String, default="registered")
+    cluster  = Column( String )
+    isGPU = Column(Boolean, default=False)
+    priority = Column(Integer)
+    retry = Column(Integer, default=0)
+
 
     # Foreign
-    taskId = Column(Integer, ForeignKey('task.id'))
     task = relationship("Task", back_populates="jobs")
-    models = relationship("Model", order_by='Model.id',back_populates="job")
+    taskId = Column(Integer, ForeignKey('task.id'))
 
-    cluster  = Column( String )
-    priority = Column(Integer)
+    
+    # Monitoring table
+    models = relationship("Model", order_by='Model.id',back_populates="job")
 
 
     def __repr__ (self):
-        return "<Job (configFilePath='{}', status='{}')>".format(
-            self.configFilePath, self.status
+        return "<Job (configFilePath='{}', status='{}, taskId = {}, configId = {}')>".format(
+            self.configFilePath, self.status, self.taskId, self.configId
         )
 
     def getStatus(self):
@@ -41,12 +54,16 @@ class Job (Base):
         self.status = status
 
 
-    def getParams (self):
+    def getConfigPath (self):
         return self.configFilePath
 
 
     def addModel( self, model ):
       self.models.append( model )
+
+
+    def getModels(self):
+      return self.models
 
 
     def getTask(self):
@@ -59,4 +76,7 @@ class Job (Base):
 
     def getPriority(sefl):
       return self.priority
+
+    
+
 

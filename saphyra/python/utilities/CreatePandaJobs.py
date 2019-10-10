@@ -1,5 +1,5 @@
 
-__all__ = ["CreatePandaJobs"]
+__all__ = ["createPandaJobs"]
 
 from Gaugi import retrieve_kw, mkdir_p
 from Gaugi.messenger import Logger
@@ -52,6 +52,8 @@ class CreatePandaJobs( Logger ):
     return timestampStr
 
 
+
+
   def __call__( self, **kw): 
 
     from sklearn.model_selection import KFold
@@ -98,6 +100,8 @@ class CreatePandaJobs( Logger ):
           
           from saphyra.readers.versions import Job_v1
           job = Job_v1()
+          # to be user by the database table
+          job.set_id( nJobs )
           job.set_sorts(list(sortWindowBounds))
           job.set_inits(list(initWindowBounds))
           job.set_models([models[i] for i in list(modelWindowBounds)],  list(modelWindowBounds) )
@@ -129,5 +133,6 @@ class CreatePandaJobs( Logger ):
 
 
 
+createPandaJobs = CreatePandaJobs()
 
 

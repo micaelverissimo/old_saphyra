@@ -44,6 +44,13 @@ parentReqParser.add_argument('-j','--jobPath', required = True, metavar='JOB_PAT
                              help = "The path to the job (python script file).")
 
 
+parentReqParser.add_argument('--db_url', requered=False, metavar='db_url', action='store', default=None,
+                            help = "DB url" )
+
+
+
+
+
 
 
 from panda import ioGridParser, GridOutputCollection, GridOutput
@@ -101,6 +108,21 @@ args.append_to_job_submission_option( 'secondaryDSs'
                                         ] 
                                         )
                                       )
+
+# Use db
+if args.db_url:
+
+  # Get the list of files from rucio
+  from panda import get_list_of_files_from_rucio
+  files = get_list_if_files_from_rucio( args.Config_DS )
+  print("Set %d jobs into the task %s" % (len(files), args.output_DS))
+
+  from ringerdb import DBContext
+  db = DBContext( args.db_url, 'jodafons' )
+  task = db.createTask( args.output_DS, cluster='cern', status='registered', etBinIdx=args.etBinIdx, etaBinIdx=args.etaBinIdx)
+
+  # Create the task
+
 
 
 

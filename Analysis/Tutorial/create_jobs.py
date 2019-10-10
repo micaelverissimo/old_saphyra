@@ -3,7 +3,6 @@
 
 
 from saphyra import *
-pandas=CreatePandaJobs()
 
 
 # ppChain
@@ -11,8 +10,8 @@ from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D
 pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
 
 
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
 
 
 # [Model]
@@ -39,7 +38,7 @@ kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
 
 
 from Gaugi import PythonLoopingBounds
-pandas( models        = get_model(),
+createPandaJobs( models        = get_model(),
         ppChain       = pp,
         crossVal      = kf,
         nInits        = 1,

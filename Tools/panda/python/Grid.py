@@ -67,9 +67,9 @@ class SecondaryDataset( object ):
   def __repr__(self):
     return 'SecondaryDataset(' + str(self) + '|reusable=' + str(self.reusable) + ')'
 
-class SecondaryDatasetCollection( object ):
-  __metaclass__ = LimitedTypeList
-  _acceptedTypes = SecondaryDataset,
+class SecondaryDatasetCollection( metaclass=LimitedTypeList ):
+  #_acceptedTypes = SecondaryDataset,
+  _acceptedTypes = list,
 
 class GridOutput( object ):
   """
@@ -93,9 +93,15 @@ class GridOutput( object ):
   def __repr__(self):
     return 'GridOutput(' + str(self) + ')'
 
-class GridOutputCollection( object ):
-  __metaclass__ = LimitedTypeList
+
+
+
+class GridOutputCollection( metaclass=LimitedTypeList ):
   _acceptedTypes = GridOutput,
+
+
+
+
 
 class MultiThreadGridConfigure( CastToTypeOptionConfigure ):
   """

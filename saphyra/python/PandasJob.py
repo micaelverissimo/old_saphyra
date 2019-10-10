@@ -15,6 +15,8 @@ import numpy as np
 from saphyra.posproc import Summary
 
 from tensorflow.keras.models import clone_model
+from datetime import datetime
+
 
 class PandasJob( Logger ):
 
@@ -24,7 +26,6 @@ class PandasJob( Logger ):
 
     self._pattern_generator = pattern_generator
 
-    self._db = retrieve_kw( kw, 'db', None)
 
     self._optimizer = retrieve_kw( kw, 'optimizer'  , 'adam'                )
     self._loss      = retrieve_kw( kw, 'loss'       , 'binary_crossentropy' )
@@ -71,7 +72,7 @@ class PandasJob( Logger ):
     self._tunedData = retrieve_kw( kw, 'tunedData'  , TunedData_v1()        )
     self._outputfile= retrieve_kw( kw, 'outputfile' , 'tunedDisc'           )
 
-
+    self.__db = NotSet
     checkForUnusedVars(kw)
 
     if type(self._inits) is int:
@@ -79,6 +80,14 @@ class PandasJob( Logger ):
 
     self._context = NotSet
     self._index_from_cv = NotSet
+
+
+  def setDBContext( self, db ):
+    self.__db = db
+
+  def getDBContext(self):
+    return self.__db
+
 
 
   @property
@@ -219,6 +228,8 @@ class PandasJob( Logger ):
               c.set_validation_data( (x_val,y_val) )
 
 
+          start = datetime.now()
+
           # Training
           history = model_for_this_init.fit(x_train, y_train,
                               epochs          = self._epochs,
@@ -244,15 +255,18 @@ class PandasJob( Logger ):
             if proc.execute( self.getContext() ).isFailure():
               MSG_ERROR(self, "There is an erro in %s", proc.name())
 
+          end = datetime.now()
+          self.getContext().setHandler("time" , end-start)
+
           # add the tuned parameters to the output file
           self._tunedData.attach_ctx( self.getContext() )
 
 
 
-          if self._db:
+          if self.getDBContext():
             try:
               MSG_INFO( self, "Adding DB model into the Job" )
-              self._db.attach_ctx( self.getContext() )
+              self.getDBContext().attach_ctx( self.getContext() )
             except Exception as e:
               MSG_WARNING(self, "Its not possible to store the model into the DB base. Error: %s",e)
 

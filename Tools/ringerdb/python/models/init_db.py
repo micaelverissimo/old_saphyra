@@ -1,7 +1,7 @@
 
 #from sqlalchemy.ext.declarative import declarative_base
 #Base = declarative_base()
-from saphyra.db.models import *
+from ringerdb.models import *
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -14,7 +14,7 @@ users = ["jodafons", "mverissimo", "gabriel.milan","wsfreund","cadu.covas"]
 
 
 for user in users:
-  obj = Worker( username = user )
+  obj = Worker( username = user, maxPriority = 1000 )
   session.add(obj)
 
 

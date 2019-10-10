@@ -4,7 +4,7 @@ __all__=['Worker']
 
 from sqlalchemy import Column, Integer, String, Date, Float, ForeignKey
 from sqlalchemy.orm import relationship
-from saphyra.db.models import Base
+from ringerdb.models import Base
 
 
 #
@@ -17,12 +17,14 @@ class Worker (Base):
   # Local
   id = Column(Integer, primary_key = True)
   username = Column(String, unique = True)
+  maxPriority = Column( Integer )
 
   # Foreign
   tasks = relationship("Task", order_by="Task.id", back_populates="user")
 
+
   def __repr__ (self):
-    return "<User {}>".format(self.username)
+    return "<User {}, priority {}>".format(self.username, self.maxPriority)
 
   # Method that adds tasks into user
   def addTask (self, task):
@@ -33,7 +35,6 @@ class Worker (Base):
     return self.tasks
 
 
-  # Method that gets single task from user
   def getTask (self, taskName):
     for task in self.getTasks():
       if taskName == task.getTaskName():
@@ -41,9 +42,17 @@ class Worker (Base):
     return None
 
 
-  def name(self):
+  def getUserName(self):
     return self.username
 
   def setUserName(self, name ):
     self.username = name
 
+
+  def getMaxPriority(self):
+    return self.maxPriority
+
+  def setMaxPriority(self, value):
+    self.maxPriority = value
+
+  

@@ -1,15 +1,15 @@
 
-__all__ = ["DBContext", "aws_url"]
+__all__ = ["RingerDB", "aws_url"]
 
 from Gaugi import Logger, NotSet
 from Gaugi.messenger.macros import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from saphyra.db.models import*
+from ringerdb.models import*
 
 aws_url = 'postgres://ringer:6sJ09066sV1990;6@postgres-ringer-db.cahhufxxnnnr.us-east-2.rds.amazonaws.com/ringer'
 
-class DBContext(Logger):
+class RingerDB(Logger):
 
   def __init__( self, username, url ):
 
@@ -42,18 +42,29 @@ class DBContext(Logger):
       MSG_FATAL(self, "failed to execute the query(Worker.username==username)" )
 
 
-  def createTask( self, taskName ):
+  def createTask( self , taskName, configFilePath, inputFilePath, outputFilePath, cluster,
+                  templateExecArgs="{}", 
+                  secondaryDataPath="{}", 
+                  etBinIdx=None, 
+                  etaBinIdx=None,
+                  isGPU=False):
 
     try:
       # Create the task and append into the user area
-      task = Task(taskName=taskName 
+      task = Task(taskName=taskName, 
                   inputFilePath=inputFilePath,
                   outputFilePath=outputFilePath,
                   configFilePath=configFilePath,
                   # The task always start as registered status
                   status='registered',
+                  cluster=cluster,
+                  # Extra args
+                  templateExecArgs=templateExecArgs,
+                  secondaryDataPath=secondaryDataPath,
                   etBinIdx=etBinIdx,
-                  etaBinIdx=etaBinIdx))
+                  etaBinIdx=etaBinIdx,
+                  isGPU=isGPU
+                  )
       self.user().addTask(task)
       self.commit()
       return task
@@ -62,8 +73,39 @@ class DBContext(Logger):
       return None
 
 
-  def getTask( self, taskName ):
+  def createJob( self, task, configFilePath, configId, priority=1000, execArgs="{}", isGPU=False ):
 
+    try:
+
+      job = Job( configFilePath=configFilePath,
+                 configId=configId,
+                 execArgs=execArgs,
+                 cluster=task.getCluster(),
+                 retry=0,
+                 status="registered",
+                 priority=priority,
+                 isGPU=isGPU
+                 )
+      task.addJob(job)
+      self.commit()
+      return Job
+    except Exception as e:
+      MSG_ERROR( self, e)
+      return None
+
+
+  def getUser( self, username ):
+    try:
+      return self.session().query(Worker).filter(Worker.username==username).first()
+    except Exception as e:
+      MSG_ERROR(self, e)
+      return None
+
+  def user(self):
+    return self.__user
+
+
+  def getTask( self, taskName ):
     try: # Get the task object using the task name as filter
       return self.session().query(Task).filter(Task.taskName==taskName).first()
     except Exception as e:
@@ -83,18 +125,9 @@ class DBContext(Logger):
     self.session().close()
 
 
-  def createJob(self, task, configFilePath, configId)
-  
-    try:
-      job = Job(configFilePath=configFilePath, status="registered", configId=configId)
-      task.addJob(job)
-      self.commit()
-      return job
-    except Exception as e:
-      MSG_ERROR(self, e)
-      return None
 
-
+  def getCurrentUser(self):
+    return self.__user
 
   def setCurrentJob( self, job ):
     self.__job = job
@@ -102,9 +135,18 @@ class DBContext(Logger):
   def getCurrentJob(self):
     return self.__job
 
+  def setCurrentTask( self , task):
+    self.__task = task
+
+  def getCurrentTask(self):
+    return self.__task
 
 
   def attach_ctx( self,  context ):
+
+
+    # NOTE: this should be append into the database for future
+    taskId = self.getCurrentTask().id
 
     init = context.getHandler("init")
     sort = context.getHandler("sort")
@@ -113,31 +155,30 @@ class DBContext(Logger):
     time =context.getHandler("time")
     etBinIdx = self.getCurrentJob().getTask().etBinIdx
     etaBinIdx = self.getCurrentJob().getTask().etaBinIdx
-
     # Create the model database context
     if 'fitting' in history.keys():
       # Setting Summary and PileupFit values
-      for key, obj in history['history']['fitting'].items():
+      for key, obj in history['fitting'].items():
         # Create the model context
-        model = Model(time=time)
+        model = Model(time=time, taskId=taskId)
         model.setInit(init)
         model.setSort(sort)
-        model.setModelID(imodel)
+        model.setModelId(imodel)
         model.setEtBinIdx(etBinIdx)
         model.setEtaBinIdx(etaBinIdx)
         model.setSummary( history['summary'] )
-        model.setPileupFit( obj )
-        self.getCurrentJob().setModel(model)
+        model.setFitting( obj )
+        self.getCurrentJob().addModel(model)
     else:
       # Setting only Summary values
-      model = Model(time=time)
+      model = Model(time=time, taskId=taskId)
       model.setInit(init)
       model.setSort(sort)
-      model.setModelID(imodel)
+      model.setModelId(imodel)
       model.setEtBinIdx(etBinIdx)
       model.setEtaBinIdx(etaBinIdx)
       model.setSummary( history['summary'] )
-      self.getCurrentJob().setModel(model)
+      self.getCurrentJob().addModel(model)
  
     self.commit()
 

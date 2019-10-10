@@ -17,8 +17,8 @@ import json
 
 class Job_v1( LoggerStreamable ):
 
-  _streamerObj = LoggerRawDictStreamer(toPublicAttrs = {'_sorts', '_inits', '_models'})
-  _cnvObj = RawDictCnv(toProtectedAttrs = {'_sorts', '_inits', '_models'})
+  _streamerObj = LoggerRawDictStreamer(toPublicAttrs = {'_id' , '_sorts', '_inits', '_models'})
+  _cnvObj = RawDictCnv(toProtectedAttrs = {'_id', '_sorts', '_inits', '_models'})
 
   __version =  1
 
@@ -27,6 +27,7 @@ class Job_v1( LoggerStreamable ):
     self._sorts  = []
     self._inits  = []
     self._models = []
+    self._id     = None
 
   def set_sorts(self, v):
     if type(v) is int:
@@ -66,6 +67,11 @@ class Job_v1( LoggerStreamable ):
     return models, id_models
 
 
+  def set_id( self, id ):
+    self._id = id
+
+  def id(self):
+    return self._id
 
   def save(self, fname):
     d = self.toRawObj()

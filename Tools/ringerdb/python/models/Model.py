@@ -3,7 +3,7 @@ __all__ = ["Model"]
 
 from sqlalchemy import Column, Integer, String, Date, Float, ForeignKey, JSON, Time
 from sqlalchemy.orm import relationship
-from saphyra.db.models import Base
+from ringerdb.models import Base
 
 
 class Model( Base ):
@@ -11,8 +11,9 @@ class Model( Base ):
 
   id            = Column( Integer, primary_key = True )
   job           = relationship( "Job", order_by='Job.id', back_populates='models')
-  jobID         = Column( Integer, ForeignKey('job.id' )) 
-  modelID       = Column( Integer )
+  jobId         = Column( Integer, ForeignKey('job.id' )) 
+  taskId        = Column( Integer ) 
+  modelId       = Column( Integer )
   sort          = Column( Integer )
   init          = Column( Integer )
   etBinIdx      = Column( Integer )
@@ -20,7 +21,7 @@ class Model( Base ):
   time          = Column( Time )
 
   # Extra column to append any other information in json format
-  extra_data      = Column( JSON )
+  metadataInfo   = Column( JSON , default="{}")
 
   # train summary
   mse           = Column( Float )
@@ -112,6 +113,12 @@ class Model( Base ):
   fit_fa_total_op = Column( Float )
   fit_fa_passed_op = Column( Float )
 
+
+  def setModelId(self,id):
+    self.modelId=id
+
+  def getModelId(self):
+    return self.modelId
 
   def setSort( self, sort ):
     self.sort = sort
@@ -212,11 +219,11 @@ class Model( Base ):
 
 
 
-  def setMetadata(self, meta):
-    self.extra_data=meta
+  def setMetadataInfo(self, meta):
+    self.metadataInfo=meta
 
-  def getMetadata(self):
-    return self.extra_data
+  def getMetadataInfo(self):
+    return self.metadataInfo
 
 
 

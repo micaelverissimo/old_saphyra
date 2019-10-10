@@ -2,6 +2,11 @@
 
 __all__ = ["PileupFit"]
 
+try:
+  xrange
+except NameError:
+  xrange = range
+
 from saphyra import isTensorFlowTwo
 from saphyra import Algorithm
 from Gaugi.messenger.macros import *
@@ -44,8 +49,12 @@ class PileupFit( Algorithm ):
 
 
   def add( self, key, reference, pd, fa ):
-    MSG_INFO( self, '%s | %s(pd=%1.2f, fa=%1.2f, sp=%1.2f)', key, reference, pd*100, fa*100, sp(pd,fa)*100 )
-    self._reference[key] = {'pd':pd, 'fa':fa, 'sp':sp(pd,fa), 'reference' : reference}
+    pd = (pd[0]/float(pd[1]), pd[0],pd[1])
+    fa = (fa[0]/float(fa[1]), fa[0],fa[1])
+    print(pd)
+    print(fa)
+    MSG_INFO( self, '%s | %s(pd=%1.2f, fa=%1.2f, sp=%1.2f)', key, reference, pd[0]*100, fa[0]*100, sp(pd[0],fa[0])*100 )
+    self._reference[key] = {'pd':pd, 'fa':fa, 'sp':sp(pd[0],fa[0]), 'reference' : reference}
 
 
   def execute( self, context ):
@@ -98,7 +107,7 @@ class PileupFit( Algorithm ):
 
       d = self.calculate( history, hist, ref, y_pred_s, y_pred_b, y_pred_val_s, y_pred_val_b, pileup_s, pileup_b, pileup_val_s, pileup_val_b )
       MSG_INFO(self, "          : %s", key )
-      MSG_INFO(self, "Reference : [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", ref['pd']*100, ref['fa']*100, ref['sp']*100 )
+      MSG_INFO(self, "Reference : [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", ref['pd'][0]*100, ref['fa'][0]*100, ref['sp']*100 )
       MSG_INFO(self, "Train     : [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd'][0]*100, d['fa'][0]*100, d['sp']*100 )
       MSG_INFO(self, "Validation: [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd_val'][0]*100, d['fa_val'][0]*100, d['sp_val']*100 )
       MSG_INFO(self, "Operation : [Pd: %1.4f] , Fa: %1.4f and SP: %1.4f ", d['pd_op'][0]*100, d['fa_op'][0]*100, d['sp_op']*100 )
@@ -117,11 +126,13 @@ class PileupFit( Algorithm ):
     d['pd_ref'] = ref['pd']
     d['fa_ref'] = ref['fa']
     d['sp_ref'] = ref['sp']
+
+
     d['reference'] = ref['reference']
 
     # Fitting
     self.Fill( hist, y_pred_s, pileup_s)
-    slope, offset, discr_points, pileup_points, error_points = self.fit( hist, ref['pd'] )
+    slope, offset, discr_points, pileup_points, error_points = self.fit( hist, ref['pd'][0] )
     d['slope'] = slope
     d['offset'] = offset
     #self.plot( store, 'signal',hist_s, slope, offset, discr_points, pileup_points, error_points, xmin, xmax, ymin, ymax )
@@ -143,7 +154,7 @@ class PileupFit( Algorithm ):
     # Fit for operation (train+val)
     # Here, we just need to fill the train values since the val set was filled before
     self.Fill( hist, y_pred_val_s, pileup_val_s)
-    slope, offset, discr_points, pileup_points, error_points = self.fit( hist, ref['pd'] )
+    slope, offset, discr_points, pileup_points, error_points = self.fit( hist, ref['pd'][0] )
     d['slope_op'] = slope
     d['offset_op'] = offset
     y_pred_op_s = np.concatenate((y_pred_s, y_pred_val_s))

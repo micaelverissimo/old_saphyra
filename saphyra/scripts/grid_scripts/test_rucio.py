@@ -1,9 +1,5 @@
-
-
-__all__ = ["get_list_of_files_from_rucio"]
-
 # Get all files name for the dataset (ds) passed
-def get_list_of_files_from_rucio( ds ):
+def get_list_files( ds ):
   import os
   print(('Getting list of files in %s')%(ds))
   command = ('rucio list-files %s | cut -f2 -d  "|" >& rucio_list_files.txt') % (ds) 
@@ -32,3 +28,8 @@ def get_list_of_files_from_rucio( ds ):
   return files
 
 
+f=  get_list_files("user.jodafons.job_config.ringer.mlp1to20.10sorts.10inits")
+from pprint import pprint
+pprint(f)
+
+print(len(f))

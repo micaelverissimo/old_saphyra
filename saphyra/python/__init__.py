@@ -38,7 +38,10 @@ __all__.extend( preproc.__all__              )
 from .preproc import *
 
 
-
+try:
+  xrange
+except NameError:
+  xrange = range
 
 
 

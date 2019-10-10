@@ -8,6 +8,8 @@ from Gaugi import StatusCode
 from saphyra import Algorithm
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import precision_score
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import roc_curve
@@ -15,11 +17,8 @@ import numpy as np
 
 class Summary( Algorithm ):
 
-  def __init__( self, **kw ):
+  def __init__( self,**kw ):
     Algorithm.__init__(self, "Summary", **kw)
-    # To much disk consume in this feature. disable it!
-    self._save_roc_curves=False
-
 
 
   def execute( self, context ):
@@ -42,20 +41,29 @@ class Summary( Algorithm ):
     y_pred_operation = np.concatenate( (y_pred, y_pred_val), axis=0)
     y_operation = np.concatenate((y_train,y_val), axis=0)
 
+
+    # No threshold is needed
     d['auc'] = roc_auc_score(y_train, y_pred)
     d['auc_val'] = roc_auc_score(y_val, y_pred_val)
     d['auc_op'] = roc_auc_score(y_operation, y_pred_operation)
 
 
+    # No threshold is needed
     d['mse'] = mean_squared_error(y_train, y_pred)
     d['mse_val'] = mean_squared_error(y_val, y_pred_val)
     d['mse_op'] = mean_squared_error(y_operation, y_pred_operation)
 
+
+    
+
+
+    # Here, the threshold is variable and the best values will
+    # be setted by the max sp value found in hte roc curve
     # Training
     fa, pd, thresholds = roc_curve(y_train, y_pred)
     sp = np.sqrt(  np.sqrt(pd*(1-fa)) * (0.5*(pd+(1-fa)))  )
     knee = np.argmax(sp)
-
+    threshold = thresholds[knee]
 
     MSG_INFO( self, "Train samples     : Prob. det (%1.4f), False Alarm (%1.4f), SP (%1.4f), AUC (%1.4f) and MSE (%1.4f)",
         pd[knee], fa[knee], sp[knee], d['auc'], d['mse'])
@@ -63,15 +71,21 @@ class Summary( Algorithm ):
 
     d['max_sp_pd'] = pd[knee]
     d['max_sp_fa'] = fa[knee]
-    d['max_sp'] = sp[knee]
-    if self._save_roc_curves:
-      d['roc_pd'] = pd
-      d['roc_fa'] = fa
+    d['max_sp']    = sp[knee]
+    d['acc']              = accuracy_score(y_train,y_pred>threshold)
+    d['precision_score']  = precision_score(y_train, y_pred>threshold)
+    d['recall_score']     = recall_score(y_train, y_pred>threshold)
+    d['f1_score']         = f1_score(y_train, y_pred>threshold)
+
+
+
+
 
     # Validation
     fa, pd, thresholds = roc_curve(y_val, y_pred_val)
     sp = np.sqrt(  np.sqrt(pd*(1-fa)) * (0.5*(pd+(1-fa)))  )
     knee = np.argmax(sp)
+    threshold = thresholds[knee]
 
     MSG_INFO( self, "Validation Samples: Prob. det (%1.4f), False Alarm (%1.4f), SP (%1.4f), AUC (%1.4f) and MSE (%1.4f)",
         pd[knee], fa[knee], sp[knee], d['auc_val'], d['mse_val'])
@@ -80,16 +94,17 @@ class Summary( Algorithm ):
     d['max_sp_pd_val'] = pd[knee]
     d['max_sp_fa_val'] = fa[knee]
     d['max_sp_val'] = sp[knee]
-    if self._save_roc_curves:
-      d['roc_pd_val'] = pd
-      d['roc_fa_val'] = fa
-
+    d['acc_val']              = accuracy_score(y_val,y_pred_val>threshold)
+    d['precision_score_val']  = precision_score(y_val, y_pred_val>threshold)
+    d['recall_score_val']     = recall_score(y_val, y_pred_val>threshold)
+    d['f1_score_val']         = f1_score(y_val, y_pred_val>threshold)
 
 
     # Operation 
     fa, pd, thresholds = roc_curve(y_operation, y_pred_operation)
     sp = np.sqrt(  np.sqrt(pd*(1-fa)) * (0.5*(pd+(1-fa)))  )
     knee = np.argmax(sp)
+    threshold = thresholds[knee]
 
     MSG_INFO( self, "Operation Samples : Prob. det (%1.4f), False Alarm (%1.4f), SP (%1.4f), AUC (%1.4f) and MSE (%1.4f)",
         pd[knee], fa[knee], sp[knee], d['auc_val'], d['mse_val'])
@@ -98,9 +113,12 @@ class Summary( Algorithm ):
     d['max_sp_pd_op'] = pd[knee]
     d['max_sp_fa_op'] = fa[knee]
     d['max_sp_op'] = sp[knee]
-    if self._save_roc_curves:
-      d['roc_pd_op'] = pd
-      d['roc_fa_op'] = fa
+    d['acc_op']              = accuracy_score(y_operation,y_pred_operation>threshold)
+    d['precision_score_op']  = precision_score(y_operation, y_pred_operation>threshold)
+    d['recall_score_op']     = recall_score(y_operation, y_pred_operation>threshold)
+    d['f1_score_op']         = f1_score(y_operation, y_pred_operation>threshold)
+
+
 
     history['summary'] = d
     

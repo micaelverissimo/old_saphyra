@@ -75,11 +75,12 @@ else()
   
   
   add_subdirectory(Gaugi)
-  add_subdirectory(Core/TuningTools)
-  add_subdirectory(Core/saphyra)
+  add_subdirectory(saphyra)
+  add_subdirectory(External/TuningTools)
   add_subdirectory(External/monet)
   add_subdirectory(External/pytex)
   add_subdirectory(Tools/panda)
+  add_subdirectory(Tools/ringerdb)
   
   add_library(saphyra SHARED
     $<TARGET_OBJECTS:Gaugi> 
