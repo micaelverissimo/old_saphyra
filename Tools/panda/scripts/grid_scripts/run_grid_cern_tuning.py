@@ -126,7 +126,8 @@ if args.db_url:
   from ringerdb import Task, Job
   isGPU=True if args.grid__cmtConfig =='nvidia-gpu' else False
   # task, config, inut, output, cluster
-  task = db.createTask( args.grid__outDS, args.grid__inDS, args.dataDS, args.grid__outDS+"_td", "CERN", 
+  task = db.createTask( args.grid__outDS, args.grid__inDS, args.dataDS, args.grid__outDS+"_td", 
+                        args.grid__containerImage, "CERN", 
                         # Extra
                         secondaryDataPath="{'refDS':'%s'}" % (args.refDS),
                         templateExecArgs=execCommand,

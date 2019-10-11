@@ -42,7 +42,7 @@ class RingerDB(Logger):
       MSG_FATAL(self, "failed to execute the query(Worker.username==username)" )
 
 
-  def createTask( self , taskName, configFilePath, inputFilePath, outputFilePath, cluster,
+  def createTask( self , taskName, configFilePath, inputFilePath, outputFilePath, containerImage, cluster,
                   templateExecArgs="{}", 
                   secondaryDataPath="{}", 
                   etBinIdx=None, 
@@ -55,6 +55,7 @@ class RingerDB(Logger):
                   inputFilePath=inputFilePath,
                   outputFilePath=outputFilePath,
                   configFilePath=configFilePath,
+                  containerImage=containerImage,
                   # The task always start as registered status
                   status='registered',
                   cluster=cluster,
@@ -78,6 +79,7 @@ class RingerDB(Logger):
     try:
 
       job = Job( configFilePath=configFilePath,
+                 containerImage=task.containerImage,
                  configId=configId,
                  execArgs=execArgs,
                  cluster=task.getCluster(),
@@ -110,6 +112,14 @@ class RingerDB(Logger):
       return self.session().query(Task).filter(Task.taskName==taskName).first()
     except Exception as e:
       MSG_ERROR(self, e)
+      return None
+
+
+  def getAllUsers( self ):
+    try:
+      return self.session().query(Worker).all()
+    except Exception as e:
+      MSG_ERROR( self, e)
       return None
 
 

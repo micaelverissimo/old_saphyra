@@ -15,6 +15,8 @@ class Job (Base):
     # Local
     id = Column(Integer, primary_key = True)
 
+    containerImage = Column(String)
+    
     # Job configuration for this job
     configFilePath = Column(String)
     # For CERN grid cluster

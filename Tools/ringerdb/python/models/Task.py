@@ -19,6 +19,7 @@ class Task (Base):
   inputFilePath = Column(String)
   outputFilePath = Column(String)
   configFilePath = Column(String)
+  containerImage = Column(String)
 
   # For LPS grid
   templateExecArgs   = Column( String, default="" ) 
@@ -99,6 +100,7 @@ class Task (Base):
     return self.templateExecArgs
 
 
-
+  def getContainerImage(self):
+    return self.containerImage
 
 
