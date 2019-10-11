@@ -9,9 +9,12 @@ from lpsgrid import *
 
 
 # Create all services
-schedule      = Schedule( "Schedule", LCGRules(), 5*MINUTE )
+schedule      = Schedule( "Schedule", LCGRule())
 db            = RingerDB('jodafons', url)
-orchestrator  = Orchestrator( "Kubernetes", "../data/lps_cluster.yaml" )
+orchestrator  = Orchestrator(  "../data/lps_cluster.yaml" )
+
+
+pilot = Pilot( db, schedule, orchestrator )
 
 
 

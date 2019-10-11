@@ -3,9 +3,9 @@ from . import Pilot
 __all__.extend(Pilot.__all__)
 from .Pilot import *
 
-from . import Slots
-__all__.extend(Slots.__all__)
-from .Slots import *
+from . import slots
+__all__.extend(slots.__all__)
+from .slots import *
 
 from . import Consumer
 __all__.extend(Consumer.__all__)

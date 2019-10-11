@@ -5,9 +5,9 @@ __all__.extend(Rule.__all__)
 from .Rule import *
 
 
-from . import LCGRules
-__all__.extend(LCGRules.__all__)
-from .LCGRules import *
+from . import LCGRule
+__all__.extend(LCGRule.__all__)
+from .LCGRule import *
 
 
 

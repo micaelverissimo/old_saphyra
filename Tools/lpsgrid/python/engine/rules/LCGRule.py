@@ -1,15 +1,15 @@
 
 
-__all__ = [""]
+__all__ = ["LCGRule"]
 
-from lps_cluster import Rule
-from lps_cluster.core.messenger.macros import *
+from lpsgrid.engine.rules import Rule
+from Gaugi.messenger.macros import *
 
 
 class LCGRule(Rule):
 
-  def __init__(self, db):
-    Rule.__init__(self, db)
+  def __init__(self):
+    Rule.__init__(self)
 
 
 
@@ -19,11 +19,12 @@ class LCGRule(Rule):
 
     # LCG rule taken from: https://twiki.cern.ch/twiki/bin/view/PanDA/PandaAthena#Job_priority
     # this must be ordered by creation (date). First must be the older one
-    jobs = self.db().getAllJobs( user )
+    jobs = user.getAllJobs()
+  
 
     # The total number of the user's subJobs existing in the whole queue. (existing = job status is one of 
     # defined,assigned,activated,sent,starting,running)
-    T = self.db().getTotalUntilRunning()
+    T = getTotalUntilRunning()
 
     # Update all priorities
     for n, job in enumerate( jobs ):

@@ -10,7 +10,7 @@ from collections import deque
 
 class Slots( Logger ):
 
-  def __init__(self, maxlenght, nodes = None) :
+  def __init__(self, maxlenght, nodes) :
     Logger.__init__(self)
     if nodes:
       if not type(nodes) is list:

@@ -7,21 +7,20 @@ from Gaugi.messenger.macros import *
 import time
 from sqlalchemy import and_, or_
 
+from lpsgrid.engine.constants import *
+
 MAX_FAILED_JOBS= 10
+MAX_UPDATE_SECONDS = 5*60
+
 
 class Schedule(Logger):
 
-  def __init__(self):
+  def __init__(self, name, rule):
 
-    Logger.__init__(self, db, rules)
-    self._rules = rules
-    self._db
-    self._then = NotSet
-
-
-  def db(self):
-    return self._db
-
+    Logger.__init__(self, name=name)
+    self.__rule = rule
+    self.__then = NotSet
+    self.__maxUpdateTime = MAX_UPDATE_TIME
 
   def initialize(self):
     return StatusCode.SUCCESS
@@ -33,12 +32,19 @@ class Schedule(Logger):
       return False
     else:
       now = time.time()
-      if (now-self._then) > MAX_UPDATE_SECONDS:
+      if (now-self._then) > self.__maxUpdateTime:
         # reset the time
         self._then = NotSet
         return True
     return False
 
+
+  def setDatabase(self, db):
+    self._db = db
+
+
+  def db(self):
+    return self._db
 
 
   def calculate(self):
@@ -135,7 +141,8 @@ class Schedule(Logger):
 
 
 
-
+  def setUpdateTime( self, t ):
+    self.__maxUpdateTime = t
 
 
 

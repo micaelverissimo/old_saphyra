@@ -6,38 +6,35 @@ from Gaugi import Logger, NotSet
 from Gaugi.messenger.macros import *
 
 
+
+
+
 class Pilot(Logger):
 
-  def __init__(self):
+  def __init__(self, db, schedule, orchestrator):
     Logger.__init__(self)
+    self.__cpu_slot = NotSet
+    self.__gpu_slot = NotSet
+    self.__db = db
+    self.__schedule = schedule
+    self.__orchestrator = orchestrator
 
 
-  def setSchedule( self, sc ):
-    self.schedule = sc
 
 
-  def setDatabase( self, db ):
-    self._db = db
+  def setSlots( self, slot ):
+    if type(slot) is CPUSlots:
+      self._cpu_slot = slot
+    elif type(slot) is GPUSlot:
+      self._gpu_slot = slot
+    else:
+      MSG_ERROR(self, "slot must be CPUSlots or GPUSlots.")
 
-
-  def setCPUSlot( self, slot ):
-    self._cpu_slot = slot
-
-
-  def setGPUSlot( self, slot ):
-    self._gpu_slot = slot
 
 
   def treat(self):
-
-    if self.db() is NotSet:
-      MSG_FATAL( self, "Database is not set." )
-    if self.schedule() is NotSet:
-      MSG_FATAL( self, "Schedule is not set." )
-    if not (self.cpu_slot() and self.gpu_slot()):
+    if not (self.cpuSlots() and self.gpuSlots()):
       MSG_FATAL( self, "cpu and gpu slots not set. You must set one or bouth" )
-    if self.orchestrator() is NotSet:
-      MSG_FATAL( self, "Orchestrator is not set" )
 
 
   def db(self):
@@ -45,19 +42,19 @@ class Pilot(Logger):
 
 
   def sechedule(self):
-    return self._schedule
+    return self.__schedule
 
 
   def orchestrator(self):
-    return self._orchestrator
+    return self.__orchestrator
 
 
-  def getGPUSlots(self):
-    return self._gpu_slot
+  def cpuSlots(self):
+    return self.__cpu_slot
 
 
-  def getCPUSlots(self):
-    return self._cpu_slot
+  def gpuSlots(self):
+    return self.__gpu_slot
 
 
   def initialize(self):
@@ -74,14 +71,14 @@ class Pilot(Logger):
       MSG_FATAL( self, "Not possible to initialize the Schedule tool. abort" )
 
     # link orchestrator/db to slots
-    self.cpu_slots().setDatabase( self.db() )
-    self.cpu_slots().setOrchestrator( self.orchestrator() )
+    self.cpuSlots().setDatabase( self.db() )
+    self.cpuSlots().setOrchestrator( self.orchestrator() )
     if self.cpu_slots().initialize().isFailure():
       MSG_FATAL( self, "Not possible to initialize the CPU slot tool. abort" )
 
     # link orchestrator/db to slots
-    self.gpu_slots().setDatabase( self.db() )
-    self.gpu_slots().setOrchestrator( self.orchestrator() )
+    self.gpuSlots().setDatabase( self.db() )
+    self.gpu_Slots().setOrchestrator( self.orchestrator() )
     if self.gpu_slots().initialize().isFailure():
       MSG_FATAL( self, "Not possible to initialize the GPU slot tool. abort" )
 
@@ -126,8 +123,8 @@ class Pilot(Logger):
 
     self.db().finalize()
     self.schedule().finalize()
-    self.getCPUSlots().finalize()
-    self.getGPUSlots().finalize()
+    self.cpuSlots().finalize()
+    self.gpuSlots().finalize()
     self.orchestator().finalize()
     return StatusCode.SUCCESS
 

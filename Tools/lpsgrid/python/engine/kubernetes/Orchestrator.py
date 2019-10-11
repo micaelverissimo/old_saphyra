@@ -1,22 +1,41 @@
 
-__all__ = ["Kubernetes"]
+__all__ = ["Orchestrator"]
 
-from Gaugi import Logger
+from Gaugi import Logger, NotSet
 from kubernetes import *
 from pprint import pprint
 from lpsgrid.engine.enumerations import StatusJob, status_job_toString
 
 
-class Kubernetes(Logger):
+class Orchestrator(Logger):
 
-  def __init__(self):
+  def __init__(self, path):
 
     import os
     # this is the current config LPS cluster yaml file
-    config.load_kube_config(config_file=os.environ['SAPHYRA_PATH']+'/Tools/lpsgrid/data/lps_cluster.yaml')
+    #config.load_kube_config(config_file=os.environ['SAPHYRA_PATH']+'/Tools/lpsgrid/data/lps_cluster.yaml')
     # Get the job batch api
-    self._api = client.BatchV1Api()
-    self._template_job_path = os.environ['SAPHYRA_PATH']+'/Tools/lpsgrid/data/job_template.yaml'
+    #self._api = client.BatchV1Api()
+    #self._template_job_path = os.environ['SAPHYRA_PATH']+'/Tools/lpsgrid/data/job_template.yaml'
+    self.__db = NotSet
+
+  def initialize(self):
+    return StatusCode.SUCCESS
+
+
+  def execute(self):
+    return StatusCode.SUCCESS
+
+
+  def finalize(self):
+    return StatusCode.SUCCESS
+
+
+  def setDatabase(self,db):
+    self.__db = db
+
+  def db(self):
+    return self.__db
 
 
   def api(self):
@@ -73,11 +92,3 @@ class Kubernetes(Logger):
 
 
 
-kube = Kubernetes()
-
-#kube.createFromYaml( 'pi.yaml' )
-#kube.createFromYaml( 'ngiax.yaml' )
-#kube.status('pi94')
-kube.list()
-kube.delete_all()
-kube.list()
