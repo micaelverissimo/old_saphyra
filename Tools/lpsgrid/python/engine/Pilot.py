@@ -2,12 +2,12 @@
 __all__ = ["Pilot"]
 
 
-from Gaugi import Logger, NotSet
+from Gaugi import Logger, NotSet, StatusCode
 from Gaugi.messenger.macros import *
 
 
-
-
+from lpsgrid.engine.slots import *
+from lpsgrid.engine.constants import *
 
 class Pilot(Logger):
 
@@ -24,9 +24,9 @@ class Pilot(Logger):
 
   def setSlots( self, slot ):
     if type(slot) is CPUSlots:
-      self._cpu_slot = slot
-    elif type(slot) is GPUSlot:
-      self._gpu_slot = slot
+      self.__cpu_slot = slot
+    elif type(slot) is GPUSlots:
+      self.__gpu_slot = slot
     else:
       MSG_ERROR(self, "slot must be CPUSlots or GPUSlots.")
 
@@ -38,10 +38,10 @@ class Pilot(Logger):
 
 
   def db(self):
-    return self._db
+    return self.__db
 
 
-  def sechedule(self):
+  def schedule(self):
     return self.__schedule
 
 
@@ -65,7 +65,7 @@ class Pilot(Logger):
     # link db to schedule
     self.schedule().setDatabase( self.db() )
     # Update the priority for each N minutes
-    self.schedule().setUpdateTime( 5 * MINUTE )
+    self.schedule().setUpdateTime( 5 )
 
     if self.schedule().initialize().isFailure():
       MSG_FATAL( self, "Not possible to initialize the Schedule tool. abort" )
@@ -73,13 +73,13 @@ class Pilot(Logger):
     # link orchestrator/db to slots
     self.cpuSlots().setDatabase( self.db() )
     self.cpuSlots().setOrchestrator( self.orchestrator() )
-    if self.cpu_slots().initialize().isFailure():
+    if self.cpuSlots().initialize().isFailure():
       MSG_FATAL( self, "Not possible to initialize the CPU slot tool. abort" )
 
     # link orchestrator/db to slots
     self.gpuSlots().setDatabase( self.db() )
-    self.gpu_Slots().setOrchestrator( self.orchestrator() )
-    if self.gpu_slots().initialize().isFailure():
+    self.gpuSlots().setOrchestrator( self.orchestrator() )
+    if self.gpuSlots().initialize().isFailure():
       MSG_FATAL( self, "Not possible to initialize the GPU slot tool. abort" )
 
 
@@ -90,30 +90,26 @@ class Pilot(Logger):
   def execute(self):
 
     # Infinite loop
-    #while True:
+    while True:
 
-    #  try:
-    #    # Calculate all priorities for all REGISTERED jobs for each 5 minutes
-    #    self.schedule().execute()
+      # Calculate all priorities for all REGISTERED jobs for each 5 minutes
+      self.schedule().execute()
 
-    #    # Prepare jobs for CPU slots only
-    #    jobs = self.schedule().getQueue()
-    #    while self.cpu_slots().isAvailable():
-    #      self.cpu_slots().push_back( jobs.pop() )
+      ## Prepare jobs for CPU slots only
+      #jobs = self.schedule().getQueue()
+      #while self.cpu_slots().isAvailable():
+      #  self.cpu_slots().push_back( jobs.pop() )
 
-    #    # Prepare jobs for GPU slots only
-    #    jobs = self.schedule().getQueue(gpu=True)
-    #    while self.gpu_slots().isAvailable():
-    #      self.gpu_slots().push_back( jobs.pop() )
+      ## Prepare jobs for GPU slots only
+      #jobs = self.schedule().getQueue(gpu=True)
+      #while self.gpu_slots().isAvailable():
+      #  self.gpu_slots().push_back( jobs.pop() )
 
-    #    # Run the pilot for cpu queue
-    #    self.cpu_slots().execute()
-    #    # Run the pilot for gpu queue
-    #    self.gpu_slots().execute()
+      ## Run the pilot for cpu queue
+      #self.cpu_slots().execute()
+      ## Run the pilot for gpu queue
+      #self.gpu_slots().execute()
 
-    #  except:
-    #    MSG_ERROR(self, "There is an error in the pilot.")
-    #    return StatusCode.FAILURE
 
 
     return StatusCode.SUCCESS

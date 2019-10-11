@@ -1,9 +1,11 @@
 
-#__all__ = ["CPUSlots"]
-__all__ =  []
+__all__ = ["CPUSlots"]
 
 
-#class CPUSlots( Slots ):
-#  def __init__
+from lpsgrid.engine.slots import Slots
+
+class CPUSlots( Slots ):
+  def __init__( self,name,  maxLength ):
+    Slots.__init__(self,name,maxLength)
 
 

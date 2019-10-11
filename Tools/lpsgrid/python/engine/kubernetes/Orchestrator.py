@@ -4,7 +4,7 @@ __all__ = ["Orchestrator"]
 from Gaugi import Logger, NotSet
 from kubernetes import *
 from pprint import pprint
-from lpsgrid.engine.enumerations import StatusJob, status_job_toString
+from lpsgrid.engine.enumerations import Status
 
 
 class Orchestrator(Logger):
@@ -13,10 +13,10 @@ class Orchestrator(Logger):
 
     import os
     # this is the current config LPS cluster yaml file
-    #config.load_kube_config(config_file=os.environ['SAPHYRA_PATH']+'/Tools/lpsgrid/data/lps_cluster.yaml')
+    config.load_kube_config(config_file=os.environ['SAPHYRA_PATH']+'/Tools/lpsgrid/data/lps_cluster.yaml')
     # Get the job batch api
-    #self._api = client.BatchV1Api()
-    #self._template_job_path = os.environ['SAPHYRA_PATH']+'/Tools/lpsgrid/data/job_template.yaml'
+    self._api = client.BatchV1Api()
+    self._template_job_path = os.environ['SAPHYRA_PATH']+'/Tools/lpsgrid/data/job_template.yaml'
     self.__db = NotSet
 
   def initialize(self):
@@ -51,10 +51,10 @@ class Orchestrator(Logger):
   def status( self, name ):
     resp = self.api().read_namespaced_job_status( name=name, namespace='default' )
     if not resp.status.active is None:
-      return StatusJob.RUNNING
+      return Status.RUNNING
     elif not resp.status.failed is None:
-      return StatusJob.FAILED
-    return StatusJob.DONE
+      return Status.FAILED
+    return Status.DONE
 
 
 

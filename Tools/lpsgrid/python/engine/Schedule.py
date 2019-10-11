@@ -4,21 +4,23 @@ __all__ = ["Schedule"]
 
 from Gaugi import Logger, NotSet
 from Gaugi.messenger.macros import *
+from Gaugi import StatusCode
 import time
 from sqlalchemy import and_, or_
-
+from lpsgrid.engine.enumerations import *
 from lpsgrid.engine.constants import *
+from ringerdb.models import *
 
-MAX_FAILED_JOBS= 10
-MAX_UPDATE_SECONDS = 5*60
+MAX_TEST_JOBS=2
+MAX_FAILED_JOBS=1
 
 
 class Schedule(Logger):
 
-  def __init__(self, name, rule):
+  def __init__(self, name, rules):
 
     Logger.__init__(self, name=name)
-    self.__rule = rule
+    self.__rules = rules
     self.__then = NotSet
     self.__maxUpdateTime = MAX_UPDATE_TIME
 
@@ -27,14 +29,14 @@ class Schedule(Logger):
 
 
   def tictac( self ):
-    if self._then is NotSet:
-      self._then = time.time()
+    if self.__then is NotSet:
+      self.__then = time.time()
       return False
     else:
       now = time.time()
-      if (now-self._then) > self.__maxUpdateTime:
+      if (now-self.__then) > self.__maxUpdateTime:
         # reset the time
-        self._then = NotSet
+        self.__then = NotSet
         return True
     return False
 
@@ -52,41 +54,48 @@ class Schedule(Logger):
 
     for user in self.db().getAllUsers():
 
+      MSG_INFO(self,"Caluclating for %s", user )
       # Get the initial priority of the user
       maxPriority = user.getMaxPriority()
-
+      MSG_INFO( self, "%s with max priority: %d", user.getUserName, user.getMaxPriority())
       # Get the number of tasks
-      tasks = user.getAllTask()
-
+      tasks = user.getAllTasks()
 
       for task in tasks:
 
+        MSG_INFO(self,"Task status is %s",task.getStatus())
         # Get the task status (REGISTED, TESTING, RUNNING, BROKEN, DONE)
-        if task.getStatus() is StatusTask.REGISTED:
+        if task.getStatus() == Status.REGISTERED:
+          MSG_INFO(self, "Task with status: registered")
           # We need to check if this is a good task to proceed.
           # To test, we will launch 10 first jobs and if 80%
           # of jobs is DONE, we will change the task status to
           # RUNNING. Until than, all not choosed jobs will have
           # priority equal zero and the 10 ones will be equal
           # USER max priority (1000,2000,..., N)
-          self.setJobsToBeTested( username, task )
+          self.setJobsToBeTested( user, task )
           # change the task status to: REGISTED to TESTING.
-          task.setStatus( StatusTask.TESTING )
+          task.setStatus( Status.TESTING )
+          self.db().commit()
         # Check if this is a test
-        elif task.getStatus() is StatusTask.TESTING:
+        elif task.getStatus() == Status.TESTING:
           # Check if we can change the task status to RUNNING or BROKEN.
           # If not, this will still TESTING until we decide each signal
           # will be assigned to this task
+          MSG_INFO(self, "Task with status: testing")
           self.checkTask( task )
 
-        elif task.getStatus() is StatusTask.RUNNING:
+        elif task.getStatus() == Status.RUNNING:
           # If this task was assigned as RUNNING, we must recalculate
           # the priority of all jobs inside of this task.
-          self.calculatePriorities( task )
+          MSG_INFO(self, "Task with status: running")
 
-        else: # BROKEN Status
+
+        else: # DONE, BROKEN or FAILED Status
+          MSG_INFO(self, "continue...")
           continue
 
+      self.calculatePriorities( user )
 
     return StatusCode.SUCCESS
 
@@ -97,6 +106,7 @@ class Schedule(Logger):
   def execute(self):
     # Calculate the priority for every N minute
     if self.tictac():
+      MSG_INFO(self, "Calculate...")
       self.calculate()
 
 
@@ -113,36 +123,68 @@ class Schedule(Logger):
     jobs = task.getAllJobs()
     jobCount = 0
     while (jobCount < MAX_TEST_JOBS):
-      if len(jobs)>0:
-        testJob = jobs.pop()
-      else: # Stopping the loop since we have less than MAX_TEST_JOBS in the list
+      try:
+        MSG_INFO(self, "add job to the test stack...")
+        jobs[jobCount].setPriority(priority)
+        jobs[jobCount].setStatus(Status.TESTING)
+        jobCount+=1
+        self.db().commit()
+      except Exception as e:
+        MSG_ERROR(self, e)
         break
-      testJob.setPriority( priority )
-      jobCount+=1
-    self.db().commit()
 
 
   def checkTask( self, task ):
 
+    MSG_INFO(self, "Check Tasks assigned...")
     # Maybe we need to checge these rules
-    if len(self.db().session().query(Job).filter( and_( or_( Job.status==StatusJob.FAILED,  Job.status==StatusJob.BROKEN), Job.taskId==task.id )).all()) > MAX_FAILED_JOBS:
-      task.setStatus( StatusTask.BROKEN )
-    elif len(self.db().session().query(Job).filter( and_( Job.status==StatusJob.DONE, Job.taskId==task.id )).all()) > MAX_FAILED_JOBS:
-      self.db().setStatus( task, StatusTask.RUNNING )
+    if len(self.db().session().query(Job).filter( and_( or_( Job.status==Status.FAILED,  Job.status==Status.BROKEN), Job.taskId==task.id )).all()) > MAX_FAILED_JOBS:
+      task.setStatus( Status.BROKEN )
+      MSG_INFO(self, "broken...")
+      # kill all jobs into the task assigned as broken status
+      self.closeAllJobs( task )
+    elif len(self.db().session().query(Job).filter( and_( Job.status==Status.DONE, Job.taskId==task.id )).all()) > MAX_FAILED_JOBS:
+      MSG_INFO(self,"assigned all jobs!")
+      task.setStatus( Status.RUNNING )
+      self.db().commit()
+      self.assignedAllJobs(task)
     else:
-      self.db().setStatus( task, StatusTask.TESTING )
+      MSG_INFO( self, "still stesting....")
+      #task.setStatus( Status.TESTING )
 
 
 
-  def calculatePriorities( self, user, task ):
+  def calculatePriorities( self, user):
     # The rules will be an external class with Rule as inheritance.
     # These rules can be changed depends on the demand.
-    return self.rules( self.db(), user, task, status = [StatusJob.REGISTED] )
+    return self.__rules( self.db(), user)
 
 
 
   def setUpdateTime( self, t ):
     self.__maxUpdateTime = t
+
+
+
+  def closeAllJobs(self, task):
+    for job in task.getAllJobs():
+      job.setStatus( Status.BROKEN )
+      job.setPriority( -1 )
+
+
+  def assignedAllJobs( self, task ):
+    for job in task.getAllJobs():
+      if job.getStatus() == Status.REGISTERED:
+        job.setStatus( Status.ASSIGNED )
+        self.db().commit()
+
+
+
+
+
+
+
+
 
 
 

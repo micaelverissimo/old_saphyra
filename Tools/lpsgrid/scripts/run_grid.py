@@ -17,9 +17,17 @@ orchestrator  = Orchestrator(  "../data/lps_cluster.yaml" )
 pilot = Pilot( db, schedule, orchestrator )
 
 
+cpu = CPUSlots( "CPU" , 100 ) 
+gpu = GPUSlots( "CPU" , [1,2] ) 
+
+
+pilot.setSlots(cpu)
+pilot.setSlots(gpu)
+
+pilot.initialize()
+pilot.execute()
 
 # Create the pilot
-#pilot  = Pilot("LPS_Cluster")
 #
 ## Add slots
 #pilot.setCPUSlot( Slots( "CPU" , maxlenght=100 ) )
@@ -33,7 +41,7 @@ pilot = Pilot( db, schedule, orchestrator )
 #
 ## Start
 #pilot.initialize()
-#pilot.execute()
+
 #pilot.finalize()
 
 
