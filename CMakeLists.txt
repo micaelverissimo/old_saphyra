@@ -81,6 +81,7 @@ else()
   add_subdirectory(External/pytex)
   add_subdirectory(Tools/panda)
   add_subdirectory(Tools/ringerdb)
+  add_subdirectory(Tools/lpsgrid)
   
   add_library(saphyra SHARED
     $<TARGET_OBJECTS:Gaugi> 

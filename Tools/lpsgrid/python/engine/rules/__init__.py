@@ -1,8 +1,13 @@
 __all__ = []
 
-from . import core
-__all__.extend(core.__all__)
-from .core import *
+from . import Rule
+__all__.extend(Rule.__all__)
+from .Rule import *
+
+
+from . import LCGRules
+__all__.extend(LCGRules.__all__)
+from .LCGRules import *
 
 
 

@@ -1,18 +1,15 @@
 
+__all__ = ["Pilot"]
 
+
+from Gaugi import Logger, NotSet
+from Gaugi.messenger.macros import *
 
 
 class Pilot(Logger):
 
   def __init__(self):
-
     Logger.__init__(self)
-
-    # Create the schedule (Tool)
-    self._schedule = Schedule( "Schedule" )
-    # Create the CPU/GPU queue for docker process
-    # self._cpu_queue = ClusterSlots( "CPU" , slots=20, nodes=[1,2,3] )
-    # self._gpu_queue = ClusterSlots( "GPU" , slots=1 , nodes=[2]     )
 
 
   def setSchedule( self, sc ):
@@ -26,6 +23,7 @@ class Pilot(Logger):
   def setCPUSlot( self, slot ):
     self._cpu_slot = slot
 
+
   def setGPUSlot( self, slot ):
     self._gpu_slot = slot
 
@@ -36,11 +34,30 @@ class Pilot(Logger):
       MSG_FATAL( self, "Database is not set." )
     if self.schedule() is NotSet:
       MSG_FATAL( self, "Schedule is not set." )
-    if self.cpu_slot() and self.gpu_slot():
+    if not (self.cpu_slot() and self.gpu_slot()):
       MSG_FATAL( self, "cpu and gpu slots not set. You must set one or bouth" )
     if self.orchestrator() is NotSet:
       MSG_FATAL( self, "Orchestrator is not set" )
 
+
+  def db(self):
+    return self._db
+
+
+  def sechedule(self):
+    return self._schedule
+
+
+  def orchestrator(self):
+    return self._orchestrator
+
+
+  def getGPUSlots(self):
+    return self._gpu_slot
+
+
+  def getCPUSlots(self):
+    return self._cpu_slot
 
 
   def initialize(self):
@@ -76,30 +93,30 @@ class Pilot(Logger):
   def execute(self):
 
     # Infinite loop
-    while True:
+    #while True:
 
-      try:
-        # Calculate all priorities for all REGISTERED jobs for each 5 minutes
-        self.schedule().execute()
+    #  try:
+    #    # Calculate all priorities for all REGISTERED jobs for each 5 minutes
+    #    self.schedule().execute()
 
-        # Prepare jobs for CPU slots only
-        jobs = self.schedule().getQueue()
-        while self.cpu_slots().isAvailable():
-          self.cpu_slots().push_back( jobs.pop() )
+    #    # Prepare jobs for CPU slots only
+    #    jobs = self.schedule().getQueue()
+    #    while self.cpu_slots().isAvailable():
+    #      self.cpu_slots().push_back( jobs.pop() )
 
-        # Prepare jobs for GPU slots only
-        jobs = self.schedule().getQueue(gpu=True)
-        while self.gpu_slots().isAvailable():
-          self.gpu_slots().push_back( jobs.pop() )
+    #    # Prepare jobs for GPU slots only
+    #    jobs = self.schedule().getQueue(gpu=True)
+    #    while self.gpu_slots().isAvailable():
+    #      self.gpu_slots().push_back( jobs.pop() )
 
-        # Run the pilot for cpu queue
-        self.cpu_slots().execute()
-        # Run the pilot for gpu queue
-        self.gpu_slots().execute()
+    #    # Run the pilot for cpu queue
+    #    self.cpu_slots().execute()
+    #    # Run the pilot for gpu queue
+    #    self.gpu_slots().execute()
 
-      except:
-        MSG_ERROR(self, "There is an error in the pilot.")
-        return StatusCode.FAILURE
+    #  except:
+    #    MSG_ERROR(self, "There is an error in the pilot.")
+    #    return StatusCode.FAILURE
 
 
     return StatusCode.SUCCESS
@@ -109,8 +126,8 @@ class Pilot(Logger):
 
     self.db().finalize()
     self.schedule().finalize()
-    self.cpu_slots().finalize()
-    self.gpu_slots().finalize()
+    self.getCPUSlots().finalize()
+    self.getGPUSlots().finalize()
     self.orchestator().finalize()
     return StatusCode.SUCCESS
 
@@ -118,30 +135,5 @@ class Pilot(Logger):
 
 
 
-
-
-
-# Create all services
-schedule      = Schedule( "Schedule", LCGRules(), 5*MINUTE )
-db            = DBUtil( "Database", "/path/to/my/database.db" )
-orchestrator  = Orchestrator( "Kubernetes", "/path/to/my/cluster/config.yaml" )
-
-# Create the pilot
-pilot  = Pilot("LPS_Cluster")
-
-# Add slots
-pilot.setCPUSlot( Slots( "CPU" , maxlenght=100 ) )
-pilot.setGPUSlot(  Slots( "GPU" , maxlenght=1  , nodes=["node06"]) )
-
-# Set services
-pilot.setDatabase( db )
-pilot.setSchedule( schedule )
-pilot.setOrchestrator( orchestrator )
-
-
-# Start
-pilot.initialize()
-pilot.execute()
-pilot.finalize()
 
 

@@ -2,9 +2,9 @@
 __all__ = ["JobConsumer"]
 
 
-from lps_cluster.core.messenger import Logger
-from lps_cluster.core.messenger.macros import *
-from lps_cluster import retrieve_kw
+from Gaugi.messenger import Logger
+from Gaugi.messenger.macros import *
+from Gaugi import retrieve_kw
 
 
 class JobConsumer( Logger ):
@@ -48,20 +48,20 @@ class JobConsumer( Logger ):
 
   def update(self):
 
-    sc = self.db().getStatus(self._job)
-    # The user send kill to database, we must tell to rancher
-    # to stop this
-    if sc is StatusJob.KILLED:
-      self.kill()
+    #sc = self.db().getStatus(self._job)
+    ## The user send kill to database, we must tell to rancher
+    ## to stop this
+    #if sc is StatusJob.KILLED:
+    #  self.kill()
 
-    elif sc is StatusJob.STARTING:
+    #elif sc is StatusJob.STARTING:
 
-      # check the status with rancher
-      rsc = self.rancher().getStatus( self._jobID )
-      if rsc is StatusJob.RUNNING:
-        self.db().setStatus( self._job, StatusJob.RUNNING )
-      elif 
-
+    #  # check the status with rancher
+    #  rsc = self.rancher().getStatus( self._jobID )
+    #  if rsc is StatusJob.RUNNING:
+    #    self.db().setStatus( self._job, StatusJob.RUNNING )
+    #  elif 
+    pass
 
 
   def kill(self):
@@ -69,7 +69,7 @@ class JobConsumer( Logger ):
     self._db.setJobStatus( self.getUsername(), self.getTaksID(), self.getJobID(), StatusJob.KILLED )
 
 
-  def stop(self)
+  def stop(self):
     # tell to rancher to stop this job in the stack
     return
 

@@ -2,7 +2,7 @@
 __all__ = ["Slots"]
 
 
-from Gaugi.messenger import Logger
+from Gaugi import Logger, NotSet
 from Gaugi.messenger.macros import *
 from Gaugi import retrieve_kw
 from collections import deque
@@ -10,10 +10,16 @@ from collections import deque
 
 class Slots( Logger ):
 
-  def __init__(self, nodes, maxlenght) :
+  def __init__(self, maxlenght, nodes = None) :
     Logger.__init__(self)
-    self._nodes = nodes
-    self._total = maxlength
+    if nodes:
+      if not type(nodes) is list:
+        MSG_FATAL(self, "Nodes must be a list")
+      self._nodes = nodes
+      self._total = len(nodes)
+    else:
+      self._nodes = NotSet
+      self._total = maxlength
     self._slots = [None for _ in range(self._total)]
 
 
@@ -23,6 +29,14 @@ class Slots( Logger ):
 
   def setOrchestator( self, orc ):
     self._orchestrator = orc
+
+  
+  def db(self):
+    return self._db
+
+
+  def orchestrator(self):
+    return self._orchestrator
 
 
   def initialize(self):
@@ -44,7 +58,7 @@ class Slots( Logger ):
 
 
   def execute(self):
-    self.update()
+    #self.update()
     return StatusCode.SUCCESS
 
 

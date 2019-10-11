@@ -5,7 +5,9 @@ __all__ = ["Schedule"]
 from Gaugi import Logger, NotSet
 from Gaugi.messenger.macros import *
 import time
+from sqlalchemy import and_, or_
 
+MAX_FAILED_JOBS= 10
 
 class Schedule(Logger):
 
@@ -16,8 +18,10 @@ class Schedule(Logger):
     self._db
     self._then = NotSet
 
+
   def db(self):
     return self._db
+
 
   def initialize(self):
     return StatusCode.SUCCESS
@@ -102,7 +106,7 @@ class Schedule(Logger):
     priority = user.getMaxPriority( )
     jobs = task.getAllJobs()
     jobCount = 0
-    while (jobCount < MAX_TEST_JOBS)
+    while (jobCount < MAX_TEST_JOBS):
       if len(jobs)>0:
         testJob = jobs.pop()
       else: # Stopping the loop since we have less than MAX_TEST_JOBS in the list
@@ -115,11 +119,9 @@ class Schedule(Logger):
   def checkTask( self, task ):
 
     # Maybe we need to checge these rules
-    if len(self.db().session().query(Job).filter( and_( or_( Job.status=StatusJob.FAILED,  
-      Job.status=StatusJob.BROKEN), Job.taskId==task.id )).all()) > MAX_FAILED_JOBS:
+    if len(self.db().session().query(Job).filter( and_( or_( Job.status==StatusJob.FAILED,  Job.status==StatusJob.BROKEN), Job.taskId==task.id )).all()) > MAX_FAILED_JOBS:
       task.setStatus( StatusTask.BROKEN )
-    elif len(self.db().session().query(Job).filter( and_( Job.status=StatusJob.DONE, 
-      Job.taskId==task.id )).all()) > MAX_FAILED_JOBS:
+    elif len(self.db().session().query(Job).filter( and_( Job.status==StatusJob.DONE, Job.taskId==task.id )).all()) > MAX_FAILED_JOBS:
       self.db().setStatus( task, StatusTask.RUNNING )
     else:
       self.db().setStatus( task, StatusTask.TESTING )

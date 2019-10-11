@@ -1,10 +1,10 @@
 
 __all__ = ["Kubernetes"]
 
-from lps_cluster import Logger
+from Gaugi import Logger
 from kubernetes import *
 from pprint import pprint
-from lps_cluster.core.enumerations import StatusJob, status_job_toString
+from lpsgrid.engine.enumerations import StatusJob, status_job_toString
 
 
 class Kubernetes(Logger):
@@ -13,10 +13,10 @@ class Kubernetes(Logger):
 
     import os
     # this is the current config LPS cluster yaml file
-    config.load_kube_config(config_file=os.environ['LPS_CLUSTER_PATH']+'/data/lps_cluster.yaml')
+    config.load_kube_config(config_file=os.environ['SAPHYRA_PATH']+'/Tools/lpsgrid/data/lps_cluster.yaml')
     # Get the job batch api
     self._api = client.BatchV1Api()
-    self._template_job_path = os.environ['LPS_CLUSTER_PATH']+'/data/job_template.yaml'
+    self._template_job_path = os.environ['SAPHYRA_PATH']+'/Tools/lpsgrid/data/job_template.yaml'
 
 
   def api(self):

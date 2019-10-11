@@ -6,6 +6,7 @@ export LC_ALL=''
 export RCM_NO_COLOR=0
 export RCM_GRID_ENV=0
 
+export SAPHYRA_PATH=`pwd`
 
 cd build
 rm -rf lib

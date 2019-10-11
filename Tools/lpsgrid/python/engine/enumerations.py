@@ -1,7 +1,7 @@
 
 __all__ = [ "StatusJob", "status_job_toString" ]
 
-from lps_cluster import EnumStringification
+from Gaugi import EnumStringification
 
 
 class StatusJob ( EnumStringification ):

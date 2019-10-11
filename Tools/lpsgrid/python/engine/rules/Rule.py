@@ -2,8 +2,8 @@
 
 __all__ = [""]
 
-from lps_cluster import Logger
-from lps_cluster.core.messenger.macros import *
+from Gaugi import Logger
+from Gaugi.messenger.macros import *
 
 
 class Rule(Logger):
@@ -35,13 +35,4 @@ class Rule(Logger):
 
     pass
 
-    # LCG rule taken from: https://twiki.cern.ch/twiki/bin/view/PanDA/PandaAthena#Job_priority
-    # this must be ordered by creation (date). First must be the older one
-    jobs = self.db().getAllJobs( user )
-
-    # The total number of the user's subJobs existing in the whole queue. (existing = job status is one of 
-    # defined,assigned,activated,sent,starting,running)
-    T = self.db().getTotalUntilRunning()
-
-    priority = self.db().getPriority(user) - (T
 
