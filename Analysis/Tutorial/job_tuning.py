@@ -173,7 +173,7 @@ try:
   
 except  Exception as e:
   print(e)
-  if args.useDB:
+  if useDB:
     db.getCurrentJob().setStatus('failed')
     db.commit()
 
