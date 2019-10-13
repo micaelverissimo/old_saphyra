@@ -72,7 +72,7 @@ class PandasJob( Logger ):
     self._tunedData = retrieve_kw( kw, 'tunedData'  , TunedData_v1()        )
     self._outputfile= retrieve_kw( kw, 'outputfile' , 'tunedDisc'           )
 
-    self.__db = NotSet
+    self.__db = None
     checkForUnusedVars(kw)
 
     if type(self._inits) is int:
@@ -296,7 +296,7 @@ class PandasJob( Logger ):
     try:
       # prepare to save the tuned data
       self._tunedData.save( self._outputfile )
-    except e:
+    except Exception as e:
       MSG_FATAL( self, "Its not possible to save the tuned data: %s" , e )
     # Save all root objects in the store gate service
     #self._storegate.write()
