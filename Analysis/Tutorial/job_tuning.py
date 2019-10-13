@@ -102,9 +102,10 @@ if useDB:
 
 
 try:
-  
-  db.getCurrentJob().setStatus( "starting" )
-  db.commit()
+
+  if useDB:
+    db.getCurrentJob().setStatus( "starting" )
+    db.commit()
 
 
   ref_target = [
