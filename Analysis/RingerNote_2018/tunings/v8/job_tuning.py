@@ -158,9 +158,9 @@ try:
   # Create the panda job 
   pjob = PandasJob(  pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
                     job               = args.configFile, 
-                    loss              = 'binary_crossentropy',
+                    loss              = 'mean_squared_error',
                     metrics           = ['accuracy'],
-                    epochs            = 2,
+                    epochs            = 5000,
                     ppChain           = pp,
                     crossval          = kf,
                     outputfile        = outputFile,
