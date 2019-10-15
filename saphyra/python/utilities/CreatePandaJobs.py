@@ -106,8 +106,9 @@ class CreatePandaJobs( Logger ):
           job.set_inits(list(initWindowBounds))
           job.set_models([models[i] for i in list(modelWindowBounds)],  list(modelWindowBounds) )
          
-          job.save( outputFolder+'/job_container/' + ('job_config_%s_%s_%s.%s') %
+          job.save( outputFolder+'/job_container/' + ('job_config.ID_%s.%s_%s_%s.%s') %
               ( 
+                str(nJobs).zfill(4),
                 modelWindowBounds.formattedString('m'),
                 sortWindowBounds.formattedString('s'), 
                 initWindowBounds.formattedString('i'), time_stamp) )

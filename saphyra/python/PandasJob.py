@@ -16,7 +16,7 @@ from saphyra.posproc import Summary
 
 from tensorflow.keras.models import clone_model
 from datetime import datetime
-
+import time
 
 class PandasJob( Logger ):
 
@@ -264,11 +264,21 @@ class PandasJob( Logger ):
 
 
           if self.getDBContext():
-            try:
-              MSG_INFO( self, "Adding DB model into the Job" )
-              self.getDBContext().attach_ctx( self.getContext() )
-            except Exception as e:
-              MSG_WARNING(self, "Its not possible to store the model into the DB base. Error: %s",e)
+
+            NUMBER_OF_TRIALS=3; MINUTE=60; proceed=False
+            for _ in range(NUMBER_OF_TRIALS):
+              if self.getDBContext().isConnected():
+                MSF_INFO(self, "Data base is connected..."); proceed=True
+                break
+              else:
+                MSG_INFO(self, "Data base connection is failed... wainting 5 minutes")
+                time.sleep( 5*MINUTE )
+            if proceed:
+              try:
+                MSG_INFO( self, "Adding DB model into the Job" )
+                self.getDBContext().attach_ctx( self.getContext() )
+              except Exception as e:
+                MSG_WARNING(self, "Its not possible to store the model into the DB base. Error: %s",e)
 
 
 

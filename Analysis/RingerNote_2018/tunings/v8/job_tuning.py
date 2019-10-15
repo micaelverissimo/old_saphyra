@@ -13,7 +13,9 @@ def getPileup( path ):
   return load(path)['data'][:,0]
 
 
-
+def getJobConfigId( path ):
+  from Gaugi import load
+  return dict(load(path))['id']
 
 from saphyra import PandasJob, PatternGenerator, sp, PreProcChain_v1, Norm1, Summary, PileupFit, ReshapeToConv1D
 from sklearn.model_selection import KFold,StratifiedKFold
@@ -46,6 +48,13 @@ parser.add_argument('-r','--refFile', action='store',
             help = "The reference file.")
 
 
+
+
+parser.add_argument('-t', '--taskName', action='store', 
+        dest='taskName', required = False, default = None,
+            help = "The task name into the database")
+
+
 if len(sys.argv)==1:
   parser.print_help()
   sys.exit(1)
@@ -53,57 +62,136 @@ if len(sys.argv)==1:
 args = parser.parse_args()
 
 
-ref_target = [
-              ('tight_cutbased' , 'T0HLTElectronT2CaloTight'        ),
-              ('medium_cutbased', 'T0HLTElectronT2CaloMedium'       ),
-              ('loose_cutbased' , 'T0HLTElectronT2CaloLoose'        ),
-              ('vloose_cutbased', 'T0HLTElectronT2CaloVLoose'       ),
-              ]
+# Check if this job will run in DB mode
+useDB = True if (args.taskName) else False
+job_id = getJobConfigId( args.configFile )
 
 
-from saphyra import ReferenceReader
-ref_obj = ReferenceReader().load(args.refFile)
+if useDB:
+    from ringerdb import RingerDB
+    from ringerdb.models import *
+    url = 'postgres://ringer:6sJ09066sV1990;6@postgres-ringer-db.cahhufxxnnnr.us-east-2.rds.amazonaws.com/ringer'
+    try:
+      db = RingerDB('jodafons', url)
+    except Exception as e:
+      print(e)
+      raise SystemExit
 
-from sklearn.model_selection import StratifiedKFold, KFold
-kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
-
-from saphyra import PreProcChain_v1, Norm1
-pp = PreProcChain_v1( [Norm1()] )
-
-
-posproc = [Summary()]
-correction = PileupFit( "PileupFit", getPileup(args.dataFile) )
-# Calculate the reference for each operation point
-# using the ringer v6 tuning as reference
-for ref in ref_target:
-  pd = ref_obj.getSgnPassed(ref[0]) / float(ref_obj.getSgnTotal(ref[0]))
-  fa = ref_obj.getBkgPassed(ref[0]) / float(ref_obj.getBkgTotal(ref[0]))
-  correction.add( ref[0], ref[1], pd, fa )
-posproc = [Summary(), correction]
+    if db.isConnected():
+      print('db is connected...')
 
 
-
-job = PandasJob(  pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
-                  job               = args.configFile, 
-                  loss              = 'mse',
-                  metrics           = ['accuracy'],
-                  epochs            = 5000,
-                  ppChain           = pp,
-                  crossval          = kf,
-                  outputfile        = args.outputFile,
-                  class_weight      = True 
-                  )
-
-job.posproc   += posproc
-job.callbacks += [sp(patience=25, verbose=True, save_the_best=True)]
-job.initialize()
-job.execute()
-job.finalize()
+    task = db.getTask( args.taskName )
+    if not task:
+      print("there is no this task name (%s) into the database. abort...")
+      sys.exit()
 
 
-
+    job = task.getJob(job_id)
+    if not job:
+      print("there is no job with configId (%s) into the database. abort...")
+      raise SystemExit
+    #from sqlalchemy import and_
+    #job = db.session().query(Job).filter( and_(Job.taskId==task.id ,Job.configId==id) ).first()
+    print(job)
+    # check if there is model into the job. If yes, we must erase and retry
+    models = job.getModels()
+    if models:
+      for model in models:
+        print("Delete: %s"%model)
+        db.session().delete(model)
+        db.commit()
+      job.retry = job.retry+1
+      db.commit()
+    
+    # Fill this execArgs just for good practicy
+    db.setCurrentTask( task )
+    db.setCurrentJob(job)
+   
 
 
 
+try:
 
+  if useDB:
+    db.getCurrentJob().setStatus( "starting" )
+    db.commit()
+
+  outputFile = args.outputFile
+  if '/' in outputFile:
+    # This is a path
+    outputFile+='tunedDiscr.jobId_s%'%str(job_id).zfill(4)
+  else:
+    outputFile+='.jobId_%s'%str(job_id).zfill(4)
+
+  ref_target = [
+                ('tight_cutbased' , 'T0HLTElectronT2CaloTight'        ),
+                ('medium_cutbased', 'T0HLTElectronT2CaloMedium'       ),
+                ('loose_cutbased' , 'T0HLTElectronT2CaloLoose'        ),
+                ('vloose_cutbased', 'T0HLTElectronT2CaloVLoose'       ),
+                ]
+  
+  
+  from saphyra import ReferenceReader
+  ref_obj = ReferenceReader().load(args.refFile)
+  
+  from sklearn.model_selection import StratifiedKFold, KFold
+  kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
+  
+  # ppChain
+  from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D
+  pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
+  
+  
+  # NOTE: This must be default, always
+  posproc = [Summary()]
+
+  correction = PileupFit( "PileupFit", getPileup(args.dataFile) )
+  # Calculate the reference for each operation point
+  # using the ringer v6 tuning as reference
+  for ref in ref_target:
+    # (passed, total)
+    pd = (ref_obj.getSgnPassed(ref[0]) , ref_obj.getSgnTotal(ref[0]))
+    fa = (ref_obj.getBkgPassed(ref[0]) , ref_obj.getBkgTotal(ref[0]))
+    correction.add( ref[0], ref[1], pd, fa )
+  posproc = [Summary(), correction]
+  
+  
+  # Create the panda job 
+  pjob = PandasJob(  pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
+                    job               = args.configFile, 
+                    loss              = 'binary_crossentropy',
+                    metrics           = ['accuracy'],
+                    epochs            = 2,
+                    ppChain           = pp,
+                    crossval          = kf,
+                    outputfile        = outputFile,
+                    class_weight      = True,
+                    #save_history      = False,
+                    )
+  
+  pjob.posproc   += posproc
+  pjob.callbacks += [sp(patience=25, verbose=True, save_the_best=True)]
+  pjob.initialize()
+  
+  if useDB:
+    pjob.setDBContext( db )
+    db.getCurrentJob().setStatus('running')
+    db.commit()
+  
+
+  pjob.execute()
+  pjob.finalize()
+  
+  if useDB:
+    db.getCurrentJob().setStatus('done')
+    db.commit()
+  
+
+except  Exception as e:
+  print(e)
+  if useDB:
+    db.getCurrentJob().setStatus('failed')
+    db.commit()
+  raise SystemExit
 
