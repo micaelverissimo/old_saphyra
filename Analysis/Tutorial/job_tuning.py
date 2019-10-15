@@ -28,7 +28,7 @@ import sys,os
 
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
-
+import tensorflow as tf
 config = ConfigProto()
 config.gpu_options.allow_growth = True
 tf.keras.backend.set_session(tf.Session(config=config))
