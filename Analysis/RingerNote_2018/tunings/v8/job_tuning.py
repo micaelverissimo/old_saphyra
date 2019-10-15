@@ -140,7 +140,8 @@ try:
   
   # ppChain
   from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D
-  pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
+  #pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
+  pp = PreProcChain_v1( [Norm1()] )
   
   
   # NOTE: This must be default, always

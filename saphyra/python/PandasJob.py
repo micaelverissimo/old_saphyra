@@ -268,7 +268,7 @@ class PandasJob( Logger ):
             NUMBER_OF_TRIALS=3; MINUTE=60; proceed=False
             for _ in range(NUMBER_OF_TRIALS):
               if self.getDBContext().isConnected():
-                MSF_INFO(self, "Data base is connected..."); proceed=True
+                MSG_INFO(self, "Data base is connected..."); proceed=True
                 break
               else:
                 MSG_INFO(self, "Data base connection is failed... wainting 5 minutes")
@@ -284,7 +284,6 @@ class PandasJob( Logger ):
 
           # Clear everything for the next init
           K.clear_session()
-          break
 
 
       # You must clean everythin before reopen the dataset
