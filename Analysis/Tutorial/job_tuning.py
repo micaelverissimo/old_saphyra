@@ -31,7 +31,8 @@ from tensorflow.compat.v1 import InteractiveSession
 
 config = ConfigProto()
 config.gpu_options.allow_growth = True
-session = InteractiveSession(config=config)
+tf.keras.backend.set_session(tf.Session(config=config))
+
 
 mainLogger = Logger.getModuleLogger("job")
 parser = argparse.ArgumentParser(description = '', add_help = False)
