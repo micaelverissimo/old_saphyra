@@ -55,9 +55,6 @@ parser.add_argument('-r','--refFile', action='store',
         dest='refFile', required = False, default = None,
             help = "The reference file.")
 
-
-
-
 parser.add_argument('--taskName', action='store', 
         dest='taskName', required = False, default = None,
             help = "The task name into the database")
