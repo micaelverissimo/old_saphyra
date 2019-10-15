@@ -117,7 +117,7 @@ try:
   outputFile = args.outputFile
   if '/' in outputFile:
     # This is a path
-    outputFile+='tunedDiscr.jobId_s%'%str(job_id).zfill(4)
+    outputFile+='tunedDiscr.jobId_%s'%str(job_id).zfill(4)
   else:
     outputFile+='.jobId_%s'%str(job_id).zfill(4)
 
