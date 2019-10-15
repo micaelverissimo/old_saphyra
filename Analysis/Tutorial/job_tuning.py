@@ -26,6 +26,13 @@ import argparse
 import sys,os
 
 
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
+
+config = ConfigProto()
+config.gpu_options.allow_growth = True
+session = InteractiveSession(config=config)
+
 mainLogger = Logger.getModuleLogger("job")
 parser = argparse.ArgumentParser(description = '', add_help = False)
 parser = argparse.ArgumentParser()
@@ -47,10 +54,12 @@ parser.add_argument('-r','--refFile', action='store',
         dest='refFile', required = False, default = None,
             help = "The reference file.")
 
+
+
+
 parser.add_argument('--taskName', action='store', 
         dest='taskName', required = False, default = None,
-            help = "Use this parameter if you would like to store all information into the database")
-
+            help = "The task name into the database")
 
 
 if len(sys.argv)==1:
@@ -61,15 +70,18 @@ args = parser.parse_args()
 
 
 # Check if this job will run in DB mode
-useDB = True if args.taskName else False
+useDB = True if (args.taskName) else False
 
 
 if useDB:
-
     from ringerdb import RingerDB
     from ringerdb.models import *
     url = 'postgres://ringer:6sJ09066sV1990;6@postgres-ringer-db.cahhufxxnnnr.us-east-2.rds.amazonaws.com/ringer'
-    db = RingerDB('jodafons', url)
+    try:
+      db = RingerDB('jodafons', url)
+    except Exception as e:
+      print(e)
+      raise SystemExit
 
     task = db.getTask( args.taskName )
     if not task:
@@ -80,7 +92,7 @@ if useDB:
     job = task.getJob(id)
     if not job:
       print("there is no job with configId (%s) into the database. abort...")
-      sys.exit()
+      raise SystemExit
     #from sqlalchemy import and_
     #job = db.session().query(Job).filter( and_(Job.taskId==task.id ,Job.configId==id) ).first()
     print(job)
@@ -171,12 +183,11 @@ try:
     db.getCurrentJob().setStatus('done')
     db.commit()
   
+
 except  Exception as e:
   print(e)
   if useDB:
     db.getCurrentJob().setStatus('failed')
     db.commit()
-
-
-
+  raise SystemExit
 
