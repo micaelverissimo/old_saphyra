@@ -14,8 +14,8 @@ import json
 class TunedData_v1( LoggerStreamable ):
 
 
-  _streamerObj = LoggerRawDictStreamer(toPublicAttrs = {'_tunedData'})
-  _cnvObj = RawDictCnv(toProtectedAttrs = {'_tunedData'})
+  _streamerObj = LoggerRawDictStreamer(toPublicAttrs = {'_tunedData', '_jobid', '_taskname', '_username'})
+  _cnvObj = RawDictCnv(toProtectedAttrs = {'_tunedData', '_jobid', '_taskname', '_username'})
   __version =  1
 
 
@@ -23,8 +23,23 @@ class TunedData_v1( LoggerStreamable ):
 
     LoggerStreamable.__init__(self, **kw)
     self._tunedData = []
-  
+    self._username = None
+    self._taskname = None
+    self._jobId = None
 
+
+  def setDBContext( self, context ):
+    self._username = context.username()
+    self._taskname = context.taskname()
+    self._jobid = context.jobid()
+
+  def getDBContext( self ):
+    try:
+      from ringerdb import DBContext
+      return DBContext( self._username, self._taskname, self._jobid)
+    except Exception as e:
+      MSG_WARNING(self,e)
+      return None
 
   def attach( self, id_model, sort, init, tag, model, history, metadata={} ):
 
@@ -54,6 +69,10 @@ class TunedData_v1( LoggerStreamable ):
 
   def merge( self, obj ):
     self._tunedData.extend( obj.get_data() )
+
+
+
+
 
 
   def get_data(self):

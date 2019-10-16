@@ -8,5 +8,7 @@ python3 run_grid_cern_tuning.py \
       --site AUTO \
       --et 0 \
       --eta 0 \
-      --db_url "postgres://ringer:6sJ09066sV1990;6@postgres-ringer-db.cahhufxxnnnr.us-east-2.rds.amazonaws.com/ringer" \
+      --user jodafons \
+      --url "postgres://ringer:6sJ09066sV1990;6@postgres-ringer-db.cahhufxxnnnr.us-east-2.rds.amazonaws.com/ringer" \
       --dry-run \
+      --njobs 10

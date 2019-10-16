@@ -20,29 +20,32 @@ import time
 
 class PandasJob( Logger ):
 
-  def __init__(self , pattern_generator, **kw ):
+  def __init__(self , dbcontext, pattern_generator, **kw ):
 
     Logger.__init__(self,   **kw)
 
     self._pattern_generator = pattern_generator
+    self._dbcontext = dbcontext
 
-
-    self._optimizer = retrieve_kw( kw, 'optimizer'  , 'adam'                )
-    self._loss      = retrieve_kw( kw, 'loss'       , 'binary_crossentropy' )
-    self._epochs    = retrieve_kw( kw, 'epochs'     , 1000                  )
-    self._batch_size= retrieve_kw( kw, 'batch_size' , 1024                  )
-    self.callbacks  = retrieve_kw( kw, 'callbacks'  , []                    )
-    self.posproc    = retrieve_kw( kw, 'posproc'    , []                    )
-    self.metrics    = retrieve_kw( kw, 'metrics'    , []                    )
-    self._sorts     = retrieve_kw( kw, 'sorts'      , []                    )
-    self._inits     = retrieve_kw( kw, 'inits'      , []                    )
-    self.crossval   = retrieve_kw( kw, 'crossval'   , NotSet                )
-    self._verbose   = retrieve_kw( kw, 'verbose'    , True                  )
-    self._class_weight = retrieve_kw( kw, 'class_weight' , False            )
-
-    self._save_history = retrieve_kw( kw, 'save_history' , True)
+    self._optimizer     = retrieve_kw( kw, 'optimizer'  , 'adam'                )
+    self._loss          = retrieve_kw( kw, 'loss'       , 'binary_crossentropy' )
+    self._epochs        = retrieve_kw( kw, 'epochs'     , 1000                  )
+    self._batch_size    = retrieve_kw( kw, 'batch_size' , 1024                  )
+    self.callbacks      = retrieve_kw( kw, 'callbacks'  , []                    )
+    self.posproc        = retrieve_kw( kw, 'posproc'    , []                    )
+    self.metrics        = retrieve_kw( kw, 'metrics'    , []                    )
+    self._sorts         = retrieve_kw( kw, 'sorts'      , []                    )
+    self._inits         = retrieve_kw( kw, 'inits'      , []                    )
+    self.crossval       = retrieve_kw( kw, 'crossval'   , NotSet                )
+    self._verbose       = retrieve_kw( kw, 'verbose'    , True                  )
+    self._class_weight  = retrieve_kw( kw, 'class_weight' , False               )
+    self._save_history  = retrieve_kw( kw, 'save_history' , True                )
     from saphyra  import PreProcChain_v1, NoPreProc
-    self.ppChain    = retrieve_kw( kw, 'ppChain'    , PreProcChain_v1([NoPreProc()]))
+    self.ppChain        = retrieve_kw( kw, 'ppChain'    , PreProcChain_v1([NoPreProc()]))
+
+    # DB parameter
+    self._taskName  = retrieve_kw( kw, 'taskName', None )
+
 
     # Get configurations and model from job config
     job_auto_config = retrieve_kw( kw, 'job'        , NotSet                )
@@ -55,6 +58,7 @@ class PandasJob( Logger ):
       self._sorts = job.get_sorts()
       self._inits = job.get_inits()
       self._models, self._id_models = job.get_models()
+      self._jobId = job.id()
 
     # get model and tag from model file or lists
     models = retrieve_kw( kw, 'models', NotSet )
@@ -72,7 +76,7 @@ class PandasJob( Logger ):
     self._tunedData = retrieve_kw( kw, 'tunedData'  , TunedData_v1()        )
     self._outputfile= retrieve_kw( kw, 'outputfile' , 'tunedDisc'           )
 
-    self.__db = None
+    self._db = None
     checkForUnusedVars(kw)
 
     if type(self._inits) is int:
@@ -82,11 +86,19 @@ class PandasJob( Logger ):
     self._index_from_cv = NotSet
 
 
-  def setDBContext( self, db ):
-    self.__db = db
+  def setDatabase( self, db ):
+    self._db = db
 
-  def getDBContext(self):
-    return self.__db
+  def db(self):
+    return self._db
+
+
+  def getContext(self):
+    return self._context
+
+
+  def setContext(self, ctx):
+    self._context = ctx
 
 
 
@@ -157,6 +169,12 @@ class PandasJob( Logger ):
         return StatusCode.FAILURE
 
 
+      # This is not be critical since we can retrieve all data into the output file
+      if self.db():
+        if self.db().initialize().isFailure():
+          MSG_ERROR( self, "Data base connection failed...")
+          self._db = None        
+
 
     return StatusCode.SUCCESS
 
@@ -192,6 +210,11 @@ class PandasJob( Logger ):
 
           # force the context is empty for each training
           self.getContext().clear()
+
+          self.getContext().setHandler( "taskName", self._taskName      )
+          self.getContext().setHandler( "jobId", self._jobId            )
+
+
           self.getContext().setHandler( "crossval", self._crossval      )
           self.getContext().setHandler( "index"   , self._index_from_cv )
           self.getContext().setHandler( "valData" , (x_val, y_val)      )
@@ -262,24 +285,8 @@ class PandasJob( Logger ):
           self._tunedData.attach_ctx( self.getContext() )
 
 
-
-          if self.getDBContext():
-
-            NUMBER_OF_TRIALS=3; MINUTE=60; proceed=False
-            for _ in range(NUMBER_OF_TRIALS):
-              if self.getDBContext().isConnected():
-                MSG_INFO(self, "Data base is connected..."); proceed=True
-                break
-              else:
-                MSG_INFO(self, "Data base connection is failed... wainting 5 minutes")
-                time.sleep( 5*MINUTE )
-            if proceed:
-              try:
-                MSG_INFO( self, "Adding DB model into the Job" )
-                self.getDBContext().attach_ctx( self.getContext() )
-              except Exception as e:
-                MSG_WARNING(self, "Its not possible to store the model into the DB base. Error: %s",e)
-
+          if self.db():
+            self.db().execute( self.getContext() )
 
 
           # Clear everything for the next init
@@ -304,28 +311,14 @@ class PandasJob( Logger ):
         MSG_ERROR(self, "There is a problem to finalize the pos processor: %s", proc.name() )
     try:
       # prepare to save the tuned data
+      self._tunedData.setDBContext( self._dbcontext )
       self._tunedData.save( self._outputfile )
     except Exception as e:
       MSG_FATAL( self, "Its not possible to save the tuned data: %s" , e )
     # Save all root objects in the store gate service
     #self._storegate.write()
-
     return StatusCode.SUCCESS
 
-
-
-  # TODO: for generator purpose
-  def execute_g(self):
-
-    return StatusCode.SUCCESS
-
-
-  def getContext(self):
-    return self._context
-
-
-  def setContext(self, ctx):
-    self._context = ctx
 
 
 
@@ -344,7 +337,6 @@ class PandasJob( Logger ):
     x_val   = data[   self._index_from_cv[sort][1]]
     y_val   = target[ self._index_from_cv[sort][1]]
     return x_train, x_val, y_train, y_val
-
 
 
 

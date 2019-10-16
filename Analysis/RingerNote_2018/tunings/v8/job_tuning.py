@@ -47,9 +47,13 @@ parser.add_argument('-r','--refFile', action='store',
         dest='refFile', required = False, default = None,
             help = "The reference file.")
 
-parser.add_argument('-t', '--taskName', action='store', 
-        dest='taskName', required = False, default = None,
+parser.add_argument('-t', '--task', action='store', 
+        dest='task', required = True, default = None,
             help = "The task name into the database")
+
+parser.add_argument('-u', '--user', action='store', 
+        dest='user', required = True, default = None,
+            help = "The user name into the database")
 
 
 if len(sys.argv)==1:
@@ -60,64 +64,32 @@ args = parser.parse_args()
 
 
 # Check if this job will run in DB mode
-useDB = True if (args.taskName) else False
+useDB = True if (args.task and args.user) else False
 job_id = getJobConfigId( args.configFile )
-
+from ringerdb import DBContext
+dbcontext = DBContext( args.user, args.task, job_id )
 
 if useDB:
-    from ringerdb import RingerDB
+    from ringerdb import RingerDB, DBContext
     from ringerdb.models import *
     url = 'postgres://ringer:6sJ09066sV1990;6@postgres-ringer-db.cahhufxxnnnr.us-east-2.rds.amazonaws.com/ringer'
     try:
-      db = RingerDB('jodafons', url)
+      db = RingerDB(url, dbcontext)
+      if db.initialize().isFailure():  useDB=False
     except Exception as e:
       print(e)
-      raise SystemExit
-
-    if db.isConnected():
-      print('db is connected...')
-
-
-    task = db.getTask( args.taskName )
-    if not task:
-      print("there is no this task name (%s) into the database. abort...")
-      sys.exit()
-
-
-    job = task.getJob(job_id)
-    if not job:
-      print("there is no job with configId (%s) into the database. abort...")
-      raise SystemExit
-    #from sqlalchemy import and_
-    #job = db.session().query(Job).filter( and_(Job.taskId==task.id ,Job.configId==id) ).first()
-    print(job)
-    # check if there is model into the job. If yes, we must erase and retry
-    models = job.getModels()
-    if models:
-      for model in models:
-        print("Delete: %s"%model)
-        db.session().delete(model)
-        db.commit()
-      job.retry = job.retry+1
-      db.commit()
-    
-    # Fill this execArgs just for good practicy
-    db.setCurrentTask( task )
-    db.setCurrentJob(job)
-   
-
+      useDB=False
 
 
 try:
 
   if useDB:
-    db.getCurrentJob().setStatus( "starting" )
-    db.commit()
+    db.getContext().job().setStatus( "starting" ); db.commit()
 
   outputFile = args.outputFile
   if '/' in outputFile:
     # This is a path
-    outputFile+='tunedDiscr.jobId_%s'%str(job_id).zfill(4)
+    outputFile = (outputFile+'/tunedDiscr.jobID_%s'%str(job_id).zfill(4)).replace('//','/')
   else:
     outputFile+='.jobId_%s'%str(job_id).zfill(4)
 
@@ -137,8 +109,8 @@ try:
   
   # ppChain
   from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D
-  #pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
-  pp = PreProcChain_v1( [Norm1()] )
+  pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
+  #pp = PreProcChain_v1( [Norm1()] )
   
   
   # NOTE: This must be default, always
@@ -156,11 +128,12 @@ try:
   
   
   # Create the panda job 
-  pjob = PandasJob(  pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
+  job = PandasJob(  dbcontext, pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
                     job               = args.configFile, 
-                    loss              = 'mean_squared_error',
+                    #loss              = 'mean_squared_error',
+                    loss              = 'binary_crossentropy',
                     metrics           = ['accuracy'],
-                    epochs            = 5000,
+                    epochs            = 1,
                     ppChain           = pp,
                     crossval          = kf,
                     outputfile        = outputFile,
@@ -168,28 +141,30 @@ try:
                     #save_history      = False,
                     )
   
-  pjob.posproc   += posproc
-  pjob.callbacks += [sp(patience=25, verbose=True, save_the_best=True)]
-  pjob.initialize()
+  job.posproc   += posproc
+  job.callbacks += [sp(patience=25, verbose=True, save_the_best=True)]
+  job.initialize()
   
   if useDB:
-    pjob.setDBContext( db )
-    db.getCurrentJob().setStatus('running')
+    job.setDatabase( db )
+    db.getContext().job().setStatus('running')
     db.commit()
+  else:
+    job.setDBContext( dbcontext )
   
-
-  pjob.execute()
-  pjob.finalize()
+  job.execute()
+  job.finalize()
   
   if useDB:
-    db.getCurrentJob().setStatus('done')
+    db.getContext().job().setStatus('done')
     db.commit()
-  
+    db.finalize()
+  sys.exit(0)
 
 except  Exception as e:
   print(e)
   if useDB:
-    db.getCurrentJob().setStatus('failed')
+    db.getContext().job().setStatus('failed')
     db.commit()
-  raise SystemExit
-
+    db.finalize()
+  sys.exit(1)
