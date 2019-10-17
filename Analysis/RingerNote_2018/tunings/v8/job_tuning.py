@@ -55,6 +55,10 @@ parser.add_argument('-u', '--user', action='store',
         dest='user', required = True, default = None,
             help = "The user name into the database")
 
+parser.add_argument('--useDB', action='store', 
+        dest='useDB', required = False, default = False,
+            help = "Use database.")
+
 
 if len(sys.argv)==1:
   parser.print_help()
@@ -64,7 +68,7 @@ args = parser.parse_args()
 
 
 # Check if this job will run in DB mode
-useDB = True if (args.task and args.user) else False
+useDB = args.useDB
 job_id = getJobConfigId( args.configFile )
 from ringerdb import DBContext
 dbcontext = DBContext( args.user, args.task, job_id )
