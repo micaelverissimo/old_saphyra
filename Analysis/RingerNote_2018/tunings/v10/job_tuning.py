@@ -1,6 +1,23 @@
 #!/usr/bin/env python
 
-from saphyra import PandasJob, sp, PreProcChain_v1, Norm1, Summary, PileupFit, ReshapeToConv1D
+def getPatterns( path ):
+  from Gaugi import load
+  d = load(path)
+  data = d['data'][:,1:101]
+  target = d['target']
+  return data, target
+
+
+def getPileup( path ):
+  from Gaugi import load
+  return load(path)['data'][:,0]
+
+
+def getJobConfigId( path ):
+  from Gaugi import load
+  return dict(load(path))['id']
+
+from saphyra import PandasJob, PatternGenerator, sp, PreProcChain_v1, Norm1, Summary, PileupFit, ReshapeToConv1D
 from sklearn.model_selection import KFold,StratifiedKFold
 from Gaugi.messenger import LoggingLevel, Logger
 from Gaugi import load
@@ -30,23 +47,17 @@ parser.add_argument('-r','--refFile', action='store',
         dest='refFile', required = False, default = None,
             help = "The reference file.")
 
-parser.add_argument('--layer', action='store', 
-        dest='layer', required = True, default = 0, type=int,
-            help = "The calo layer")
+parser.add_argument('-t', '--task', action='store', 
+        dest='task', required = True, default = None,
+            help = "The task name into the database")
 
+parser.add_argument('-u', '--user', action='store', 
+        dest='user', required = True, default = None,
+            help = "The user name into the database")
 
-
-def get_model( ninputs ):
-  modelCol = []
-  from keras.models import Sequential
-  from keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
-  for n in range(1,20+1):
-    model = Sequential()
-    model.add(Dense(n, input_shape=(ninputs,), activation='tanh', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-    model.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-    model.add(Activation('tanh'))
-    modelCol.append(model)
-  return modelCol
+parser.add_argument('--useDB', action='store', 
+        dest='useDB', required = False, default = False,
+            help = "Use database.")
 
 
 if len(sys.argv)==1:
@@ -55,89 +66,106 @@ if len(sys.argv)==1:
 
 args = parser.parse_args()
 
-layer = args.layer
-is layer == 1:
-  _slice = (0,7)
-elif layer == 2:
-  _slice = (8, 71)
-elif layer == 3:
-  _slice = (72, 79)
-elif layer == 4:
-  _slice = (80,87)
-elif layer == 5:
-  _slice = (88,91)
-elif layer == 6:
-  _slice = (92,95)
-elif layer == 7:
-  _slice = (96,99)
-else:
-  _slice = (0,99)
 
-# Reading data and get all information needed
-# by the tuning proceding
-raw = load(args.dataFile)
-data = raw['data'][:,1:101]
-data = data[:,_slice[0]:_slice[1]]
-target = raw['target']
-pileup = raw['data'][:,0]
-del raw
+# Check if this job will run in DB mode
+useDB = args.useDB
+job_id = getJobConfigId( args.configFile )
+from ringerdb import DBContext
+dbcontext = DBContext( args.user, args.task, job_id )
+
+if useDB:
+    from ringerdb import RingerDB, DBContext
+    from ringerdb.models import *
+    url = 'postgres://ringer:6sJ09066sV1990;6@postgres-ringer-db.cahhufxxnnnr.us-east-2.rds.amazonaws.com/ringer'
+    try:
+      db = RingerDB(url, dbcontext)
+      if db.initialize().isFailure():  useDB=False
+    except Exception as e:
+      print(e)
+      useDB=False
 
 
-ref_target = [
-              ('tight_cutbased' , 'T0HLTElectronT2CaloTight'        ),
-              ('medium_cutbased', 'T0HLTElectronT2CaloMedium'       ),
-              ('loose_cutbased' , 'T0HLTElectronT2CaloLoose'        ),
-              ('vloose_cutbased', 'T0HLTElectronT2CaloVLoose'       ),
-              ]
+try:
 
+  if useDB:
+    db.getContext().job().setStatus( "starting" ); db.commit()
 
-from saphyra import ReferenceReader
-ref_obj = ReferenceReader().load(args.refFile)
+  outputFile = args.outputFile
+  if '/' in outputFile:
+    # This is a path
+    outputFile = (outputFile+'/tunedDiscr.jobID_%s'%str(job_id).zfill(4)).replace('//','/')
+  else:
+    outputFile+='.jobId_%s'%str(job_id).zfill(4)
 
-posproc = [Summary()]
+  ref_target = [
+                ('tight_cutbased' , 'T0HLTElectronT2CaloTight'        ),
+                ('medium_cutbased', 'T0HLTElectronT2CaloMedium'       ),
+                ('loose_cutbased' , 'T0HLTElectronT2CaloLoose'        ),
+                ('vloose_cutbased', 'T0HLTElectronT2CaloVLoose'       ),
+                ]
+  
+  
+  from saphyra import ReferenceReader
+  ref_obj = ReferenceReader().load(args.refFile)
+  
+  from sklearn.model_selection import StratifiedKFold, KFold
+  kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
+  
+  # ppChain
+  from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D
+  pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
+  
+  
+  # NOTE: This must be default, always
+  posproc = [Summary()]
 
-obj = PileupFit( "PileupFit", pileup )
-# Calculate the reference for each operation point
-# using the ringer v6 tuning as reference
-for ref in ref_target:
-  pd = ref_obj.getSgnPassed(ref[0]) / float(ref_obj.getSgnTotal(ref[0]))
-  fa = ref_obj.getBkgPassed(ref[0]) / float(ref_obj.getBkgTotal(ref[0]))
-  obj.add( ref[0], ref[1], pd, fa )
+  correction = PileupFit( "PileupFit", getPileup(args.dataFile) )
+  # Calculate the reference for each operation point
+  # using the ringer v6 tuning as reference
+  for ref in ref_target:
+    # (passed, total)
+    pd = (ref_obj.getSgnPassed(ref[0]) , ref_obj.getSgnTotal(ref[0]))
+    fa = (ref_obj.getBkgPassed(ref[0]) , ref_obj.getBkgTotal(ref[0]))
+    correction.add( ref[0], ref[1], pd, fa )
+  posproc = [Summary(), correction]
+  
+  
+  # Create the panda job 
+  job = PandasJob(  dbcontext, pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
+                    job               = args.configFile, 
+                    #loss              = 'mean_squared_error',
+                    loss              = 'binary_crossentropy',
+                    metrics           = ['accuracy'],
+                    epochs            = 5000,
+                    ppChain           = pp,
+                    crossval          = kf,
+                    outputfile        = outputFile,
+                    class_weight      = True,
+                    #save_history      = False,
+                    )
+  
+  job.posproc   += posproc
+  job.callbacks += [sp(patience=25, verbose=True, save_the_best=True)]
+  job.initialize()
+  
+  if useDB:
+    job.setDatabase( db )
+    db.getContext().job().setStatus('running')
+    db.commit()
+  
+  job.execute()
+  job.finalize()
+  
+  if useDB:
+    db.getContext().job().setStatus('done')
+    db.commit()
+    db.finalize()
+  sys.exit(0)
 
-posproc.append( obj )
-
-from sklearn.model_selection import StratifiedKFold, KFold
-kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
-
-from saphyra import PreProcChain_v1, Norm1
-pp = PreProcChain_v1( [Norm1()] )
-
-# number of input rings
-ninputs = _slice[1] - _slice[0] + 1
-
-job = PandasJob(  job           = args.configFile, 
-                  models        = get_model(ninputs),
-                  loss          = 'mse',
-                  metrics       = ['accuracy'],
-                  epochs        = 5000,
-                  ppChain       = pp,
-                  crossval      = kf,
-                  outputfile    = args.outputFile,
-                  data          = data,
-                  target        = target,
-                  class_weight  = True 
-                  )
-
-job.posproc   += posproc
-job.callbacks += [sp(patience=25, verbose=True, save_the_best=True)]
-job.initialize()
-job.execute()
-job.finalize()
-
-
-
-
-
-
-
-
+except  Exception as e:
+  print(e)
+  if useDB:
+    db.getContext().job().setStatus('failed')
+    db.commit()
+    db.finalize()
+  sys.exit(1)
