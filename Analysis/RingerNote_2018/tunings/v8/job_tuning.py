@@ -153,8 +153,6 @@ try:
     job.setDatabase( db )
     db.getContext().job().setStatus('running')
     db.commit()
-  else:
-    job.setDBContext( dbcontext )
   
   job.execute()
   job.finalize()
