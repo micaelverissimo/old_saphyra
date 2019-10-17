@@ -36,10 +36,16 @@ parentReqParser.add_argument('-j','--jobPath', required = True, metavar='JOB_PAT
                              help = "The path to the job (python script file).")
 
 
+parentReqParser.add_argument('-t','--task', required = False, metavar='task', action='store',
+                             help = "The task name into the database.")
 
-# Very extra parameters
-parentReqParser.add_argument('--db_url', required=False, metavar='db_url', action='store', default=None,
-                            help = "DB url" )
+
+parentReqParser.add_argument('--url', required=False, metavar='url', action='store', default=None,
+                            help = "Database url" )
+
+
+parentReqParser.add_argument('--user', required=False, metavar='user', action='store', default=None,
+                            help = "The user name into the database" )
 
 
 parentReqParser.add_argument('--et', required=False, metavar='etBinIdx', action='store', default=None,
@@ -48,6 +54,10 @@ parentReqParser.add_argument('--et', required=False, metavar='etBinIdx', action=
 
 parentReqParser.add_argument('--eta', required=False, metavar='etaBinIdx', action='store', default=None,
                             help = "eta bin index" )
+
+
+parentReqParser.add_argument('--njobs', required=False, metavar='njobs', action='store', default=None,
+                            help = "Number of jobs (without rucio)" )
 
 
 
@@ -60,7 +70,8 @@ from panda import ioGridParser, GridOutputCollection, GridOutput
 ioGridParser.delete_arguments('grid__inDS', 'grid__nJobs')
 ioGridParser.suppress_arguments( grid__mergeOutput          = False # We disabled it since late 2017, where GRID
                                # added a limited to the total memory and processing time for merging jobs.
-                               , grid_CSV__outputs          = GridOutputCollection( [ GridOutput('td','tunedDiscr.pic.gz')] )
+                               #, grid_CSV__outputs          = GridOutputCollection( [ GridOutput('td','tunedDiscr.pic.gz')] )
+                               , grid_CSV__outputs          = GridOutputCollection( [ GridOutput('td','tunedDiscr*')] )
                                #, grid_CSV__outputs          = GridOutputCollection( [  ] )
                                , grid__nFiles               = None
                                , grid__nFilesPerJob         = 1
@@ -101,12 +112,10 @@ args.set_job_submission_option('inTarBall', args.get_job_submission_option('outT
 args.set_job_submission_option('outTarBall', None )
 args.append_to_job_submission_option( 'secondaryDSs'
                                       , 
-                                        #SecondaryDatasetCollection (
                                         [
                                           SecondaryDataset( key = "REF"    , nFilesPerJob = 1, container = args.refDS        , reusable = True) ,
                                           SecondaryDataset( key = "DATA"   , nFilesPerJob = 1, container = args.dataDS       , reusable = True) ,
                                         ] 
-                                        #)
                                       )
 
 
@@ -114,49 +123,56 @@ args.append_to_job_submission_option( 'secondaryDSs'
 execCommand ="""sh -c '. /setup_envs.sh && python {JOB_PATH} -o tunedDiscr -d %DATA -c %IN -r %REF'""".format(JOB_PATH=args.jobPath)
 
 # Use db
-if args.db_url:
+if args.url:
 
-  # Get the list of files from rucio
-  from panda import get_list_of_files_from_rucio
-  files = get_list_of_files_from_rucio( args.grid__inDS )
-  print("Set %d jobs into the task %s" % (len(files), args.grid__outDS))
+  if not args.njobs:
+    # Get the list of files from rucio
+    from panda import get_list_of_files_from_rucio
+    files = get_list_of_files_from_rucio( args.grid__inDS )
+    print("Set %d jobs into the task %s" % (len(files), args.grid__outDS))
+  else:
+    files = ['dummy_%s.in'%(str(f).zfill(4)) for f in range(int(args.njobs))]
+
 
   from ringerdb import RingerDB
-  db = RingerDB( 'jodafons', args.db_url )
+  db = RingerDB( args.url )
+  
+  
   from ringerdb import Task, Job
   isGPU=True if args.grid__cmtConfig =='nvidia-gpu' else False
-  # task, config, inut, output, cluster
-  task = db.createTask( args.grid__outDS, args.grid__inDS, args.dataDS, args.grid__outDS+"_td", 
-                        args.grid__containerImage, "CERN", 
-                        # Extra
-                        secondaryDataPath="{'refDS':'%s'}" % (args.refDS),
-                        templateExecArgs=execCommand,
-                        etBinIdx=args.et, 
-                        etaBinIdx=args.eta,
-                        isGPU=isGPU,
-                        )
   
-  print(task)
-  for idx, f in enumerate(files):
-    print("Adding job (%d) with config (%s)" %(idx,f))
-    # Create the exec args just for good practicy. This is not used in LCG/CERN grid
-    command = execCommand
-    command = command.replace( '%DATA', args.dataDS )
-    command = command.replace( '%IN'  , args.grid__inDS)
-    command = command.replace( '%REF'  , args.refDS)
-    print(command)
-    job = db.createJob( task, f, idx, execArgs=command, isGPU=isGPU )
+  try:
+    user = db.getUser( args.user )
+    # task, config, inut, output, cluster
+    task = db.createTask( user, args.task, args.grid__inDS, args.dataDS, args.grid__outDS+"_td", 
+                          args.grid__containerImage, "CERN", 
+                          # Extra
+                          secondaryDataPath="{'refDS':'%s'}" % (args.refDS),
+                          templateExecArgs=execCommand,
+                          etBinIdx=args.et, 
+                          etaBinIdx=args.eta,
+                          isGPU=isGPU,
+                          )
+    
+    mainLogger.info( task )
 
-  db.commit()
-  db.close()
+    for idx, f in enumerate(files):
+      mainLogger.info("Adding job (%d) with config (%s)" %(idx,f))
+      # Create the exec args just for good practicy. This is not used in LCG/CERN grid
+      command = execCommand
+      command = command.replace( '%DATA', args.dataDS )
+      command = command.replace( '%IN'  , args.grid__inDS)
+      command = command.replace( '%REF'  , args.refDS)
+      mainLogger.info(command)
+      job = db.createJob( task, f, idx, execArgs=command, isGPU=isGPU )
+    db.commit()
+    db.close()
+  except Exception as e:
+    mainLogger.fatal(e)
 
 
 
 
-
-
-
-from panda import SecondaryDataset, SecondaryDatasetCollection
 
 args.setExec( execCommand  )
 # And run
