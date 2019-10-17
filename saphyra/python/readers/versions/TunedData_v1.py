@@ -23,9 +23,9 @@ class TunedData_v1( LoggerStreamable ):
 
     LoggerStreamable.__init__(self, **kw)
     self._tunedData = []
-    self._username = None
-    self._taskname = None
-    self._jobId = None
+    self._username  = None
+    self._taskname  = None
+    self._jobid     = None
 
 
   def setDBContext( self, context ):

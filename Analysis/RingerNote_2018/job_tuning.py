@@ -109,8 +109,8 @@ try:
   
   # ppChain
   from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D
-  #pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
-  pp = PreProcChain_v1( [Norm1()] )
+  pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
+  #pp = PreProcChain_v1( [Norm1()] )
   
   
   # NOTE: This must be default, always
@@ -130,10 +130,10 @@ try:
   # Create the panda job 
   job = PandasJob(  dbcontext, pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
                     job               = args.configFile, 
-                    loss              = 'mean_squared_error',
-                    #loss              = 'binary_crossentropy',
+                    #loss              = 'mean_squared_error',
+                    loss              = 'binary_crossentropy',
                     metrics           = ['accuracy'],
-                    epochs            = 5000,
+                    epochs            = 1,
                     ppChain           = pp,
                     crossval          = kf,
                     outputfile        = outputFile,
