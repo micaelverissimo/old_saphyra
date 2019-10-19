@@ -257,7 +257,7 @@ class PandasJob( Logger ):
           history = model_for_this_init.fit(x_train, y_train,
                               epochs          = self._epochs,
                               batch_size      = self._batch_size,
-                              verbose         = self._verbose,
+                              verbose         = False,
                               validation_data = (x_val,y_val),
                               # copy protection to avoid the interruption or interference
                               # in the next training (e.g: early stop)
