@@ -1,5 +1,17 @@
 #!/usr/bin/env python
 
+try:
+  from tensorflow.compat.v1 import ConfigProto
+  from tensorflow.compat.v1 import InteractiveSession
+
+  config = ConfigProto()
+  config.gpu_options.allow_growth = True
+  session = InteractiveSession(config=config)
+except Exception as e:
+  print(e)
+  print("Not possible to set gpu allow growth")
+
+
 def getPatterns( path ):
   from Gaugi import load
   d = load(path)
