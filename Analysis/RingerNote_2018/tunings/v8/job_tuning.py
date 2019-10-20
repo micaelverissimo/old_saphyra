@@ -86,7 +86,7 @@ if useDB:
 
 
 try:
-
+  print('starting...')
   if useDB:
     db.getContext().job().setStatus( "starting" ); db.commit()
 
@@ -105,6 +105,7 @@ try:
                 ]
   
   
+  print('loading references...')
   from saphyra import ReferenceReader
   ref_obj = ReferenceReader().load(args.refFile)
   
@@ -120,6 +121,7 @@ try:
   # NOTE: This must be default, always
   posproc = [Summary()]
 
+  print('laoding pileup from data file....')
   correction = PileupFit( "PileupFit", getPileup(args.dataFile) )
   # Calculate the reference for each operation point
   # using the ringer v6 tuning as reference
@@ -130,7 +132,7 @@ try:
     correction.add( ref[0], ref[1], pd, fa )
   posproc = [Summary(), correction]
   
-  
+  print('start panda!')
   # Create the panda job 
   job = PandasJob(  dbcontext, pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
                     job               = args.configFile, 
