@@ -55,9 +55,9 @@ class PandasJob( Logger ):
       from saphyra.readers import JobReader
       job = JobReader().load( job_auto_config )
       # retrive sort/init lists from file
-      self._sorts = job.get_sorts()
-      self._inits = job.get_inits()
-      self._models, self._id_models = job.get_models()
+      self._sorts = job.getSorts()
+      self._inits = job.getInits()
+      self._models, self._id_models = job.getModels()
       self._jobId = job.id()
 
     # get model and tag from model file or lists
