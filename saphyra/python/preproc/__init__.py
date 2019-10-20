@@ -12,6 +12,10 @@ from . import Norm1
 __all__.extend( Norm1.__all__            )
 from .Norm1 import *
 
+from . import RingerRp
+__all__.extend( RingerRp.__all__            )
+from .RingerRp import *
+
 from . import TrackSimpleNorm
 __all__.extend( TrackSimpleNorm.__all__            )
 from .TrackSimpleNorm import *
@@ -23,8 +27,6 @@ from .ShowerShapeSimpleNorm import *
 from . import utilities
 __all__.extend( utilities.__all__            )
 from .utilities import *
-
-
 
 from . import reshape
 __all__.extend( reshape.__all__            )
