@@ -30,7 +30,7 @@ kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
 
 from saphyra.readers.versions import Job_v1
 
-minibatchs = [256,512,1024,2048,4096,8196]
+minibatchs = [32784,16392,8196,4096,2048,1024,512]
 nJobs  = 0
 for idx, minibatch in enumerate(minibatchs):
 
@@ -43,5 +43,5 @@ for idx, minibatch in enumerate(minibatchs):
   job.setMetadata( {'batch_size': minibatch} )
   # save the job
   job.save( 'job.minibatch.%d' % idx )
-
+  nJobs+=1
 
