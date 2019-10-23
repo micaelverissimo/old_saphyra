@@ -49,7 +49,7 @@ class TunedData_v1( LoggerStreamable ):
                             'history'  : history,
                             'sequence' : json.loads(model.to_json()),
                             'weights'  : model.get_weights() ,
-                            'metadata' : metadata, 
+                            'metadata' : metadata,
                            })
 
 
@@ -61,7 +61,8 @@ class TunedData_v1( LoggerStreamable ):
                             'history'  : context.getHandler("history"),
                             'sequence' : json.loads(context.getHandler("model").to_json()),
                             'weights'  : context.getHandler("model").get_weights() ,
-                            'metadata' : metadata, 
+                            'metadata' : metadata,
+                            'time'     : context.getHandler('time'),
                            })
 
 

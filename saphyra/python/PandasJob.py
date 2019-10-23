@@ -173,7 +173,7 @@ class PandasJob( Logger ):
       if self.db():
         if self.db().initialize().isFailure():
           MSG_ERROR( self, "Data base connection failed...")
-          self._db = None        
+          self._db = None
 
 
     return StatusCode.SUCCESS
@@ -265,6 +265,10 @@ class PandasJob( Logger ):
                               class_weight    = compute_class_weight('balanced',np.unique(y_train),y_train) if self._class_weight else None,
                               shuffle         = True).history
 
+          end = datetime.now()
+          self.getContext().setHandler("time" , end-start)
+
+
           if not self._save_history:
             # NOTE: overwrite to slim version. This is used to reduce the output size
             history = {}
@@ -277,9 +281,6 @@ class PandasJob( Logger ):
             MSG_INFO( self, "Executing the pos processor %s", proc.name() )
             if proc.execute( self.getContext() ).isFailure():
               MSG_ERROR(self, "There is an erro in %s", proc.name())
-
-          end = datetime.now()
-          self.getContext().setHandler("time" , end-start)
 
           # add the tuned parameters to the output file
           self._tunedData.attach_ctx( self.getContext() )
