@@ -14,121 +14,51 @@ pp = PreProcChain_v1( [Norm1()] )
 
 
 
-def get_models( kernel_size ):  
+def get_models( ):  
   
   from tensorflow.keras.models import Sequential
   from tensorflow.keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
+  filter_conv_1       = [4,8,16,32,64]
+  kernel_size_conv_1  = [2,4,6,8]
+  filter_conv_2       = [4,8,16,32,64]
+  kernel_size_conv_2  = [2,4,6,8]
+  neurons_dense_1     = [8,16,32,64,128]
 
- 
-  model0 = Sequential()
-  model0.add(Conv1D(8, kernel_size=kernel_size, activation='relu', input_shape=(100,1) )) 
-  model0.add(Dropout(0.25))
-  model0.add(Flatten())
-  model0.add(Dense(16,  activation='relu', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model0.add(Dropout(0.25))
-  model0.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model0.add(Activation('sigmoid'))
-  
-  
-  
-  model1 = Sequential()
-  model1.add(Conv1D(16, kernel_size=kernel_size, activation='relu', input_shape=(100,1) )) 
-  model1.add(Dropout(0.25))
-  model1.add(Flatten())
-  model1.add(Dense(32,  activation='relu', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model1.add(Dropout(0.25))
-  model1.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model1.add(Activation('sigmoid'))
-  
-  
-  model2 = Sequential()
-  model2.add(Conv1D(32, kernel_size=kernel_size, activation='relu', input_shape=(100,1) )) 
-  model2.add(Dropout(0.25))
-  model2.add(Flatten())
-  model2.add(Dense(64,  activation='relu', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model2.add(Dropout(0.25))
-  model2.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model2.add(Activation('sigmoid'))
-  
-  
-  
-  model3 = Sequential()
-  model3.add(Conv1D(8, kernel_size=kernel_size, activation='relu', input_shape=(100,1) )) 
-  model3.add(Conv1D(16, kernel_size=kernel_size, activation='relu' )) 
-  model3.add(Dropout(0.25))
-  model3.add(Flatten())
-  model3.add(Dense(32,  activation='relu', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model3.add(Dropout(0.25))
-  model3.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model3.add(Activation('sigmoid'))
-  
-  
-  
-  
-  model4 = Sequential()
-  model4.add(Conv1D(16, kernel_size=kernel_size, activation='relu', input_shape=(100,1) )) 
-  model4.add(Conv1D(32, kernel_size=kernel_size, activation='relu' )) 
-  model4.add(Dropout(0.25))
-  model4.add(Flatten())
-  model4.add(Dense(64,  activation='relu', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model4.add(Dropout(0.25))
-  model4.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model4.add(Activation('sigmoid'))
-  
-  
-  
-  
-  
-  
-  model5 = Sequential()
-  model5.add(Conv1D(8, kernel_size=kernel_size, activation='relu', input_shape=(100,1) )) 
-  model5.add(Conv1D(16, kernel_size=kernel_size, activation='relu' )) 
-  model5.add(Dropout(0.25))
-  model5.add(Flatten())
-  model5.add(Dense(32,  activation='relu', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model5.add(Dropout(0.25))
-  model5.add(Dense(16,  activation='relu', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model5.add(Dropout(0.25))
-  model5.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model5.add(Activation('sigmoid'))
-  
-  
-  
-  
-  model6 = Sequential()
-  model6.add(Conv1D(16, kernel_size=kernel_size, activation='relu', input_shape=(100,1) )) 
-  model6.add(Conv1D(32, kernel_size=kernel_size, activation='relu' )) 
-  model6.add(Dropout(0.25))
-  model6.add(Flatten())
-  model6.add(Dense(64,  activation='relu', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model6.add(Dropout(0.25))
-  model6.add(Dense(32,  activation='relu', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model6.add(Dropout(0.25))
-  model6.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model6.add(Activation('sigmoid'))
-  
-  
-  
-  model7 = Sequential()
-  model7.add(Conv1D(32, kernel_size=kernel_size, activation='relu', input_shape=(100,1) )) 
-  model7.add(Conv1D(64, kernel_size=kernel_size, activation='relu' )) 
-  model7.add(Dropout(0.25))
-  model7.add(Conv1D(128, kernel_size=kernel_size, activation='relu' )) 
-  model7.add(Dropout(0.25))
-  model7.add(Flatten())
-  model7.add(Dense(64,  activation='relu', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model7.add(Dropout(0.25))
-  model7.add(Dense(32,  activation='relu', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model7.add(Dropout(0.25))
-  model7.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-  model7.add(Activation('sigmoid'))
-  
-  
-  modelCol = [model0,model1,model2,model3,model4,model5,model6,model7]
-  return modelCol
+  models = []
+
+  # Build all models with only one conv layer
+  for f1 in filter_conv_1:
+    for k1 in kernel_size_conv_1:
+      for d1 in neurons_dense_1:
+        model = Sequential()
+        model.add(Conv1D(f1, kernel_size=k1, activation='relu', input_shape=(100,1),name='conv1' )) 
+        model.add(Flatten())
+        model.add(Dense(d1,  activation='relu',name='dense1'))
+        model.add(Dropout(0.5))
+        model.add(Dense(1, activation='linear',name='dense2'))
+        model.add(Activation('sigmoid',name='output'))
+        models.append( model )
 
 
+  # Build all models with only one conv layer
+  for f1 in filter_conv_1:
+    print(f1)
+    for k1 in kernel_size_conv_1:
+      for f2 in filter_conv_2:
+        for k2 in kernel_size_conv_2:
+          for d1 in neurons_dense_1:
+            model = Sequential()
+            model.add(Conv1D(f1, kernel_size=k1, activation='relu', input_shape=(100,1),name='conv1' )) 
+            model.add(Conv1D(f2, kernel_size=k2, activation='relu',name='conv2' )) 
+            model.add(Flatten())
+            model.add(Dense(d1,  activation='relu', name='dense1'))
+            model.add(Dropout(0.5))
+            model.add(Dense(1, activation='linear',name='dense2'))
+            model.add(Activation('sigmoid',name='output'))
+            models.append( model )
 
+  print("Total number of models: %d" % len(models) )
+  return models
 
 
 
@@ -139,17 +69,17 @@ kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
 #kf = KFold(n_splits=10, random_state=1234, shuffle=True)
 
 
-
+models = get_models()
 from Gaugi import PythonLoopingBounds
-createPandaJobs( models        = get_models(2),
+createPandaJobs( models        = models,
         ppChain       = pp,
         crossVal      = kf,
-        nInits        = 5,
-        nInitsPerJob  = 2,
+        nInits        = 1,
+        nInitsPerJob  = 1,
         sortBounds    = PythonLoopingBounds(10),
         nSortsPerJob  = 1,
-        nModelsPerJob = 2,
-        outputFolder  = 'job_config.ringer.v10.cnn.10sorts.5inits'
+        nModelsPerJob = 1,
+        outputFolder  = 'job_config.ringer.v10.cnn.10sorts.1inits'
         )
 
 
