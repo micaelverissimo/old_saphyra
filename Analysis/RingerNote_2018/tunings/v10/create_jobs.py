@@ -77,9 +77,9 @@ createPandaJobs( models        = models,
         nInits        = 1,
         nInitsPerJob  = 1,
         sortBounds    = PythonLoopingBounds(10),
-        nSortsPerJob  = 1,
+        nSortsPerJob  = 10,
         nModelsPerJob = 1,
-        outputFolder  = 'job_config.ringer.v10.cnn.10sorts.1inits'
+        outputFolder  = 'job_config.ringer.v10.cnn_grid_search.10sorts.1inits'
         )
 
 

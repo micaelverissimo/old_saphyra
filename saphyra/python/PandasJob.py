@@ -51,9 +51,12 @@ class PandasJob( Logger ):
     job_auto_config = retrieve_kw( kw, 'job'        , NotSet                )
     # read the job configuration from file
     if job_auto_config:
-      MSG_INFO( self, 'Reading job configuration from: %s', job_auto_config )
-      from saphyra.readers import JobReader
-      job = JobReader().load( job_auto_config )
+      if type(job_auto_config) is str:
+        MSG_INFO( self, 'Reading job configuration from: %s', job_auto_config )
+        from saphyra.readers import JobReader
+        job = JobReader().load( job_auto_config )
+      else:
+        job = job_auto_config
       # retrive sort/init lists from file
       self._sorts = job.getSorts()
       self._inits = job.getInits()

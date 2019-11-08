@@ -101,10 +101,10 @@ class CreatePandaJobs( Logger ):
           from saphyra.readers.versions import Job_v1
           job = Job_v1()
           # to be user by the database table
-          job.set_id( nJobs )
-          job.set_sorts(list(sortWindowBounds))
-          job.set_inits(list(initWindowBounds))
-          job.set_models([models[i] for i in list(modelWindowBounds)],  list(modelWindowBounds) )
+          job.setId( nJobs )
+          job.setSorts(list(sortWindowBounds))
+          job.setInits(list(initWindowBounds))
+          job.setModels([models[i] for i in list(modelWindowBounds)],  list(modelWindowBounds) )
          
           job.save( outputFolder+'/job_container/' + ('job_config.ID_%s.%s_%s_%s.%s') %
               ( 
