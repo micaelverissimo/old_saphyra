@@ -1,5 +1,10 @@
 __all__ = []
 
+
+from . import PatternReader
+__all__.extend( PatternReader.__all__              )
+from .PatternReader import *
+
 from . import CrossValReader
 __all__.extend( CrossValReader.__all__              )
 from .CrossValReader import *

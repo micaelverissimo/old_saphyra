@@ -191,8 +191,9 @@ class PandasJob( Logger ):
 
     for isort, sort in enumerate( self._sorts ):
 
-      # get the current kfold
-      x_train, x_val, y_train, y_val = self.pattern_g( self._pattern_generator, sort )
+      # get the current kfold and train, val sets
+      x_train, x_val, y_train, y_val, self._index_from_cv = self.pattern_g( self._pattern_generator, self._crossval, sort )
+
 
       # Pre processing step
       if self._ppChain.takesParamsFromData:
@@ -327,20 +328,10 @@ class PandasJob( Logger ):
 
 
 
-  def pattern_g( self, generator, sort ):
-    # this generator must be implemented by the user
-    data, target = generator()
-
+  def pattern_g( self, generator, crossval, sort ):
     # If the index is not set, you muat run the cross validation Kfold to get the index
-    if self._index_from_cv is NotSet:
-      self._index_from_cv = [(train_index, val_index) for train_index, val_index in self._crossval.split(data,target)]
-
-    # get the current kfold
-    x_train = data[   self._index_from_cv[sort][0]]
-    y_train = target[ self._index_from_cv[sort][0]]
-    x_val   = data[   self._index_from_cv[sort][1]]
-    y_val   = target[ self._index_from_cv[sort][1]]
-    return x_train, x_val, y_train, y_val
+    # this generator must be implemented by the user
+    return generator(crossval, sort)
 
 
 

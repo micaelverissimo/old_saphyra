@@ -6,80 +6,74 @@ from saphyra import *
 
 
 # ppChain
-from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D
+from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D, NoPreProc
 
-pp = PreProcChain_v1( [Norm1()] )
-
-
+pp = PreProcChain_v1( [NoPreProc()] )
 
 
 
-def get_models( ):  
-  
-  from tensorflow.keras.models import Sequential
-  from tensorflow.keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
-  filter_conv_1       = [4,8,16,32,64]
-  kernel_size_conv_1  = [2,4,6,8]
-  filter_conv_2       = [4,8,16,32,64]
-  kernel_size_conv_2  = [2,4,6,8]
-  neurons_dense_1     = [8,16,32,64,128]
+# import tensorflow/keras wrapper
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.layers import Input, Concatenate, Reshape, Dense, Dropout, Activation, Conv1D, Flatten, MaxPooling1D
 
-  models = []
+input_ps = Input(shape=(8,1))
+conv1_ps  = Conv1D( 8, kernel_size=2, activation='relu', name='conv1_ps' )(input_ps)
+#conv2_ps  = Conv1D( 8, kernel_size=2, activation='relu', name='conv2_ps' )(conv1_ps)
 
-  # Build all models with only one conv layer
-  for f1 in filter_conv_1:
-    for k1 in kernel_size_conv_1:
-      for d1 in neurons_dense_1:
-        model = Sequential()
-        model.add(Conv1D(f1, kernel_size=k1, activation='relu', input_shape=(100,1),name='conv1' )) 
-        model.add(Flatten())
-        model.add(Dense(d1,  activation='relu',name='dense1'))
-        model.add(Dropout(0.5))
-        model.add(Dense(1, activation='linear',name='dense2'))
-        model.add(Activation('sigmoid',name='output'))
-        models.append( model )
+input_em1 = Input(shape=(64,1))
+conv1_em1  = Conv1D( 8, kernel_size=2, activation='relu', name='conv1_em1' )(input_em1)
+#conv2_em1  = Conv1D( 8, kernel_size=2, activation='relu', name='conv2_em1' )(conv1_em1)
+
+input_em2 = Input(shape=(8,1))
+conv1_em2  = Conv1D( 8, kernel_size=2, activation='relu', name='conv1_em2' )(input_em2)
+#conv2_em2  = Conv1D( 8, kernel_size=2, activation='relu', name='conv2_em2' )(conv1_em2)
+
+input_em3 = Input(shape=(8,1))
+conv1_em3  = Conv1D( 8, kernel_size=2, activation='relu', name='conv1_em3' )(input_em3)
+#conv2_em3  = Conv1D( 8, kernel_size=2, activation='relu', name='conv2_em3' )(conv1_em3)
+
+input_had1 = Input(shape=(4,1))
+conv1_had1  = Conv1D( 8, kernel_size=2, activation='relu', name='conv1_had1' )(input_had1)
+#conv2_had1  = Conv1D( 8, kernel_size=2, activation='relu', name='conv2_had1' )(conv1_had1)
+
+input_had2 = Input(shape=(4,1))
+conv1_had2  = Conv1D( 8, kernel_size=2, activation='relu', name='conv1_had2' )(input_had2)
+#conv2_had2  = Conv1D( 8, kernel_size=2, activation='relu', name='conv2_had2' )(conv1_had2)
+
+input_had3 = Input(shape=(4,1))
+conv1_had3  = Conv1D( 8, kernel_size=2, activation='relu', name='conv1_had3' )(input_had3)
+#conv2_had3  = Conv1D( 8, kernel_size=2, activation='relu', name='conv2_had3' )(conv1_had3)
 
 
-  # Build all models with only one conv layer
-  for f1 in filter_conv_1:
-    print(f1)
-    for k1 in kernel_size_conv_1:
-      for f2 in filter_conv_2:
-        for k2 in kernel_size_conv_2:
-          for d1 in neurons_dense_1:
-            model = Sequential()
-            model.add(Conv1D(f1, kernel_size=k1, activation='relu', input_shape=(100,1),name='conv1' )) 
-            model.add(Conv1D(f2, kernel_size=k2, activation='relu',name='conv2' )) 
-            model.add(Flatten())
-            model.add(Dense(d1,  activation='relu', name='dense1'))
-            model.add(Dropout(0.5))
-            model.add(Dense(1, activation='linear',name='dense2'))
-            model.add(Activation('sigmoid',name='output'))
-            models.append( model )
 
-  print("Total number of models: %d" % len(models) )
-  return models
-
+merge_all = Concatenate(axis=1)([conv1_ps,conv1_em1,conv1_em2,conv1_em3,conv1_had1,conv1_had2,conv1_had3])
+#merge_all = Concatenate(axis=1)([conv2_ps,conv2_em1,conv2_em2,conv2_em3,conv2_had1,conv2_had2,conv2_had3])
+conv1_all  = Conv1D( 64, kernel_size=3, activation='relu', name='conv1_all' )(merge_all)
+#conv2_all  = Conv1D( 64, kernel_size=2, activation='relu', name='conv2_all' )(conv1_all)
+#conv3_all  = Conv1D( 64, kernel_size=2, activation='relu', name='conv3_all' )(conv2_all)
+flatten   = Flatten(name='flatten')(conv1_all)
+dense_1   = Dense(64,  activation='relu',name='dense1')(flatten)
+dense_2   = Dense(1,  activation='linear',name='dense2')(dense_1)
+output    = Activation('sigmoid',name='output')(dense_2)
+model     = Model( [input_ps,input_em1,input_em2,input_em3,input_had1,input_had2,input_had3], output )
 
 
 
 
 from sklearn.model_selection import StratifiedKFold, KFold
 kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
-#kf = KFold(n_splits=10, random_state=1234, shuffle=True)
 
 
-models = get_models()
 from Gaugi import PythonLoopingBounds
-createPandaJobs( models        = models,
+createPandaJobs( models        = [model],
         ppChain       = pp,
         crossVal      = kf,
         nInits        = 1,
         nInitsPerJob  = 1,
         sortBounds    = PythonLoopingBounds(10),
-        nSortsPerJob  = 10,
+        nSortsPerJob  = 1,
         nModelsPerJob = 1,
-        outputFolder  = 'job_config.ringer.v10.cnn_grid_search.10sorts.1inits'
+        outputFolder  = 'job_config.ringer.v10.RingerNet.10sorts.1inits'
         )
 
 

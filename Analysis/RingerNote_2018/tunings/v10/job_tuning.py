@@ -13,13 +13,57 @@ except Exception as e:
 
 
 
+def getPatterns( path, cv, sort):
+ 
+  PS  = np.arange(0,8)
+  EM1 = np.arange(8,72)
+  EM2 = np.arange(72,80)
+  EM3 = np.arange(80,88)
+  HAD1= np.arange(88,92)
+  HAD2= np.arange(92,96)
+  HAD3= np.arange(96,100)
+  
+  def norm1( data ):
+      norms = np.abs( data.sum(axis=1) )
+      norms[norms==0] = 1
+      return data/norms[:,None]
+  
+  def reshape( data ):
+      data = np.array([data])
+      return np.transpose(data, [1,2,0])
 
-def getPatterns( path ):
-  from Gaugi import load
+  # Load data
   d = load(path)
-  data = d['data'][:,1:101]
+  data = norm1(d['data'][:,1:101])
   target = d['target']
-  return data, target
+
+  # This is mandatory
+  splits = [(train_index, val_index) for train_index, val_index in cv.split(data,target)]
+
+  x_train = [    reshape(data [ splits[0][0] ][:,PS ] ),
+                 reshape(data [ splits[0][0] ][:,EM1] ),
+                 reshape(data [ splits[0][0] ][:,EM2] ),
+                 reshape(data [ splits[0][0] ][:,EM3] ),
+                 reshape(data [ splits[0][0] ][:,HAD1]),
+                 reshape(data [ splits[0][0] ][:,HAD2]),
+                 reshape(data [ splits[0][0] ][:,HAD3]),
+            ]
+  
+  y_train = target [ splits[0][0] ]
+  x_val =[
+          reshape(data [ splits[0][1] ][:, PS   ]),
+          reshape(data [ splits[0][1] ][:, EM1  ]),
+          reshape(data [ splits[0][1] ][:, EM2  ]),
+          reshape(data [ splits[0][1] ][:, EM3  ]),
+          reshape(data [ splits[0][1] ][:, HAD1 ]),
+          reshape(data [ splits[0][1] ][:, HAD2 ]),
+          reshape(data [ splits[0][1] ][:, HAD3 ]),
+         ]
+  y_val = target [ splits[0][1] ]
+
+  return x_train, x_val, y_train, y_val, splits
+
+
 
 
 def getPileup( path ):
@@ -126,8 +170,8 @@ try:
   kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
 
   # ppChain
-  from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D
-  pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
+  from saphyra import PreProcChain_v1, NoPreProc
+  pp = PreProcChain_v1( [NoPreProc()] )
 
 
   # NOTE: This must be default, always
