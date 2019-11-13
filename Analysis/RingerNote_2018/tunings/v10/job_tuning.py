@@ -40,26 +40,26 @@ def getPatterns( path, cv, sort):
   # This is mandatory
   splits = [(train_index, val_index) for train_index, val_index in cv.split(data,target)]
 
-  x_train = [    reshape(data [ splits[0][0] ][:,PS ] ),
-                 reshape(data [ splits[0][0] ][:,EM1] ),
-                 reshape(data [ splits[0][0] ][:,EM2] ),
-                 reshape(data [ splits[0][0] ][:,EM3] ),
-                 reshape(data [ splits[0][0] ][:,HAD1]),
-                 reshape(data [ splits[0][0] ][:,HAD2]),
-                 reshape(data [ splits[0][0] ][:,HAD3]),
+  x_train = [    reshape(data [ splits[sort][0] ][:,PS ] ),
+                 reshape(data [ splits[sort][0] ][:,EM1] ),
+                 reshape(data [ splits[sort][0] ][:,EM2] ),
+                 reshape(data [ splits[sort][0] ][:,EM3] ),
+                 reshape(data [ splits[sort][0] ][:,HAD1]),
+                 reshape(data [ splits[sort][0] ][:,HAD2]),
+                 reshape(data [ splits[sort][0] ][:,HAD3]),
             ]
   
-  y_train = target [ splits[0][0] ]
+  y_train = target [ splits[sort][0] ]
   x_val =[
-          reshape(data [ splits[0][1] ][:, PS   ]),
-          reshape(data [ splits[0][1] ][:, EM1  ]),
-          reshape(data [ splits[0][1] ][:, EM2  ]),
-          reshape(data [ splits[0][1] ][:, EM3  ]),
-          reshape(data [ splits[0][1] ][:, HAD1 ]),
-          reshape(data [ splits[0][1] ][:, HAD2 ]),
-          reshape(data [ splits[0][1] ][:, HAD3 ]),
+          reshape(data [ splits[sort][1] ][:, PS   ]),
+          reshape(data [ splits[sort][1] ][:, EM1  ]),
+          reshape(data [ splits[sort][1] ][:, EM2  ]),
+          reshape(data [ splits[sort][1] ][:, EM3  ]),
+          reshape(data [ splits[sort][1] ][:, HAD1 ]),
+          reshape(data [ splits[sort][1] ][:, HAD2 ]),
+          reshape(data [ splits[sort][1] ][:, HAD3 ]),
          ]
-  y_val = target [ splits[0][1] ]
+  y_val = target [ splits[sort][1] ]
 
   return x_train, x_val, y_train, y_val, splits
 
