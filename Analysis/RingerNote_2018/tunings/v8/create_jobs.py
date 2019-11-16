@@ -20,8 +20,8 @@ def get_model( ):
   modelCol = []
   for n in range(2,15+1):
     model = Sequential()
-    model.add(Dense(n, input_shape=(100,), activation='tanh', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
-    model.add(Dense(1, activation='linear', kernel_initializer='random_uniform', bias_initializer='random_uniform'))
+    model.add(Dense(n, input_shape=(100,), activation='tanh'))
+    model.add(Dense(1, activation='linear'))
     model.add(Activation('tanh'))
     modelCol.append(model)
   return modelCol

@@ -92,15 +92,15 @@ conv2d_1_had_merged = Conv2D( 16, kernel_size=(1,1), activation='relu', name='co
 # Explore all layers
 merge_all          = Concatenate(axis=1,name='concat_all')([conv2d_1_em_merged, conv2d_1_had_merged]) # output is (None, 8, 8 , 16)
 conv2d_1_merge_all =  Conv2D( 8, kernel_size=(2,2), name='conv2d_1_merge_all')(merge_all) # output is (None, 7, 7, 8)
-conv2d_2_merge_all =  Conv2D( 16, kernel_size=(2,2), name='conv2d_2_merge_all')(conv2d_1_merge_all) # output is (None, 6, 6, 16)
+conv2d_2_merge_all =  Conv2D( 16, kernel_size=(2,2), name='conv2d_2_merge_all')(Dropout(0,5)(conv2d_1_merge_all)) # output is (None, 6, 6, 16)
 conv2d_3_merge_all =  Conv2D( 32, kernel_size=(2,2), name='conv2d_3_merge_all')(conv2d_2_merge_all) # output is (None, 5, 5, 32)
 
 
 
 # Fully connected (classification layer)
-flatten   = Flatten(name='flatten')(conv2d_3_merge_all)
+flatten   = Flatten(name='flatten')(Dropout(0.5)(conv2d_3_merge_all))
 dense_1   = Dense(64,  activation='relu',name='dense_1')(flatten)
-dense_2   = Dense(8,  activation='relu' ,name='dense_2')(dense_1)
+dense_2   = Dense(8,  activation='relu' ,name='dense_2')(Dropout(0.5)(dense_1))
 dense_3   = Dense(1,  activation='linear',name='dense_3')(dense_2)
 output    = Activation('sigmoid',name='output')(dense_3)
 model     = Model( [input_ps,input_em1,input_em2,input_em3,input_had1,input_had2,input_had3], output )

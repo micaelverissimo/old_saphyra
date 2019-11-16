@@ -12,12 +12,21 @@ except Exception as e:
   print("Not possible to set gpu allow growth")
 
 
-def getPatterns( path ):
+def getPatterns( path, cv, sort):
   from Gaugi import load
   d = load(path)
   data = d['data'][:,1:101]
   target = d['target']
-  return data, target
+
+  splits = [(train_index, val_index) for train_index, val_index in cv.split(data,target)]
+  
+  x_train = data [ splits[sort][0]]
+  y_train = target [ splits[sort][0] ]
+  x_val = data [ splits[sort][1]]
+  y_val = target [ splits[sort][1] ]
+
+  return x_train, x_val, y_train, y_val, splits
+
 
 
 def getPileup( path ):
