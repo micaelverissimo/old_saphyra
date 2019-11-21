@@ -1,11 +1,32 @@
 #!/usr/bin/env python
 
-def getPatterns( path ):
+try:
+  from tensorflow.compat.v1 import ConfigProto
+  from tensorflow.compat.v1 import InteractiveSession
+
+  config = ConfigProto()
+  config.gpu_options.allow_growth = True
+  session = InteractiveSession(config=config)
+except Exception as e:
+  print(e)
+  print("Not possible to set gpu allow growth")
+
+
+def getPatterns( path, cv, sort):
   from Gaugi import load
   d = load(path)
   data = d['data'][:,1:101]
   target = d['target']
-  return data, target
+
+  splits = [(train_index, val_index) for train_index, val_index in cv.split(data,target)]
+  
+  x_train = data [ splits[sort][0]]
+  y_train = target [ splits[sort][0] ]
+  x_val = data [ splits[sort][1]]
+  y_val = target [ splits[sort][1] ]
+
+  return x_train, x_val, y_train, y_val, splits
+
 
 
 def getPileup( path ):
@@ -55,6 +76,10 @@ parser.add_argument('-u', '--user', action='store',
         dest='user', required = True, default = None,
             help = "The user name into the database")
 
+parser.add_argument('--useDB', action='store', 
+        dest='useDB', required = False, default = False,
+            help = "Use database.")
+
 
 if len(sys.argv)==1:
   parser.print_help()
@@ -64,7 +89,7 @@ args = parser.parse_args()
 
 
 # Check if this job will run in DB mode
-useDB = True if (args.task and args.user) else False
+useDB = args.useDB
 job_id = getJobConfigId( args.configFile )
 from ringerdb import DBContext
 dbcontext = DBContext( args.user, args.task, job_id )
@@ -82,7 +107,7 @@ if useDB:
 
 
 try:
-
+  print('starting...')
   if useDB:
     db.getContext().job().setStatus( "starting" ); db.commit()
 
@@ -101,6 +126,7 @@ try:
                 ]
   
   
+  print('loading references...')
   from saphyra import ReferenceReader
   ref_obj = ReferenceReader().load(args.refFile)
   
@@ -109,13 +135,14 @@ try:
   
   # ppChain
   from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D
-  pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
-  #pp = PreProcChain_v1( [Norm1()] )
+  #pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
+  pp = PreProcChain_v1( [Norm1()] )
   
   
   # NOTE: This must be default, always
   posproc = [Summary()]
 
+  print('laoding pileup from data file....')
   correction = PileupFit( "PileupFit", getPileup(args.dataFile) )
   # Calculate the reference for each operation point
   # using the ringer v6 tuning as reference
@@ -126,14 +153,14 @@ try:
     correction.add( ref[0], ref[1], pd, fa )
   posproc = [Summary(), correction]
   
-  
+  print('start panda!')
   # Create the panda job 
   job = PandasJob(  dbcontext, pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
                     job               = args.configFile, 
-                    #loss              = 'mean_squared_error',
-                    loss              = 'binary_crossentropy',
+                    loss              = 'mean_squared_error',
+                    #loss              = 'binary_crossentropy',
                     metrics           = ['accuracy'],
-                    epochs            = 1,
+                    epochs            = 5000,
                     ppChain           = pp,
                     crossval          = kf,
                     outputfile        = outputFile,
@@ -149,8 +176,6 @@ try:
     job.setDatabase( db )
     db.getContext().job().setStatus('running')
     db.commit()
-  else:
-    job.setDBContext( dbcontext )
   
   job.execute()
   job.finalize()
