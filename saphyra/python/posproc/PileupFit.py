@@ -74,8 +74,8 @@ class PileupFit( Algorithm ):
     x_val , y_val    = context.getHandler("valData")
 
     # Get all outputs before the last activation function
-    y_pred = model.predict( x_train, batch_size = 1024*6, verbose=1 )
-    y_pred_val = model.predict( x_val, batch_size = 1024*6, verbose=1 )
+    y_pred = model.predict( x_train, batch_size = 1024, verbose=1 )
+    y_pred_val = model.predict( x_val, batch_size = 1024, verbose=1 )
 
     # Get the pileup value for each event using the
     # external information

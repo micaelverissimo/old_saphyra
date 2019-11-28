@@ -55,7 +55,7 @@ class TunedData_v1( LoggerStreamable ):
 
 
   def attach_ctx( self, context ,  metadata={}):
-    self._tunedData.append({'imodel'   : context.getHandler("id_model"),
+    self._tunedData.append({'imodel'   : context.getHandler("imodel"),
                             'sort'     : context.getHandler("sort"),
                             'init'     : context.getHandler("init"),
                             'history'  : context.getHandler("history"),

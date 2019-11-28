@@ -61,6 +61,7 @@ class PandasJob( Logger ):
       self._sorts = job.getSorts()
       self._inits = job.getInits()
       self._models, self._id_models = job.getModels()
+      print (self._id_models)
       self._jobId = job.id()
 
     # get model and tag from model file or lists

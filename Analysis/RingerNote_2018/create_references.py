@@ -10,21 +10,22 @@ import argparse
 import sys,os
 import numpy as np
 
-path = '/eos/user/j/jodafons/CERN-DATA/tuning/data17_201907XX_v10/files/data17_13TeV.AllPeriods.sgn.probes_lhmedium_EGAM1.bkg.VProbes_EGAM7.GRL_v97/*.npz'
+#path = '/eos/user/j/jodafons/CERN-DATA/tuning/data17_201907XX_v10/files/data17_13TeV.AllPeriods.sgn.probes_lhmedium_EGAM1.bkg.VProbes_EGAM7.GRL_v97/*.npz'
+path = '/eos/user/j/jodafons/CERN-DATA/tuning/RingerNote_2018/files/data17_13TeV.AllPeriods.sgn.probes_lhmedium_EGAM2.bkg.VProbes_EGAM7.GRL_v97//*.npz'
 
 from Gaugi import expandFolders
 fileList = expandFolders(path)
 
 
 ref_target = [
-              ('tight_v8'       , 'T0HLTElectronRingerTight_v8'     ),
-              ('medium_v8'      , 'T0HLTElectronRingerMedium_v8'    ),
-              ('loose_v8'       , 'T0HLTElectronRingerLoose_v8'     ),
-              ('vloose_v8'      , 'T0HLTElectronRingerVeryLoose_v8' ),
-              ('tight_v6'       , 'T0HLTElectronRingerTight_v6'     ),
-              ('medium_v6'      , 'T0HLTElectronRingerMedium_v6'    ),
-              ('loose_v6'       , 'T0HLTElectronRingerLoose_v6'     ),
-              ('vloose_v6'      , 'T0HLTElectronRingerVeryLoose_v6' ),
+              #('tight_v8'       , 'T0HLTElectronRingerTight_v8'     ),
+              #('medium_v8'      , 'T0HLTElectronRingerMedium_v8'    ),
+              #('loose_v8'       , 'T0HLTElectronRingerLoose_v8'     ),
+              #('vloose_v8'      , 'T0HLTElectronRingerVeryLoose_v8' ),
+              #('tight_v6'       , 'T0HLTElectronRingerTight_v6'     ),
+              #('medium_v6'      , 'T0HLTElectronRingerMedium_v6'    ),
+              #('loose_v6'       , 'T0HLTElectronRingerLoose_v6'     ),
+              #('vloose_v6'      , 'T0HLTElectronRingerVeryLoose_v6' ),
               ('tight_cutbased' , 'T0HLTElectronT2CaloTight'        ),
               ('medium_cutbased', 'T0HLTElectronT2CaloMedium'       ),
               ('loose_cutbased' , 'T0HLTElectronT2CaloLoose'        ),
@@ -43,7 +44,7 @@ for f in fileList:
   data = raw['data'][:,1:101]
   target = raw['target']
   
-  print ff 
+  print (ff )
   etBins = raw["etBins"] 
   etaBins = raw["etaBins"  ] 
   etBinIdx = raw["etBinIdx" ] 

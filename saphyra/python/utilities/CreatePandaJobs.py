@@ -77,7 +77,7 @@ class CreatePandaJobs( Logger ):
     # creating the job mechanism file first
 
     mkdir_p(outputFolder)
-    mkdir_p(outputFolder+ '/job_container')
+    #mkdir_p(outputFolder+ '/job_container')
     
     if type(models) is not list:
       models = [models]
@@ -106,7 +106,7 @@ class CreatePandaJobs( Logger ):
           job.setInits(list(initWindowBounds))
           job.setModels([models[i] for i in list(modelWindowBounds)],  list(modelWindowBounds) )
          
-          job.save( outputFolder+'/job_container/' + ('job_config.ID_%s.%s_%s_%s.%s') %
+          job.save( outputFolder+'/' + ('job_config.ID_%s.%s_%s_%s.%s') %
               ( 
                 str(nJobs).zfill(4),
                 modelWindowBounds.formattedString('m'),
@@ -115,21 +115,21 @@ class CreatePandaJobs( Logger ):
           nJobs+=1
 
     MSG_INFO( self, "A total of %d jobs...", nJobs)
-    from saphyra.readers.versions import CrossVal_v1
-    cv = CrossVal_v1()
-    cv.set_object(crossval)
-    cv.save( outputFolder+'/' +('crossvalFile_%s')%(time_stamp) )
+    #from saphyra.readers.versions import CrossVal_v1
+    #cv = CrossVal_v1()
+    #cv.set_object(crossval)
+    #cv.save( outputFolder+'/' +('crossvalFile_%s')%(time_stamp) )
     
 
-    from saphyra.readers.versions import Model_v1
-    m = Model_v1()
-    m.set_models( models , range(len(models)))
-    m.save( outputFolder+'/'+ ('modelFile_%s')%(time_stamp) )
+    #from saphyra.readers.versions import Model_v1
+    #m = Model_v1()
+    #m.set_models( models , range(len(models)))
+    #m.save( outputFolder+'/'+ ('modelFile_%s')%(time_stamp) )
 
 
-    from saphyra.readers.versions import PreProcChain_v1
-    pp = PreProcChain_v1(ppChain)
-    pp.save( outputFolder+'/'+ ('preprocFile_%s')%(time_stamp) )
+    #from saphyra.readers.versions import PreProcChain_v1
+    #pp = PreProcChain_v1(ppChain)
+    #pp.save( outputFolder+'/'+ ('preprocFile_%s')%(time_stamp) )
     
 
 
