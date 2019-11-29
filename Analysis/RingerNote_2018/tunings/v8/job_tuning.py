@@ -184,6 +184,7 @@ try:
     db.getContext().job().setStatus('done')
     db.commit()
     db.finalize()
+  print("finished!")
   sys.exit(0)
 
 except  Exception as e:
