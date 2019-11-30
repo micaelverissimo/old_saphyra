@@ -21,11 +21,13 @@ def get_model( ):
   for n in range(2,15+1):
     model = Sequential()
     model.add(RingerRp(input_shape=(100,)))
-    model.add(Dense(5, activation='tanh'))
+    model.add(Dense(n, activation='tanh'))
     model.add(Dense(1, activation='linear'))
     model.add(Activation('tanh'))
     modelCol.append(model)
   return modelCol
+
+
 
 
 
@@ -44,7 +46,7 @@ createPandaJobs( models        = get_model(),
         sortBounds    = PythonLoopingBounds(10),
         nSortsPerJob  = 1,
         nModelsPerJob = 5,
-        outputFolder  = 'job_config.ringer.v9.mlp2to15.10sorts.10inits'
+        outputFolder  = 'job_config.Jpsi_ringer.v2.mlp2to15.10sorts.10inits'
         )
 
 

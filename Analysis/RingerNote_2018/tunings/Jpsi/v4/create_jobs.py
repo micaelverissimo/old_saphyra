@@ -68,12 +68,12 @@ from Gaugi import PythonLoopingBounds
 createPandaJobs( models        = [model],
         ppChain       = pp,
         crossVal      = kf,
-        nInits        = 1,
+        nInits        = 5,
         nInitsPerJob  = 1,
         sortBounds    = PythonLoopingBounds(10),
         nSortsPerJob  = 1,
         nModelsPerJob = 1,
-        outputFolder  = 'job_config.ringer.v10.RingerNet.10sorts.1inits'
+        outputFolder  = 'job_config.Jpsi_ringer.v4.RingerNet.10sorts.5inits'
         )
 
 

@@ -10,8 +10,9 @@ import argparse
 import sys,os
 import numpy as np
 
-#path = '/eos/user/j/jodafons/CERN-DATA/tuning/data17_201907XX_v10/files/data17_13TeV.AllPeriods.sgn.probes_lhmedium_EGAM1.bkg.VProbes_EGAM7.GRL_v97/*.npz'
-path = '/eos/user/j/jodafons/CERN-DATA/tuning/RingerNote_2018/files/data17_13TeV.AllPeriods.sgn.probes_lhmedium_EGAM2.bkg.VProbes_EGAM7.GRL_v97//*.npz'
+#path = '/eos/user/j/jodafons/CERN-DATA/tuning/RingerNote_2018/files/data17_13TeV.AllPeriods.sgn.probes_lhmedium_EGAM1.bkg.VProbes_EGAM7.GRL_v97/*.npz'
+#path = '/eos/user/j/jodafons/CERN-DATA/tuning/RingerNote_2018/files/data17_13TeV.AllPeriods.sgn.probes_lhmedium_EGAM2.bkg.VProbes_EGAM7.GRL_v97/*.npz'
+path = '/eos/user/j/jodafons/CERN-DATA/tuning/RingerNote_2018/files/data18_13TeV.AllPeriods.sgn.probes_lhmedium_EGAM2.bkg.VProbes_EGAM7.GRL_v97/*.npz'
 
 from Gaugi import expandFolders
 fileList = expandFolders(path)
@@ -57,7 +58,7 @@ for f in fileList:
   obj.setEtaBinIdx( etBinIdx ) 
 
   for ref in ref_target:
-    d = raw['data'][:,np.where(raw['features'] == ref[1])[0][0]-1]
+    d = raw['data'][:,np.where(raw['features'] == ref[1])[0][0]]
     d_s = d[target==1]
     d_b = d[target!=1]
 

@@ -27,6 +27,7 @@ class PandasJob( Logger ):
     self._pattern_generator = pattern_generator
     self._dbcontext = dbcontext
 
+
     self._optimizer     = retrieve_kw( kw, 'optimizer'  , 'adam'                )
     self._loss          = retrieve_kw( kw, 'loss'       , 'binary_crossentropy' )
     self._epochs        = retrieve_kw( kw, 'epochs'     , 1000                  )
@@ -262,7 +263,7 @@ class PandasJob( Logger ):
           history = model_for_this_init.fit(x_train, y_train,
                               epochs          = self._epochs,
                               batch_size      = self._batch_size,
-                              verbose         = True,
+                              verbose         = self._verbose,
                               validation_data = (x_val,y_val),
                               # copy protection to avoid the interruption or interference
                               # in the next training (e.g: early stop)

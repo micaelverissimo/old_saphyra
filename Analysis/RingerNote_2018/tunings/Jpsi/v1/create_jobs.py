@@ -18,7 +18,7 @@ from tensorflow.keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
 
 def get_model( ):
   modelCol = []
-  for n in range(2,10+1):
+  for n in range(2,15+1):
     model = Sequential()
     model.add(Dense(n, input_shape=(100,), activation='tanh'))
     model.add(Dense(1, activation='linear'))
@@ -43,7 +43,7 @@ createPandaJobs( models        = get_model(),
         sortBounds    = PythonLoopingBounds(10),
         nSortsPerJob  = 1,
         nModelsPerJob = 5,
-        outputFolder  = 'job_config.low_energy_ringer.v1.mlp2to10.10sorts.10inits'
+        outputFolder  = 'job_config.Jpsi_ringer.v1.mlp2to15.10sorts.10inits'
         )
 
 

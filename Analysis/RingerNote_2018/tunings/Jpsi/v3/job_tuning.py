@@ -15,10 +15,11 @@ except Exception as e:
 
 def getPatterns( path, cv, sort):
  
-  #def norm1( data ):
-  #    norms = np.abs( data.sum(axis=1) )
-  #    norms[norms==0] = 1
-  #    return data/norms[:,None]
+  
+  def norm1( data ):
+      norms = np.abs( data.sum(axis=1) )
+      norms[norms==0] = 1
+      return data/norms[:,None]
   
   def reshape( data ):
       data = np.array([data])
@@ -26,19 +27,20 @@ def getPatterns( path, cv, sort):
 
   # Load data
   d = load(path)
-  data = d['data'][:,1:101]
-  #data = d['data'][:,1:101]
+  data = norm1(d['data'][:,1:101])
   target = d['target']
 
   # This is mandatory
   splits = [(train_index, val_index) for train_index, val_index in cv.split(data,target)]
 
-  x_train  = data [ splits[sort][0] ] 
+  x_train = reshape( data [ splits[sort][0] ]  )
   y_train = target [ splits[sort][0] ]
-  x_val =data [ splits[sort][1] ]
-  y_val = target [ splits[sort][1] ]
+  x_val   = reshape(data [ splits[sort][1] ]),
+  y_val   = target [ splits[sort][1] ]
 
   return x_train, x_val, y_train, y_val, splits
+
+
 
 
 def getPileup( path ):
@@ -49,8 +51,6 @@ def getPileup( path ):
 def getJobConfigId( path ):
   from Gaugi import load
   return dict(load(path))['id']
-
-
 
 from saphyra import PandasJob, PatternGenerator, sp, PreProcChain_v1, Norm1, Summary, PileupFit, ReshapeToConv1D
 from sklearn.model_selection import KFold,StratifiedKFold
@@ -108,9 +108,6 @@ job_id = getJobConfigId( args.configFile )
 from ringerdb import DBContext
 dbcontext = DBContext( args.user, args.task, job_id )
 
-from saphyra.layers.RingerRp import RingerRp
-
-
 if useDB:
     from ringerdb import RingerDB, DBContext
     from ringerdb.models import *
@@ -150,10 +147,8 @@ try:
   kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
 
   # ppChain
-  from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D,NoPreProc
-  #alpha, beta = getAlphaAndBetaFromConfig( args.configFile )
+  from saphyra import PreProcChain_v1, NoPreProc
   pp = PreProcChain_v1( [NoPreProc()] )
-
 
 
   # NOTE: This must be default, always
@@ -173,8 +168,8 @@ try:
   # Create the panda job
   job = PandasJob(  dbcontext, pattern_generator = PatternGenerator( args.dataFile, getPatterns ),
                     job               = args.configFile,
-                    loss              = 'mean_squared_error',
-                    #loss              = 'binary_crossentropy',
+                    #loss              = 'mean_squared_error',
+                    loss              = 'binary_crossentropy',
                     metrics           = ['accuracy'],
                     epochs            = 5000,
                     ppChain           = pp,
@@ -197,10 +192,6 @@ try:
   job.finalize()
 
   if useDB:
-    # NOTE: force alpha and beta extra parameters attachement
-    #for model in db.getContext().job().models():
-    #  model.alpha = alpha; model.beta = beta
- 
     db.getContext().job().setStatus('done')
     db.commit()
     db.finalize()

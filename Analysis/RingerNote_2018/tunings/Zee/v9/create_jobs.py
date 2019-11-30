@@ -13,14 +13,15 @@ pp = PreProcChain_v1( [Norm1()] )
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
-
+from saphyra.layers.RingerRp import RingerRp
 
 
 def get_model( ):
   modelCol = []
   for n in range(2,15+1):
     model = Sequential()
-    model.add(Dense(n, input_shape=(100,), activation='tanh'))
+    model.add(RingerRp(input_shape=(100,)))
+    model.add(Dense(n, activation='tanh'))
     model.add(Dense(1, activation='linear'))
     model.add(Activation('tanh'))
     modelCol.append(model)
@@ -43,7 +44,7 @@ createPandaJobs( models        = get_model(),
         sortBounds    = PythonLoopingBounds(10),
         nSortsPerJob  = 1,
         nModelsPerJob = 5,
-        outputFolder  = 'job_config.ringer.v8.mlp2to15.10sorts.10inits'
+        outputFolder  = 'job_config.Zee_ringer.v9.mlp2to15.10sorts.10inits'
         )
 
 

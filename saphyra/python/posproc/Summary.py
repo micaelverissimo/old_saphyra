@@ -41,7 +41,6 @@ class Summary( Algorithm ):
     y_pred_operation = np.concatenate( (y_pred, y_pred_val), axis=0)
     y_operation = np.concatenate((y_train,y_val), axis=0)
 
-
     # No threshold is needed
     d['auc'] = roc_auc_score(y_train, y_pred)
     d['auc_val'] = roc_auc_score(y_val, y_pred_val)
@@ -117,6 +116,14 @@ class Summary( Algorithm ):
     d['precision_score_op']  = precision_score(y_operation, y_pred_operation>threshold)
     d['recall_score_op']     = recall_score(y_operation, y_pred_operation>threshold)
     d['f1_score_op']         = f1_score(y_operation, y_pred_operation>threshold)
+
+
+    # Get the number of events for each set (train/val). Can be used to approx the number of
+    # passed events in pd/fa analysis. Use this to integrate values (approx)
+    d['sgn_total'] = len( y_train==1 )
+    d['bkg_total'] = len( y_train==0 )
+    d['sgn_total_val'] = len( y_val==1 )
+    d['bkg_total_val'] = len( y_val==0 )
 
 
 

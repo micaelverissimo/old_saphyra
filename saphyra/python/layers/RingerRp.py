@@ -20,23 +20,24 @@ HAD3    = np.arange(1,5)
 class RingerRp(Layer):
 
 
-
-  def __init__(self, alpha=None, beta=None, **kwargs):
+  def __init__(self, **kwargs):
     super(RingerRp, self).__init__(**kwargs)
     self.output_dim = (100,)
+
+
 
   def build( self, input_shape ):
     self.alpha = self.add_weight( name='alpha',
                                shape=(1,1),
-                               initializer=tf.keras.initializers.RandomNormal(mean=2, stddev=0.5),
+                               initializer=tf.keras.initializers.RandomNormal(mean=1, stddev=0.5),
                                trainable=True)
 
     self.beta = self.add_weight(name='beta',
                                   shape=(1,1),
-                                  initializer=tf.keras.initializers.RandomNormal(mean=4, stddev=0.5),
+                                  initializer=tf.keras.initializers.RandomNormal(mean=1, stddev=0.5),
                                   trainable=True)
-
-    self.rvec = K.constant(np.concatenate((PS,EM1,EM2,EM3,HAD1,HAD2,HAD3)))
+  
+    self.rvec = K.constant(np.concatenate((PS,EM1,EM2,EM3,HAD1,HAD2,HAD3)) )
     super(RingerRp, self).build(input_shape)
 
 
@@ -49,7 +50,7 @@ class RingerRp(Layer):
     Ea = K.sign(input)*K.pow( K.abs(input), self.alpha )
     rb =  K.pow(self.rvec, self.beta)
     Ea_sum = tf.reshape( K.sum( Ea, axis=1), (-1,1))
-    out = (Ea*rb)/ Ea_sum
+    out = (Ea*rb)/Ea_sum
     return out
 
 
@@ -59,4 +60,4 @@ class RingerRp(Layer):
 
 
 
-
+#
