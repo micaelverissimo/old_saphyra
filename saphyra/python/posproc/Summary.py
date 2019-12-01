@@ -32,6 +32,15 @@ class Summary( Algorithm ):
     history          = context.getHandler("history")
 
 
+    # Get the number of events for each set (train/val). Can be used to approx the number of
+    # passed events in pd/fa analysis. Use this to integrate values (approx)
+    sgn_total = len( y_train[y_train==1] )
+    bkg_total = len( y_train[y_train==0] )
+    sgn_total_val = len( y_val[y_val==1] )
+    bkg_total_val = len( y_val[y_val==0] )
+
+
+
     MSG_INFO( self, "Starting the train summary..." )
 
     y_pred = model.predict( x_train )
@@ -40,6 +49,9 @@ class Summary( Algorithm ):
     # get vectors for operation mode (train+val)
     y_pred_operation = np.concatenate( (y_pred, y_pred_val), axis=0)
     y_operation = np.concatenate((y_train,y_val), axis=0)
+
+
+
 
     # No threshold is needed
     d['auc'] = roc_auc_score(y_train, y_pred)
@@ -68,15 +80,13 @@ class Summary( Algorithm ):
         pd[knee], fa[knee], sp[knee], d['auc'], d['mse'])
     
 
-    d['max_sp_pd'] = pd[knee]
-    d['max_sp_fa'] = fa[knee]
+    d['max_sp_pd'] = ( pd[knee], int(pd[knee]*sgn_total), sgn_total)
+    d['max_sp_fa'] = ( fa[knee], int(fa[knee]*bkg_total), bkg_total)
     d['max_sp']    = sp[knee]
     d['acc']              = accuracy_score(y_train,y_pred>threshold)
     d['precision_score']  = precision_score(y_train, y_pred>threshold)
     d['recall_score']     = recall_score(y_train, y_pred>threshold)
     d['f1_score']         = f1_score(y_train, y_pred>threshold)
-
-
 
 
 
@@ -90,8 +100,8 @@ class Summary( Algorithm ):
         pd[knee], fa[knee], sp[knee], d['auc_val'], d['mse_val'])
 
 
-    d['max_sp_pd_val'] = pd[knee]
-    d['max_sp_fa_val'] = fa[knee]
+    d['max_sp_pd_val'] = (pd[knee], int(pd[knee]*sgn_total_val), sgn_total_val)
+    d['max_sp_fa_val'] = (fa[knee], int(fa[knee]*bkg_total_val), bkg_total_val)
     d['max_sp_val'] = sp[knee]
     d['acc_val']              = accuracy_score(y_val,y_pred_val>threshold)
     d['precision_score_val']  = precision_score(y_val, y_pred_val>threshold)
@@ -109,21 +119,14 @@ class Summary( Algorithm ):
         pd[knee], fa[knee], sp[knee], d['auc_val'], d['mse_val'])
 
 
-    d['max_sp_pd_op'] = pd[knee]
-    d['max_sp_fa_op'] = fa[knee]
+    d['max_sp_pd_op'] = ( pd[knee], int( pd[knee]*(sgn_total+sgn_total_val)), (sgn_total+sgn_total_val))
+    d['max_sp_fa_op'] = ( fa[knee], int( fa[knee]*(bkg_total+bkg_total_val)), (bkg_total+bkg_total_val))
     d['max_sp_op'] = sp[knee]
     d['acc_op']              = accuracy_score(y_operation,y_pred_operation>threshold)
     d['precision_score_op']  = precision_score(y_operation, y_pred_operation>threshold)
     d['recall_score_op']     = recall_score(y_operation, y_pred_operation>threshold)
     d['f1_score_op']         = f1_score(y_operation, y_pred_operation>threshold)
 
-
-    # Get the number of events for each set (train/val). Can be used to approx the number of
-    # passed events in pd/fa analysis. Use this to integrate values (approx)
-    d['sgn_total'] = len( y_train==1 )
-    d['bkg_total'] = len( y_train==0 )
-    d['sgn_total_val'] = len( y_val==1 )
-    d['bkg_total_val'] = len( y_val==0 )
 
 
 
