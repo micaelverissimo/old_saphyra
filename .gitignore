@@ -19,6 +19,6 @@ MoreFilesForYou-*
 .asetup.save
 build
 .python-version
-.python_dir
+.pythonpaths
 
 
