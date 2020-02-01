@@ -1,24 +1,16 @@
-
-
-
-
 from saphyra import *
-
-
 # ppChain
 from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D
-
 pp = PreProcChain_v1( [Norm1()] )
 
-
+# tensorflow
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
 
-
-
-def get_model( ):
+# function to define the keras model
+def get_model(neuron_min, neuron_max):
   modelCol = []
-  for n in range(2,15+1):
+  for n in range(neuron_min,neuron_max+1):
     model = Sequential()
     model.add(Dense(n, input_shape=(100,), activation='tanh'))
     model.add(Dense(1, activation='linear'))
@@ -26,24 +18,28 @@ def get_model( ):
     modelCol.append(model)
   return modelCol
 
-
-
+# cross-validation method
+n_folds = 10 # normally 10 folds
 from sklearn.model_selection import StratifiedKFold, KFold
-kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
-#kf = KFold(n_splits=10, random_state=1234, shuffle=True)
+kf = StratifiedKFold(n_splits=n_folds, random_state=512, shuffle=True)
 
-
-
-from Gaugi import PythonLoopingBounds
-createPandaJobs( models        = get_model(),
+n_max_neuron = 15
+n_min_neuron = 5
+n_inits      = 50
+createPandaJobs( 
+        models       = get_model(neuron_min=n_min_neuron,
+                                 neuron_max=n_max_neuron),
         ppChain       = pp,
         crossVal      = kf,
-        nInits        = 10,
-        nInitsPerJob  = 2,
-        sortBounds    = PythonLoopingBounds(10),
-        nSortsPerJob  = 1,
-        nModelsPerJob = 5,
-        outputFolder  = 'job_config.Jpsi_ringer.v1.mlp2to15.10sorts.10inits'
+        nInits        = n_inits,
+        nInitsPerJob  = 10,
+        sortBounds    = n_folds,
+        nSortsPerJob  = 5,
+        nModelsPerJob = 2,
+        outputFolder  = 'job_config.Jpsi_ringer.v1.mlp%ito%i.%isorts.%iinits' %(n_min_neuron,
+                                                                                n_max_neuron, 
+                                                                                n_folds, 
+                                                                                n_inits)
         )
 
 
