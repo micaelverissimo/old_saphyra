@@ -5,19 +5,20 @@ from Gaugi import ( Logger,
                     checkForUnusedVars, 
                     EnumStringification, 
                     save, 
-                    load, 
-                    LimitedTypeList, 
-                    LoggingLevel, 
-                    LoggerRawDictStreamer, 
-                    LimitedTypeStreamableList, 
-                    )
+                    load, )
+                    # LimitedTypeList, 
+                    # LoggingLevel, 
+                    # LoggerRawDictStreamer, 
+                    # LimitedTypeStreamableList, 
+                    # )
 
 from Gaugi.messenger.macros import *
 from saphyra.preproc import PrepObj
 
 import six
 
-class PreProcChain_v1 ( six.with_metaclass( LimitedTypeStreamableList,  Logger) ):
+#class PreProcChain_v1 ( six.with_metaclass( LimitedTypeStreamableList,  Logger) ):
+class PreProcChain_v1 ( Logger ):
   """
     The PreProcChain is the object to hold the pre-processing chain to be
     applied to data. They will be sequentially applied to the input data.
@@ -29,7 +30,7 @@ class PreProcChain_v1 ( six.with_metaclass( LimitedTypeStreamableList,  Logger) 
   #__metaclass__ = LimitedTypeStreamableList
   
   # These are the list (LimitedTypeList) accepted objects:
-  _acceptedTypes = (PrepObj,)
+  #_acceptedTypes = (PrepObj,)
 
   @property
   def takesParamsFromData( self ):
@@ -39,8 +40,8 @@ class PreProcChain_v1 ( six.with_metaclass( LimitedTypeStreamableList,  Logger) 
     return False
 
   def __init__(self, *args, **kw):
-    from Gaugi.LimitedTypeList import _LimitedTypeList____init__
-    _LimitedTypeList____init__(self, *args)
+    #from Gaugi.LimitedTypeList import _LimitedTypeList____init__
+    #_LimitedTypeList____init__(self, *args)
     Logger.__init__(self, kw)
 
   def __call__(self, data, revert = False, saveArgsDict = None):

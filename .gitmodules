@@ -2,21 +2,3 @@
 [submodule "Gaugi"]
 	path = Gaugi
 	url = https://github.com/jodafons/Gaugi.git
-[submodule "External/pytex"]
-	path = External/pytex
-	url = https://github.com/jodafons/pytex.git
-[submodule "External/monet"]
-	path = External/monet
-  	url = https://github.com/jodafons/monet.git
-[submodule "External/docker"]
-	path = External/docker
-	url = https://github.com/jodafons/docker.git
-[submodule "External/machinelearning"]
-	path = External/machinelearning
-	url = https://github.com/jodafons/machinelearning.git
-[submodule "External/orchestra"]
-	path = External/orchestra
-	url = https://github.com/jodafons/orchestra
-[submodule "External/ringerdb"]
-	path = External/ringerdb
-	url = https://github.com/jodafons/ringerdb

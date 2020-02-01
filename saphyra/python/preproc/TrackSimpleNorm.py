@@ -7,12 +7,9 @@ from Gaugi import ( Logger,
                     EnumStringification, 
                     save, 
                     load, 
-                    LimitedTypeList, 
-                    LoggingLevel, 
-                    LoggerRawDictStreamer, 
-                    LimitedTypeStreamableList, 
                     RawDictStreamer, 
-                    RawDictCnv )
+                    RawDictCnv,
+                    LoggerRawDictStreamer )              
 
 from saphyra.preproc import PrepObj
 

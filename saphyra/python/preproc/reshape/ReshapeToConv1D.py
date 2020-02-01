@@ -1,21 +1,19 @@
 
 __all__ = ["ReshapeToConv1D"]
 
+
+import numpy as np
 from Gaugi import ( Logger, 
                     LoggerStreamable, 
                     checkForUnusedVars, 
                     EnumStringification, 
                     save, 
                     load, 
-                    LimitedTypeList, 
-                    LoggingLevel, 
-                    LoggerRawDictStreamer, 
-                    LimitedTypeStreamableList, 
                     RawDictStreamer, 
-                    RawDictCnv )
+                    RawDictCnv,
+                    LoggerRawDictStreamer )
 
 from saphyra.preproc import PrepObj
-import numpy as np
 
 
 class ReshapeToConv1D( PrepObj ):

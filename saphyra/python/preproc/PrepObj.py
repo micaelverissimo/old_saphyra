@@ -6,13 +6,13 @@ from Gaugi import ( Logger,
                     checkForUnusedVars, 
                     EnumStringification, 
                     save, 
-                    load, 
-                    LimitedTypeList, 
-                    LoggingLevel, 
-                    LoggerRawDictStreamer, 
-                    LimitedTypeStreamableList, 
+                    load,
                     RawDictStreamer, 
-                    RawDictCnv )
+                    RawDictCnv,
+                    LoggerRawDictStreamer )
+                    # LimitedTypeList, 
+                    # LoggingLevel, 
+                    # LimitedTypeStreamableList, )
 
 
 
