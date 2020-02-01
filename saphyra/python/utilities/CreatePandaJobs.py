@@ -7,7 +7,7 @@ from Gaugi.messenger.macros import *
 #from Gaugi.LoopingBounds import *
 
 from sklearn.model_selection import KFold
-from saphyra import Norm1
+from saphyra.preproc import Norm1
 
 # A simple solution need to refine the documentation
 from itertools import product
