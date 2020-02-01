@@ -4,7 +4,16 @@ __all__ = ["createPandaJobs"]
 from Gaugi import retrieve_kw, mkdir_p
 from Gaugi.messenger import Logger
 from Gaugi.messenger.macros import *
-from Gaugi.LoopingBounds import *
+#from Gaugi.LoopingBounds import *
+
+# A simple solution need to refine the documentation
+from itertools import product
+def create_iter(fun, n_items_per_job, items_lim):
+  return [(fun(i, n_items_per_job) if
+                                    (i+n_items_per_job) <= items_lim
+                                   else fun(i, items_lim % n_items_per_job) 
+                                   for i in range(0, items_lim, n_items_per_job))]
+  #return [fun(i, n_items_per_job) for i in range(0, items_lim, n_items_per_job)]
 
 # default model (ringer vanilla)
 # Remove the keras dependence and get keras from tensorflow 2.0
@@ -82,57 +91,45 @@ class CreatePandaJobs( Logger ):
     if type(models) is not list:
       models = [models]
     
-    modelJobsWindowList = CreatePandaJobs._retrieveJobLoopingBoundsCol( PythonLoopingBounds( len(models) ), nModelsPerJob )
-    sortJobsWindowList  = CreatePandaJobs._retrieveJobLoopingBoundsCol( sortBounds                        , nSortsPerJob  )
-    initJobsWindowList  = CreatePandaJobs._retrieveJobLoopingBoundsCol( PythonLoopingBounds( nInits )     , nInitsPerJob  )
+    #modelJobsWindowList = CreatePandaJobs._retrieveJobLoopingBoundsCol( PythonLoopingBounds( len(models) ), nModelsPerJob )
+    #sortJobsWindowList  = CreatePandaJobs._retrieveJobLoopingBoundsCol( sortBounds                        , nSortsPerJob  )
+    #initJobsWindowList  = CreatePandaJobs._retrieveJobLoopingBoundsCol( PythonLoopingBounds( nInits )     , nInitsPerJob  )
+    modelJobsWindowList = create_iter(lambda i, sorts: list(range(i, i+sorts)), 
+                                      nModelsPerJob,
+                                      len(models))
+    sortJobsWindowList  = create_iter(lambda i, sorts: list(range(i, i+sorts)), 
+                                      nSortsPerJob,
+                                      nsorts)
+    initJobsWindowList  = create_iter(lambda i, sorts: list(range(i, i+sorts)), 
+                                      nInitsPerJob, 
+                                      ninits)
 
 
     nJobs = 0 
-    for modelWindowBounds in modelJobsWindowList():
-
-      for sortWindowBounds in sortJobsWindowList():
-
-        for initWindowBounds in initJobsWindowList():
-
-          #print list(sortWindowBounds)
-          MSG_INFO( self, 'Creating job config with sort (%d to %d) and %d inits and model Index (%d to %d)', 
-              sortWindowBounds[0], sortWindowBounds[-1], len(initWindowBounds), modelWindowBounds[0],modelWindowBounds[-1])
-          
-          from saphyra.readers.versions import Job_v1
-          job = Job_v1()
-          # to be user by the database table
-          job.setId( nJobs )
-          job.setSorts(list(sortWindowBounds))
-          job.setInits(list(initWindowBounds))
-          job.setModels([models[i] for i in list(modelWindowBounds)],  list(modelWindowBounds) )
-         
-          job.save( outputFolder+'/' + ('job_config.ID_%s.%s_%s_%s.%s') %
-              ( 
-                str(nJobs).zfill(4),
-                modelWindowBounds.formattedString('m'),
-                sortWindowBounds.formattedString('s'), 
-                initWindowBounds.formattedString('i'), time_stamp) )
-          nJobs+=1
+    #for (models_list, sort_list, init_list) in product(modelJobsWindowList,
+    for (model_idxs, sort_list, init_list) in product(range(len(models)),
+                                                     sortJobsWindowList, 
+                                                     initJobsWindowList):
+      MSG_INFO( self, 'Creating job config with sort (%d to %d) and %d inits and model Index %d', 
+              sort_list[0], sort_list[-1], len(init_list), model_idxs[0], model_idxs[-1])
+      
+      from saphyra.readers.versions import Job_v1
+      job = Job_v1()
+      # to be user by the database table
+      job.setId( nJobs )
+      job.setSorts(sort_list)
+      job.setInits(init_list)
+      job.setModels([models[idx] for idx in model_idxs],  model_idxs )
+      #job.setModels(modelJobsWindowList[model_idx],  model )
+      # save config file
+      model_str = 'ml%i.mu%i' %(model_idxs[0], model_idxs[-1])
+      sort_str  = 'sl%i.su%i' %(sort_list[0], sort_list[-1])
+      init_srt  = 'il%i.iu%i' %(init_list[0], init_list[-1])
+      job.save( outputFolder+'/' + ('job_config.ID_%s.%s_%s_%s.%s') %
+              ( str(nJobs).zfill(4), model_str, sort_str, init_str, time_stamp) )
+      nJobs+=1
 
     MSG_INFO( self, "A total of %d jobs...", nJobs)
-    #from saphyra.readers.versions import CrossVal_v1
-    #cv = CrossVal_v1()
-    #cv.set_object(crossval)
-    #cv.save( outputFolder+'/' +('crossvalFile_%s')%(time_stamp) )
-    
-
-    #from saphyra.readers.versions import Model_v1
-    #m = Model_v1()
-    #m.set_models( models , range(len(models)))
-    #m.save( outputFolder+'/'+ ('modelFile_%s')%(time_stamp) )
-
-
-    #from saphyra.readers.versions import PreProcChain_v1
-    #pp = PreProcChain_v1(ppChain)
-    #pp.save( outputFolder+'/'+ ('preprocFile_%s')%(time_stamp) )
-    
-
-
 
 createPandaJobs = CreatePandaJobs()
 
