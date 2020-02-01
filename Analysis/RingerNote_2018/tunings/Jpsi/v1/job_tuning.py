@@ -151,7 +151,7 @@ try:
   # print('laoding pileup from data file....')
   # correction = PileupFit( "PileupFit", getPileup(args.dataFile) )
   # # Calculate the reference for each operation point
-  # # using the ringer v6 tuning as reference
+  # # using thdocker login https://hub.docker.come ringer v6 tuning as reference
   # for ref in ref_target:
   #   # (passed, total)
   #   pd = (ref_obj.getSgnPassed(ref[0]) , ref_obj.getSgnTotal(ref[0]))
