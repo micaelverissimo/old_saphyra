@@ -13,6 +13,7 @@ cd .pythonpaths
 
 
 ln -s ../Gaugi/python Gaugi
+ln -s ../External/ringerdb/python ringerdb
 ln -s ../saphyra/python saphyra
 # ln -s ../External/monet/python monet
 # ln -s ../External/pytex/python pytex

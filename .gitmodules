@@ -1,4 +1,6 @@
-
 [submodule "Gaugi"]
 	path = Gaugi
 	url = https://github.com/jodafons/Gaugi.git
+[submodule "External/ringerdb"]
+	path = External/ringerdb
+	url = https://github.com/jodafons/ringerdb
