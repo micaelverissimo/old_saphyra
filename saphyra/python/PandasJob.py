@@ -13,6 +13,8 @@ from sklearn.utils.class_weight import compute_class_weight
 import numpy as np
 
 from saphyra.posproc import Summary
+from saphyra.readers.versions  import PreProcChain_v1
+from saphyra.preproc import NoPreProc
 
 from tensorflow.keras.models import clone_model
 from datetime import datetime
@@ -41,7 +43,6 @@ class PandasJob( Logger ):
     self._verbose       = retrieve_kw( kw, 'verbose'    , True                  )
     self._class_weight  = retrieve_kw( kw, 'class_weight' , False               )
     self._save_history  = retrieve_kw( kw, 'save_history' , True                )
-    from saphyra  import PreProcChain_v1, NoPreProc
     self.ppChain        = retrieve_kw( kw, 'ppChain'    , PreProcChain_v1([NoPreProc()]))
 
     # DB parameter
@@ -62,7 +63,6 @@ class PandasJob( Logger ):
       self._sorts = job.getSorts()
       self._inits = job.getInits()
       self._models, self._id_models = job.getModels()
-      print (self._id_models)
       self._jobId = job.id()
 
     # get model and tag from model file or lists
@@ -104,8 +104,6 @@ class PandasJob( Logger ):
 
   def setContext(self, ctx):
     self._context = ctx
-
-
 
   @property
   def crossval(self):
@@ -155,11 +153,9 @@ class PandasJob( Logger ):
 
   def initialize( self ):
 
-
     from saphyra import JobContext
     # Create the job context
     self.setContext( JobContext() )
-
 
     # Initialize the list of pos processor algorithms
     for proc in self.posproc:
@@ -184,10 +180,6 @@ class PandasJob( Logger ):
     return StatusCode.SUCCESS
 
 
-
-
-
-
   def execute( self ):
 
 
@@ -195,7 +187,6 @@ class PandasJob( Logger ):
 
       # get the current kfold and train, val sets
       x_train, x_val, y_train, y_val, self._index_from_cv = self.pattern_g( self._pattern_generator, self._crossval, sort )
-
 
       # Pre processing step
       if self._ppChain.takesParamsFromData:
@@ -325,10 +316,6 @@ class PandasJob( Logger ):
     # Save all root objects in the store gate service
     #self._storegate.write()
     return StatusCode.SUCCESS
-
-
-
-
 
   def pattern_g( self, generator, crossval, sort ):
     # If the index is not set, you muat run the cross validation Kfold to get the index

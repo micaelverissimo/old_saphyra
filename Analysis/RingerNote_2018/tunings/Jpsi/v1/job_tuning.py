@@ -143,6 +143,7 @@ try:
   from saphyra import PreProcChain_v1, Norm1, ReshapeToConv1D
   #pp = PreProcChain_v1( [Norm1(), ReshapeToConv1D()] )
   pp = PreProcChain_v1( [Norm1()] )
+  print(pp)
   
   
   # NOTE: This must be default, always

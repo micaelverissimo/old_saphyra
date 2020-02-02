@@ -32,6 +32,10 @@ class PreProcChain_v1 ( Logger ):
   # These are the list (LimitedTypeList) accepted objects:
   #_acceptedTypes = (PrepObj,)
 
+  def __iter__(self):
+    for pp in self.chain_of_pre_procs:
+      yield pp
+
   @property
   def takesParamsFromData( self ):
     #return True
@@ -39,10 +43,11 @@ class PreProcChain_v1 ( Logger ):
       if pp.takesParamsFromData: return True
     return False
 
-  def __init__(self, *args, **kw):
+  def __init__(self, chain_of_pre_procs, *args, **kw):
     #from Gaugi.LimitedTypeList import _LimitedTypeList____init__
     #_LimitedTypeList____init__(self, *args)
     Logger.__init__(self, kw)
+    self.chain_of_pre_procs = chain_of_pre_procs
 
   def __call__(self, data, revert = False, saveArgsDict = None):
     """
