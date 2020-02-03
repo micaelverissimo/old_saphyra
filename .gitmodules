@@ -4,5 +4,5 @@
 	ignore = dirty
 [submodule "External/ringerdb"]
 	path   = External/ringerdb
-	url    = https://github.com/jodafons/ringerdb
+	url    = https://github.com/jodafons/ringerdb.git
 	ignore = dirty
