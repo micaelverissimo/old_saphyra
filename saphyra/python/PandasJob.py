@@ -187,7 +187,11 @@ class PandasJob( Logger ):
 
       # get the current kfold and train, val sets
       x_train, x_val, y_train, y_val, self._index_from_cv = self.pattern_g( self._pattern_generator, self._crossval, sort )
-
+      # check if there are fewer events than the batch_size
+      _, n_evt_per_class = np.unique(y_train, return_counts=True)
+      _batch_size = (self._batch_size if np.min(n_evt_per_class) > self._batch_size
+                     else np.min(n_evt_per_class))
+      MSG_INFO( self, "Using %d as batch size.", _batch_size)
       # Pre processing step
       if self._ppChain.takesParamsFromData:
         MSG_DEBUG( self, "Take parameters from train set..." )
@@ -253,7 +257,7 @@ class PandasJob( Logger ):
           # Training
           history = model_for_this_init.fit(x_train, y_train,
                               epochs          = self._epochs,
-                              batch_size      = self._batch_size,
+                              batch_size      = _batch_size,
                               verbose         = self._verbose,
                               validation_data = (x_val,y_val),
                               # copy protection to avoid the interruption or interference
