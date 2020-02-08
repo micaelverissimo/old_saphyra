@@ -38,7 +38,8 @@ def getJobConfigId( path ):
   from Gaugi import load
   return dict(load(path))['id']
 
-from saphyra import PandasJob, PatternGenerator, sp, PreProcChain_v1, Norm1, Summary, PileupFit, ReshapeToConv1D
+from saphyra import (PandasJob, PatternGenerator, sp, PreProcChain_v1,
+                     Norm1, Summary, ReshapeToConv1D)
 from sklearn.model_selection import KFold,StratifiedKFold
 from Gaugi.messenger import LoggingLevel, Logger
 from Gaugi import load
@@ -142,16 +143,16 @@ try:
   # NOTE: This must be default, always
   posproc = [Summary()]
 
-  print('laoding pileup from data file....')
-  correction = PileupFit( "PileupFit", getPileup(args.dataFile) )
-  # Calculate the reference for each operation point
-  # using the ringer v6 tuning as reference
-  for ref in ref_target:
-    # (passed, total)
-    pd = (ref_obj.getSgnPassed(ref[0]) , ref_obj.getSgnTotal(ref[0]))
-    fa = (ref_obj.getBkgPassed(ref[0]) , ref_obj.getBkgTotal(ref[0]))
-    correction.add( ref[0], ref[1], pd, fa )
-  posproc = [Summary(), correction]
+  # print('laoding pileup from data file....')
+  # correction = PileupFit( "PileupFit", getPileup(args.dataFile) )
+  # # Calculate the reference for each operation point
+  # # using the ringer v6 tuning as reference
+  # for ref in ref_target:
+  #   # (passed, total)
+  #   pd = (ref_obj.getSgnPassed(ref[0]) , ref_obj.getSgnTotal(ref[0]))
+  #   fa = (ref_obj.getBkgPassed(ref[0]) , ref_obj.getBkgTotal(ref[0]))
+  #   correction.add( ref[0], ref[1], pd, fa )
+  # posproc = [Summary(), correction]
   
   print('start panda!')
   # Create the panda job 
@@ -169,7 +170,7 @@ try:
                     )
   
   job.posproc   += posproc
-  job.callbacks += [sp(patience=25, verbose=True, save_the_best=True)]
+  job.callbacks += [sp(patience=100, verbose=True, save_the_best=True)]
   job.initialize()
   
   if useDB:
