@@ -12,7 +12,7 @@ def get_model(neuron_min, neuron_max):
   modelCol = []
   for n in range(neuron_min,neuron_max+1):
     model = Sequential()
-    model.add(Dense(n, input_shape=(100,), activation='tanh'))
+    model.add(Dense(n, input_shape=(88,), activation='tanh'))
     model.add(Dense(1, activation='linear'))
     model.add(Activation('tanh'))
     modelCol.append(model)
@@ -36,7 +36,7 @@ createPandaJobs(
         sortBounds    = n_folds,
         nSortsPerJob  = 5,
         nModelsPerJob = 2,
-        outputFolder  = 'job_config.Jpsi_ringer.v1_noHAD.mlp%ito%i.%isorts.%iinits' %(n_min_neuron,
+        outputFolder  = 'job_config.Jpsi_ringer.v1_nohad.mlp%ito%i.%isorts.%iinits' %(n_min_neuron,
                                                                                 n_max_neuron, 
                                                                                 n_folds, 
                                                                                 n_inits)
