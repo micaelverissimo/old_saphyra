@@ -31,13 +31,12 @@ from sklearn.model_selection import StratifiedKFold, KFold
 kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
 
 
-from Gaugi import PythonLoopingBounds
 createPandaJobs( models        = [model],
         ppChain       = pp,
         crossVal      = kf,
         nInits        = 5,
         nInitsPerJob  = 1,
-        sortBounds    = PythonLoopingBounds(10),
+        sortBounds    = 10,
         nSortsPerJob  = 1,
         nModelsPerJob = 1,
         outputFolder  = 'job_config.Zee_ringer.v10.RingerNet.10sorts.5inits'

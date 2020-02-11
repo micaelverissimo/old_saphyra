@@ -52,7 +52,8 @@ def getJobConfigId( path ):
   from Gaugi import load
   return dict(load(path))['id']
 
-from saphyra import PandasJob, PatternGenerator, sp, PreProcChain_v1, Norm1, Summary, PileupFit, ReshapeToConv1D
+
+from saphyra import PandasJob, PatternGenerator, sp, PreProcChain_v1, Norm1, ReferenceFit,Summary, ReshapeToConv1D
 from sklearn.model_selection import KFold,StratifiedKFold
 from Gaugi.messenger import LoggingLevel, Logger
 from Gaugi import load
@@ -105,10 +106,14 @@ args = parser.parse_args()
 # Check if this job will run in DB mode
 useDB = args.useDB
 job_id = getJobConfigId( args.configFile )
+
+
 from ringerdb import DBContext
 dbcontext = DBContext( args.user, args.task, job_id )
 
 if useDB:
+
+
     from ringerdb import RingerDB, DBContext
     from ringerdb.models import *
     url = 'postgres://ringer:6sJ09066sV1990;6@postgres-ringer-db.cahhufxxnnnr.us-east-2.rds.amazonaws.com/ringer'
@@ -119,42 +124,41 @@ if useDB:
       print(e)
       useDB=False
 
-
 try:
 
   if useDB:
     db.getContext().job().setStatus( "starting" ); db.commit()
-
+  
   outputFile = args.outputFile
   if '/' in outputFile:
     # This is a path
     outputFile = (outputFile+'/tunedDiscr.jobID_%s'%str(job_id).zfill(4)).replace('//','/')
   else:
     outputFile+='.jobId_%s'%str(job_id).zfill(4)
-
+  
   ref_target = [
                 ('tight_cutbased' , 'T0HLTElectronT2CaloTight'        ),
                 ('medium_cutbased', 'T0HLTElectronT2CaloMedium'       ),
                 ('loose_cutbased' , 'T0HLTElectronT2CaloLoose'        ),
                 ('vloose_cutbased', 'T0HLTElectronT2CaloVLoose'       ),
                 ]
-
-
+  
+  
   from saphyra import ReferenceReader
   ref_obj = ReferenceReader().load(args.refFile)
-
+  
   from sklearn.model_selection import StratifiedKFold, KFold
   kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
-
+  
   # ppChain
   from saphyra import PreProcChain_v1, NoPreProc
   pp = PreProcChain_v1( [NoPreProc()] )
-
-
+  
+  
   # NOTE: This must be default, always
   posproc = [Summary()]
-
-  correction = PileupFit( "PileupFit", getPileup(args.dataFile) )
+  
+  correction = ReferenceFit( "ReferenceFit" )
   # Calculate the reference for each operation point
   # using the ringer v6 tuning as reference
   for ref in ref_target:
@@ -163,34 +167,34 @@ try:
     fa = (ref_obj.getBkgPassed(ref[0]) , ref_obj.getBkgTotal(ref[0]))
     correction.add( ref[0], ref[1], pd, fa )
   posproc = [Summary(), correction]
-
-
+  
+  
   # Create the panda job
   job = PandasJob(  dbcontext, pattern_generator = PatternGenerator( args.dataFile, getPatterns ),
                     job               = args.configFile,
                     #loss              = 'mean_squared_error',
                     loss              = 'binary_crossentropy',
                     metrics           = ['accuracy'],
-                    epochs            = 5000,
+                    epochs            = 2,
                     ppChain           = pp,
                     crossval          = kf,
                     outputfile        = outputFile,
                     class_weight      = True,
                     #save_history      = False,
                     )
-
+  
   job.posproc   += posproc
   job.callbacks += [sp(patience=25, verbose=True, save_the_best=True)]
   job.initialize()
-
+  
   if useDB:
     job.setDatabase( db )
     db.getContext().job().setStatus('running')
     db.commit()
-
+  
   job.execute()
   job.finalize()
-
+  
   if useDB:
     db.getContext().job().setStatus('done')
     db.commit()

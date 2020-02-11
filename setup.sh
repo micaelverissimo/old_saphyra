@@ -11,6 +11,7 @@ cd .__python__
 
 ln -s ../Gaugi/python Gaugi
 ln -s ../saphyra/python saphyra
+ln -s ../external/ringerdb/python ringerdb
 
 export PYTHONPATH=`pwd`:$PYTHONPATH
 cd ../

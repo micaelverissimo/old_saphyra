@@ -7,6 +7,10 @@ from .Summary import *
 # from . import PileupFit
 # __all__.extend( PileupFit.__all__        )
 # from .PileupFit import *
+from . import ReferenceFit
+__all__.extend( ReferenceFit.__all__        )
+from .ReferenceFit import *
+
 
 
 
