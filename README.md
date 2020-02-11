@@ -1,10 +1,6 @@
 
 # Saphyra
 
-This is a machine learning training framework to support the train conditions necessary
-to validate a model. This package is inspired in the job concept and can be used
-on CERN's grid or LPS cluster envirements. This package is integrated with keras api 
-where can be use the tensorflow or pytorch backend.
 
 ## Requirements:
 
@@ -19,6 +15,10 @@ where can be use the tensorflow or pytorch backend.
 ```bash
 source setup.sh
 ```
+
+## Docker:
+
+
 
 
 ## Contribution:
