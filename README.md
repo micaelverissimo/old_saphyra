@@ -1,13 +1,14 @@
 
-# Saphyra Tuning Framework
+# Saphyra
 
-This package provide all tools and envs to support the tuning process on CERN's Grid or
-LPS Cluster. The saphyra is integrated with keras API and can be use tensorflow or pytorch
-as backend. 
+This is a machine learning training framework to support the train conditions necessary
+to validate a model. This package is inspired in the job concept and can be used
+on CERN's grid or LPS cluster envirements. This package is integrated with keras api 
+where can be use the tensorflow or pytorch backend.
 
 ## Requirements:
 
-- tesnorflow;
+- tensorflow;
 - keras;
 - numpy;
 - python 3.
