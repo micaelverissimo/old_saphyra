@@ -2,7 +2,3 @@
 	path   = Gaugi
 	url    = https://github.com/jodafons/Gaugi.git
 	ignore = dirty
-[submodule "External/ringerdb"]
-	path   = External/ringerdb
-	url    = https://github.com/jodafons/ringerdb.git
-	ignore = dirty
