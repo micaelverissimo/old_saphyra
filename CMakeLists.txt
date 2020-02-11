@@ -69,12 +69,12 @@ endif()
 
 add_subdirectory(Gaugi)
 add_subdirectory(saphyra)
-add_subdirectory(External/TuningTools)
-add_subdirectory(External/monet)
-add_subdirectory(External/pytex)
-add_subdirectory(Tools/panda)
-add_subdirectory(External/ringerdb)
-add_subdirectory(External/orchestra/orchestra)
+#add_subdirectory(External/TuningTools)
+#add_subdirectory(External/monet)
+#add_subdirectory(External/pytex)
+#add_subdirectory(Tools/panda)
+#add_subdirectory(External/ringerdb)
+#add_subdirectory(External/orchestra/orchestra)
 
 #add_library(saphyra SHARED
 #  #$<TARGET_OBJECTS:Gaugi> 
