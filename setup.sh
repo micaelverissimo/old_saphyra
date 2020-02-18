@@ -9,7 +9,7 @@ rm -rf .__python__
 mkdir .__python__
 cd .__python__
 
-ln -s ../Gaugi/python Gaugi
+ln -s ../gaugi/python Gaugi
 ln -s ../saphyra/python saphyra
 ln -s ../external/ringerdb/python ringerdb
 
