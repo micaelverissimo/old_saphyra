@@ -39,7 +39,7 @@ createPandaJobs( models        = [model],
         sortBounds    = 10,
         nSortsPerJob  = 1,
         nModelsPerJob = 1,
-        outputFolder  = 'job_config.Zee_ringer.v10.RingerNet.10sorts.5inits'
+        outputFolder  = 'job_config.Zee_v10.10sorts.5inits'
         )
 
 
