@@ -8,7 +8,7 @@
 - keras;
 - numpy;
 - python 3.
-
+- Gaugi
 
 ## Installation:
 
