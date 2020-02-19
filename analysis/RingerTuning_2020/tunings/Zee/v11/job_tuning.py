@@ -12,9 +12,8 @@ except Exception as e:
   print("Not possible to set gpu allow growth")
 
 
-
 def getPatterns( path, cv, sort):
- 
+
   PS  = np.arange(0,8)
   EM1 = np.arange(8,72)
   EM2 = np.arange(72,80)
@@ -22,12 +21,12 @@ def getPatterns( path, cv, sort):
   HAD1= np.arange(88,92)
   HAD2= np.arange(92,96)
   HAD3= np.arange(96,100)
-  
+
   def norm1( data ):
       norms = np.abs( data.sum(axis=1) )
       norms[norms==0] = 1
       return data/norms[:,None]
-  
+
   def reshape( data ):
       data = np.array([data])
       return np.transpose(data, [1,2,0])
@@ -48,7 +47,7 @@ def getPatterns( path, cv, sort):
                  reshape(data [ splits[sort][0] ][:,HAD2]),
                  reshape(data [ splits[sort][0] ][:,HAD3]),
             ]
-  
+
   y_train = target [ splits[sort][0] ]
   x_val =[
           reshape(data [ splits[sort][1] ][:, PS   ]),
@@ -65,7 +64,6 @@ def getPatterns( path, cv, sort):
 
 
 
-
 def getPileup( path ):
   from Gaugi import load
   return load(path)['data'][:,0]
@@ -75,7 +73,8 @@ def getJobConfigId( path ):
   from Gaugi import load
   return dict(load(path))['id']
 
-from saphyra import PandasJob, PatternGenerator, sp, PreProcChain_v1, Norm1, Summary, PileupFit, ReshapeToConv1D
+
+from saphyra import PandasJob, PatternGenerator, sp, PreProcChain_v1, Norm1, ReferenceFit,Summary, ReshapeToConv1D
 from sklearn.model_selection import KFold,StratifiedKFold
 from Gaugi.messenger import LoggingLevel, Logger
 from Gaugi import load
@@ -128,10 +127,14 @@ args = parser.parse_args()
 # Check if this job will run in DB mode
 useDB = args.useDB
 job_id = getJobConfigId( args.configFile )
+
+
 from ringerdb import DBContext
 dbcontext = DBContext( args.user, args.task, job_id )
 
 if useDB:
+
+
     from ringerdb import RingerDB, DBContext
     from ringerdb.models import *
     url = 'postgres://ringer:6sJ09066sV1990;6@postgres-ringer-db.cahhufxxnnnr.us-east-2.rds.amazonaws.com/ringer'
@@ -141,7 +144,6 @@ if useDB:
     except Exception as e:
       print(e)
       useDB=False
-
 
 try:
 
@@ -177,7 +179,7 @@ try:
   # NOTE: This must be default, always
   posproc = [Summary()]
 
-  correction = PileupFit( "PileupFit", getPileup(args.dataFile) )
+  correction = ReferenceFit( "ReferenceFit" )
   # Calculate the reference for each operation point
   # using the ringer v6 tuning as reference
   for ref in ref_target:

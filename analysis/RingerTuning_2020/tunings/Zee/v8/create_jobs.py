@@ -18,7 +18,7 @@ from tensorflow.keras.layers import Dense, Dropout, Activation, Conv1D, Flatten
 
 def get_model( ):
   modelCol = []
-  for n in range(2,15+1):
+  for n in range(2,10+1):
     model = Sequential()
     model.add(Dense(n, input_shape=(100,), activation='tanh'))
     model.add(Dense(1, activation='linear'))
@@ -30,20 +30,18 @@ def get_model( ):
 
 from sklearn.model_selection import StratifiedKFold, KFold
 kf = StratifiedKFold(n_splits=10, random_state=512, shuffle=True)
-#kf = KFold(n_splits=10, random_state=1234, shuffle=True)
 
 
 
-from Gaugi import PythonLoopingBounds
 createPandaJobs( models        = get_model(),
         ppChain       = pp,
         crossVal      = kf,
-        nInits        = 10,
-        nInitsPerJob  = 2,
-        sortBounds    = PythonLoopingBounds(10),
+        nInits        = 5,
+        nInitsPerJob  = 1,
+        sortBounds    = 10,
         nSortsPerJob  = 1,
         nModelsPerJob = 5,
-        outputFolder  = 'job_config.Zee_ringer.v8.mlp2to15.10sorts.10inits'
+        outputFolder  = 'job_config.Zee_v8.n2to10.10sorts.5inits'
         )
 
 
