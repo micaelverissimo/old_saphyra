@@ -4,3 +4,6 @@
 [submodule "external/ringerdb"]
 	path = external/ringerdb
 	url = https://github.com/jodafons/ringerdb
+[submodule "external/docker"]
+	path = external/docker
+	url = https://github.com/jodafons/docker
