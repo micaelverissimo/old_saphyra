@@ -1,3 +1,6 @@
 [submodule "external/kolmov"]
 	path = external/kolmov
 	url = https://github.com/micaelverissimo/kolmov.git
+[submodule "external/ringerdb"]
+	path = external/ringerdb
+	url = https://github.com/jodafons/ringerdb
