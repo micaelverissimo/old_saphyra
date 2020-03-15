@@ -12,6 +12,7 @@ cd .__python__
 ln -s ../gaugi/python Gaugi
 ln -s ../saphyra/python saphyra
 ln -s ../external/ringerdb/python ringerdb
+ln -s ../external/kolmov/kolmov/python kolmov
 
 export PYTHONPATH=`pwd`:$PYTHONPATH
 cd ../
