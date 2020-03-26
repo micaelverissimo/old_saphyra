@@ -118,7 +118,7 @@ class Summary( Algorithm ):
     MSG_INFO( self, "Operation Samples : Prob. det (%1.4f), False Alarm (%1.4f), SP (%1.4f), AUC (%1.4f) and MSE (%1.4f)",
         pd[knee], fa[knee], sp[knee], d['auc_val'], d['mse_val'])
 
-
+    d['threshold_op'] = threshold
     d['max_sp_pd_op'] = ( pd[knee], int( pd[knee]*(sgn_total+sgn_total_val)), (sgn_total+sgn_total_val))
     d['max_sp_fa_op'] = ( fa[knee], int( fa[knee]*(bkg_total+bkg_total_val)), (bkg_total+bkg_total_val))
     d['max_sp_op'] = sp[knee]
@@ -126,9 +126,6 @@ class Summary( Algorithm ):
     d['precision_score_op']  = precision_score(y_operation, y_pred_operation>threshold)
     d['recall_score_op']     = recall_score(y_operation, y_pred_operation>threshold)
     d['f1_score_op']         = f1_score(y_operation, y_pred_operation>threshold)
-
-
-
 
     history['summary'] = d
     
