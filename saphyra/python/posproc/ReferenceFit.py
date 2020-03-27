@@ -122,23 +122,23 @@ class ReferenceFit( Algorithm ):
 
     # Get the efficiencies for train dataset
     _, index = self.closest( pd, ref['pd'][0] )
-    d['pd'] = ( pd[index],  train_total*float(pd[index]),train_total)
-    d['fa'] = ( fa[index],  train_total*float(fa[index]),train_total)
+    d['pd'] = ( pd[index],  int(train_total*float(pd[index])),train_total)
+    d['fa'] = ( fa[index],  int(train_total*float(fa[index])),train_total)
     d['sp'] = sp_func(d['pd'][0], d['fa'][0])
     d['threshold'] = thresholds[index]
 
 
     _, index = self.closest( pd_val, ref['pd'][0] )
-    d['pd_val'] = ( pd_val[index],  val_total*float(pd_val[index]),val_total)
-    d['fa_val'] = ( fa_val[index],  val_total*float(fa_val[index]),val_total)
+    d['pd_val'] = ( pd_val[index],  int(val_total*float(pd_val[index])),val_total)
+    d['fa_val'] = ( fa_val[index],  int(val_total*float(fa_val[index])),val_total)
     d['sp_val'] = sp_func(d['pd_val'][0], d['fa_val'][0])
     d['threshold_val'] = thresholds_val[index]
 
     op_total = train_total+val_total
 
     _, index = self.closest( pd_op, ref['pd'][0] )
-    d['pd_op'] = ( pd_op[index],  op_total*float(pd_op[index]),op_total)
-    d['fa_op'] = ( fa_op[index],  op_total*float(fa_op[index]),op_total)
+    d['pd_op'] = ( pd_op[index],  int(op_total*float(pd_op[index])),op_total)
+    d['fa_op'] = ( fa_op[index],  int(op_total*float(fa_op[index])),op_total)
     d['sp_op'] = sp_func(d['pd_op'][0], d['fa_op'][0])
     d['threshold_op'] = thresholds_op[index]
 
