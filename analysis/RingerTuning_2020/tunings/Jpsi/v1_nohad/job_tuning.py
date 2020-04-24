@@ -154,6 +154,17 @@ try:
   #   correction.add( ref[0], ref[1], pd, fa )
   # posproc = [Summary(), correction]
   
+
+  correction = ReferenceFit( "ReferenceFit" )
+  # Calculate the reference for each operation point
+  # using the ringer cutbased as reference
+  for ref in ref_target:
+    # (passed, total)
+    pd = (ref_obj.getSgnPassed(ref[0]) , ref_obj.getSgnTotal(ref[0]))
+    fa = (ref_obj.getBkgPassed(ref[0]) , ref_obj.getBkgTotal(ref[0]))
+    correction.add( ref[0], ref[1], pd, fa )
+  posproc = [Summary(), correction]
+
   print('start panda!')
   # Create the panda job 
   job = PandasJob(  dbcontext, pattern_generator = PatternGenerator( args.dataFile, getPatterns ), 
