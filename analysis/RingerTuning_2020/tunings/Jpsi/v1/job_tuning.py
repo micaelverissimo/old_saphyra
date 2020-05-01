@@ -77,9 +77,9 @@ parser.add_argument('-t', '--task', action='store',
         dest='task', required = True, default = None,
             help = "The task name into the database")
 
-parser.add_argument('-u', '--user', action='store', 
-        dest='user', required = True, default = None,
-            help = "The user name into the database")
+# parser.add_argument('-u', '--user', action='store', 
+#         dest='user', required = True, default = None,
+#             help = "The user name into the database")
 
 parser.add_argument('--useDB', action='store', 
         dest='useDB', required = False, default = False,
@@ -94,22 +94,22 @@ args = parser.parse_args()
 
 
 # Check if this job will run in DB mode
-useDB = args.useDB
-job_id = getJobConfigId( args.configFile )
+# useDB = args.useDB
+# job_id = getJobConfigId( args.configFile )
 
-from ringerdb import DBContext
-dbcontext = DBContext( args.user, args.task, job_id )
+# from ringerdb import DBContext
+# dbcontext = DBContext( args.user, args.task, job_id )
 
-if useDB:
-    from ringerdb import RingerDB, DBContext
-    from ringerdb.models import *
-    url = 'postgres://ringer:6sJ09066sV1990;6@postgres-ringer-db.cahhufxxnnnr.us-east-2.rds.amazonaws.com/ringer'
-    try:
-      db = RingerDB(url, dbcontext)
-      if db.initialize().isFailure():  useDB=False
-    except Exception as e:
-      print(e)
-      useDB=False
+# if useDB:
+#     from ringerdb import RingerDB, DBContext
+#     from ringerdb.models import *
+#     url = 'postgres://ringer:6sJ09066sV1990;6@postgres-ringer-db.cahhufxxnnnr.us-east-2.rds.amazonaws.com/ringer'
+#     try:
+#       db = RingerDB(url, dbcontext)
+#       if db.initialize().isFailure():  useDB=False
+#     except Exception as e:
+#       print(e)
+#       useDB=False
 
 
 try:
