@@ -12,6 +12,10 @@ from . import Norm1
 __all__.extend( Norm1.__all__            )
 from .Norm1 import *
 
+from . import StandardScaler
+__all__.extend( StandardScaler.__all__            )
+from .StandardScaler import *
+
 from . import RingerRp
 __all__.extend( RingerRp.__all__            )
 from .RingerRp import *
