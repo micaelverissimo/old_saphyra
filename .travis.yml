@@ -8,7 +8,6 @@ python:
   - "3.8"
 
 before_install:
-  - apt-get install git
   - git clone https://github.com/jodafons/saphyra.git && cd saphyra && git pull origin master && source setup.sh
 
 install:
