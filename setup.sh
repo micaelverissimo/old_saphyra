@@ -1,4 +1,4 @@
-
+#!/bin/bash
 
 export LC_ALL=''
 export RCM_NO_COLOR=0
