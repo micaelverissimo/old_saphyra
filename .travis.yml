@@ -1,7 +1,6 @@
 language: python
 
 python:
-  - "3.4"
   - "3.5"
   - "3.6"
   - "3.7"
@@ -13,8 +12,7 @@ before_install:
 
 install:
   - pip3 install --upgrade pip
-  - pip3 install -U sklearn keras sqlalchemy numpy kubernetes psycopg2-binary benedict flask-login future
-  - pip3 install -U Gaugi
+  - pip3 install -r requirements.txt
 
 script:
   - python3 ci/main.py
