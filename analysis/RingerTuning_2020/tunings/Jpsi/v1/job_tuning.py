@@ -153,7 +153,7 @@ try:
                     loss              = 'mean_squared_error',
                     #loss              = 'binary_crossentropy',
                     metrics           = ['accuracy'],
-                    epochs            = 5,
+                    epochs            = 5000,
                     ppChain           = pp,
                     crossval          = kf,
                     outputfile        = outputFile,
