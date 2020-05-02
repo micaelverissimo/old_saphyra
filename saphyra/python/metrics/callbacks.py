@@ -66,7 +66,7 @@ class sp(Callback, Logger):
     logs['max_sp_partial_derivative_pd_val'] = partial_pd
 
     if self.__verbose:
-      print( (' - val_sp: %1.4f (fa:%1.4f,pd:%1.4f), patience: %d, dSP/dFA: %d, dSP/dPD: %d') % (sp[knee],fa[knee],pd[knee], self.__ipatience, partial_fa, partial_pd) )
+      print (" - val_sp: {:.4f} (fa:{:.4f},pd:{:.4f}), patience: {}, dSP/dFA: {:.4f}, dSP/dPD: {:.4f}".format(sp[knee],fa[knee],pd[knee], self.__ipatience, partial_fa, partial_pd))
 
 
     if sp[knee] > self.__best_sp:
