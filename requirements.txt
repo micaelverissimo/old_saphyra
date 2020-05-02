@@ -7,5 +7,5 @@ psycopg2-binary
 benedict
 flask-login
 future
-tensorflow>=2.1.0
+tensorflow
 Gaugi
