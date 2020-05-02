@@ -26,7 +26,19 @@ class sp(Callback, Logger):
   def set_validation_data( self, v ):
     self._validation_data = v
 
+  # This computes dSP/dFA (partial derivative of SP respect to FA)
+  def __get_partial_derivative_fa (self, fa, pd):
+    c = 0.353553
+    up = -(pd * (pd - fa + 1))/(2 * np.sqrt(pd*(1-fa))) - np.sqrt(pd*(1-fa))
+    down = np.sqrt( np.sqrt(pd * (1-fa)) * (pd - fa + 1) )
+    return c * up / down
 
+  # This computes dSP/dPD (partial derivative of SP respect to PD)
+  def __get_partial_derivative_pd (self, fa, pd):
+    c = 0.353553
+    up = ((1-fa)*(pd-fa+1))/(2*np.sqrt(pd*(1-fa))) + np.sqrt(pd*(1-fa))
+    down = np.sqrt( np.sqrt(pd*(1-fa)) * (pd-fa+1) )    
+    return c * up / down
 
   def on_epoch_end(self, epoch, logs={}):
 
@@ -37,19 +49,24 @@ class sp(Callback, Logger):
       y_true = self.validation_data[1]
       y_pred = self.model.predict(self.validation_data[0],batch_size=1024).ravel()
 
+    # Computes SP
     fa, pd, thresholds = roc_curve(y_true, y_pred)
-
     sp = np.sqrt(  np.sqrt(pd*(1-fa)) * (0.5*(pd+(1-fa)))  )
 
-
-
-
     knee = np.argmax(sp)
+
+    # Computes partial derivatives
+    partial_pd = self.__get_partial_derivative_pd(fa[knee], pd[knee])
+    partial_fa = self.__get_partial_derivative_fa(fa[knee], pd[knee])
+
     logs['max_sp_val'] = sp[knee]
     logs['max_sp_fa_val'] = fa[knee]
     logs['max_sp_pd_val'] = pd[knee]
+    logs['max_sp_partial_derivative_fa_val'] = partial_fa
+    logs['max_sp_partial_derivative_pd_val'] = partial_pd
+
     if self.__verbose:
-      print( (' - val_sp: %1.4f (fa:%1.4f,pd:%1.4f), patience: %d') % (sp[knee],fa[knee],pd[knee], self.__ipatience) )
+      print (" - val_sp: {:.4f} (fa:{:.4f},pd:{:.4f}), patience: {}, dSP/dFA: {:.4f}, dSP/dPD: {:.4f}".format(sp[knee],fa[knee],pd[knee], self.__ipatience, partial_fa, partial_pd))
 
 
     if sp[knee] > self.__best_sp:
