@@ -1,0 +1,11 @@
+sklearn
+keras
+sqlalchemy
+numpy
+kubernetes
+psycopg2-binary
+benedict
+flask-login
+future
+tensorflow
+Gaugi

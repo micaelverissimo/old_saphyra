@@ -1,6 +1,6 @@
 
 # Saphyra
-
+[![Build Status](https://travis-ci.org/jodafons/saphyra.svg?branch=master)](https://travis-ci.org/github/jodafons/saphyra)
 
 ## Requirements:
 
