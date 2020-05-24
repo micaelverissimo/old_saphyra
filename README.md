@@ -2,6 +2,11 @@
 # Saphyra
 [![Build Status](https://travis-ci.org/jodafons/saphyra.svg?branch=master)](https://travis-ci.org/github/jodafons/saphyra)
 
+The machine learning tuning framework for the ringer project developments. This frameworks uses the Keras api to 
+call the machine learning training functions. All scripts, for each tuning tag, must be in into the analysis
+directory. You can use this framework for other projects.
+
+
 ## Requirements:
 
 - tensorflow;
