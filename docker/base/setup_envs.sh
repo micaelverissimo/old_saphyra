@@ -1,4 +1,7 @@
 #!/bin/bash
+
+
+
 CURRENT_DIR=`pwd`
 export LC_ALL=''
 export RCM_NO_COLOR=0
@@ -9,9 +12,7 @@ export SAPHYRA_PATH=`pwd`
 git pull
 mkdir .__python__
 cd .__python__
-ln -s ../gaugi/python Gaugi
 ln -s ../saphyra/python saphyra
-ln -s ../wxternal/ringerdb/python ringerdb
 export PYTHONPATH=`pwd`:$PYTHONPATH
 cd $CURRENT_DIR
 
