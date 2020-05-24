@@ -3,20 +3,24 @@
 export LC_ALL=''
 export RCM_NO_COLOR=0
 export RCM_GRID_ENV=0
-export SAPHYRA_PATH=`pwd`
 
-source setup_module.sh
-source setup_module.sh --head
+if test ! -d "$PWD/.__python__" ; then
+  echo "file __python__ not exist"
+  mkdir .__python__
+  cd .__python__
+  ln -sf ../saphyra/python saphyra
+fi
 
-rm -rf .__python__
-mkdir .__python__
+echo "Setting saphyra envs..."
 cd .__python__
-
-ln -s ../saphyra/python saphyra
-ln -s ../external/ringerdb/python ringerdb
-ln -s ../external/kolmov/kolmov/python kolmov
-
 export PYTHONPATH=`pwd`:$PYTHONPATH
-cd ../
+cd ..
+#export PATH=`pwd`/scripts:$PATH
+
+
+
+
+
+
 
 

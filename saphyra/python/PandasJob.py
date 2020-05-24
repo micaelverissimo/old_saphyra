@@ -22,12 +22,11 @@ import time
 
 class PandasJob( Logger ):
 
-  def __init__(self , dbcontext, pattern_generator, **kw ):
+  def __init__(self , pattern_generator, **kw ):
 
     Logger.__init__(self,   **kw)
 
     self._pattern_generator = pattern_generator
-    self._dbcontext = dbcontext
 
 
     self._optimizer     = retrieve_kw( kw, 'optimizer'  , 'adam'                )
@@ -45,8 +44,6 @@ class PandasJob( Logger ):
     self._save_history  = retrieve_kw( kw, 'save_history' , True                )
     self.ppChain        = retrieve_kw( kw, 'ppChain'    , PreProcChain_v1([NoPreProc()]))
 
-    # DB parameter
-    self._taskName  = retrieve_kw( kw, 'taskName', None )
 
 
     # Get configurations and model from job config
@@ -81,7 +78,6 @@ class PandasJob( Logger ):
     self._tunedData = retrieve_kw( kw, 'tunedData'  , TunedData_v1()        )
     self._outputfile= retrieve_kw( kw, 'outputfile' , 'tunedDisc'           )
 
-    self._db = None
     checkForUnusedVars(kw)
 
     if type(self._inits) is int:
@@ -89,13 +85,6 @@ class PandasJob( Logger ):
 
     self._context = NotSet
     self._index_from_cv = NotSet
-
-
-  def setDatabase( self, db ):
-    self._db = db
-
-  def db(self):
-    return self._db
 
 
   def getContext(self):
@@ -168,14 +157,6 @@ class PandasJob( Logger ):
       if proc.initialize().isFailure():
         MSG_ERROR(self, "Iniitalizing pos processor tool: %s", proc.name())
         return StatusCode.FAILURE
-
-
-      # This is not be critical since we can retrieve all data into the output file
-      if self.db():
-        if self.db().initialize().isFailure():
-          MSG_ERROR( self, "Data base connection failed...")
-          self._db = None
-
 
     return StatusCode.SUCCESS
 
@@ -286,11 +267,6 @@ class PandasJob( Logger ):
           # add the tuned parameters to the output file
           self._tunedData.attach_ctx( self.getContext() )
 
-
-          if self.db():
-            self.db().execute( self.getContext() )
-
-
           # Clear everything for the next init
           K.clear_session()
 
@@ -299,8 +275,6 @@ class PandasJob( Logger ):
       self.getContext().clear()
       # Clear the keras once again just to be sure
       K.clear_session()
-
-
 
     return StatusCode.SUCCESS
 
@@ -313,7 +287,6 @@ class PandasJob( Logger ):
         MSG_ERROR(self, "There is a problem to finalize the pos processor: %s", proc.name() )
     try:
       # prepare to save the tuned data
-      self._tunedData.setDBContext( self._dbcontext )
       self._tunedData.save( self._outputfile )
     except Exception as e:
       MSG_FATAL( self, "Its not possible to save the tuned data: %s" , e )
