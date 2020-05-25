@@ -294,6 +294,12 @@ class PandasJob( Logger ):
     #self._storegate.write()
     return StatusCode.SUCCESS
 
+  def run(self):
+    self.initialize()
+    self.execute()
+    self.finalize()
+
+
   def pattern_g( self, generator, crossval, sort ):
     # If the index is not set, you muat run the cross validation Kfold to get the index
     # this generator must be implemented by the user
