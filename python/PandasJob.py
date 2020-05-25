@@ -193,7 +193,6 @@ class PandasJob( Logger ):
           # force the context is empty for each training
           self.getContext().clear()
 
-          self.getContext().setHandler( "taskName", self._taskName      )
           self.getContext().setHandler( "jobId", self._jobId            )
 
 
