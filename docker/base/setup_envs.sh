@@ -12,7 +12,7 @@ export SAPHYRA_PATH=`pwd`
 git pull
 mkdir .__python__
 cd .__python__
-ln -s ../saphyra/python saphyra
+ln -s ../python saphyra
 export PYTHONPATH=`pwd`:$PYTHONPATH
 cd $CURRENT_DIR
 
