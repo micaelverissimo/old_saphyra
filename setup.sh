@@ -5,17 +5,17 @@ export RCM_NO_COLOR=0
 export RCM_GRID_ENV=0
 
 if test ! -d "$PWD/.__python__" ; then
-  echo "file __python__ not exist"
+  echo "creating python dir since this does not exist yet..."
   mkdir .__python__
   cd .__python__
-  ln -sf ../saphyra/python saphyra
+  ln -sf ../python saphyra
+  cd ..
 fi
 
 echo "Setting saphyra envs..."
 cd .__python__
 export PYTHONPATH=`pwd`:$PYTHONPATH
 cd ..
-#export PATH=`pwd`/scripts:$PATH
 
 
 
