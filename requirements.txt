@@ -1,11 +1,5 @@
-sklearn
-keras
-sqlalchemy
-numpy
-kubernetes
-psycopg2-binary
-benedict
-flask-login
+numpy>=1.18.1
+six>=1.12.0
+scipy>=1.4.1
 future
-tensorflow
-Gaugi
+Gaugi>=1.0.0
