@@ -37,6 +37,9 @@ from . import preproc
 __all__.extend( preproc.__all__              )
 from .preproc import *
 
+from . import layers
+__all__.extend( layers.__all__        )
+from .layers import *
 
 try:
   xrange
