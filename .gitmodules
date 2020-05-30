@@ -1,14 +1,3 @@
-[submodule "external/kolmov"]
-	path = external/kolmov
-	url = https://github.com/micaelverissimo/kolmov.git
-	ignore = all
-
-[submodule "external/ringerdb"]
-	path = external/ringerdb
-	url = https://github.com/jodafons/ringerdb
-	ignore = all
-
-[submodule "external/docker"]
-	path = external/docker
-	url = https://github.com/jodafons/docker
-	ignore = all
+[submodule "external/ringertunings"]
+	path = external/ringertunings
+	url = https://github.com/jodafons/ringertunings.git
