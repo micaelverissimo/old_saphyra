@@ -8,7 +8,6 @@ python:
 
 before_install:
   - source setup_module.sh
-  - source setup.sh
 
 install:
   - pip3 install --upgrade pip

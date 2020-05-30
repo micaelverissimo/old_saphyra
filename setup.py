@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
   name = 'saphyra',
-  version = '1.0.1',
+  version = '1.0.2',
   license='GPL-3.0',
   description = '',
   long_description = long_description,
@@ -19,7 +19,7 @@ setuptools.setup(
           'numpy',
           'six',
           'scipy',
-          'tensorflow',
+          'sklearn',
           'future'
       ],
   classifiers=[
